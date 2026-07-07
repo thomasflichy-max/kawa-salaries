@@ -1,7 +1,17 @@
-const ADMIN_EMAIL_DOMAIN = (
-  process.env.KAWA_ADMIN_EMAIL_DOMAIN ?? 'kawa.coffee'
-).toLowerCase()
+const DEFAULT_ADMIN_EMAILS = [
+  'thomas.flichy@kawa.coffee',
+  'brieuc@kawa.coffee',
+  'jean@kawa.coffee',
+]
+
+const ADMIN_EMAILS = (process.env.KAWA_ADMIN_EMAILS
+  ? process.env.KAWA_ADMIN_EMAILS.split(',')
+  : DEFAULT_ADMIN_EMAILS
+)
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean)
 
 export function isKawaStaffEmail(email: string | null | undefined) {
-  return email?.toLowerCase().endsWith(`@${ADMIN_EMAIL_DOMAIN}`) ?? false
+  if (!email) return false
+  return ADMIN_EMAILS.includes(email.toLowerCase())
 }

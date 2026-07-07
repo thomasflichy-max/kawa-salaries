@@ -19,7 +19,7 @@ const tabClasses = (isActive: boolean) =>
       : 'border-transparent text-kawa-500 hover:text-kawa-800 hover:border-sky-500'
   }`
 
-export function EmployeeNav() {
+export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
   const pathname = usePathname()
 
   return (
@@ -50,8 +50,13 @@ export function EmployeeNav() {
 
           const isActive = pathname === tab.href
           return (
-            <Link key={tab.href} href={tab.href} className={tabClasses(isActive)}>
+            <Link key={tab.href} href={tab.href} className={`${tabClasses(isActive)} flex items-center gap-1.5`}>
               {tab.label}
+              {tab.href === '/compte/panier' && cartItemCount > 0 && (
+                <span className="bg-sky-500 text-kawa-950 text-xs font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
+                  {cartItemCount}
+                </span>
+              )}
             </Link>
           )
         })}

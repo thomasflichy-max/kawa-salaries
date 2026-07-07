@@ -49,6 +49,7 @@ export async function addToCart(
 
   revalidatePath('/compte/panier')
   revalidatePath('/compte/produits')
+  revalidatePath('/compte', 'layout')
 }
 
 export async function updateCartItemQuantity(itemId: string, quantity: number) {
@@ -65,6 +66,7 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
   }
 
   revalidatePath('/compte/panier')
+  revalidatePath('/compte', 'layout')
 }
 
 export async function removeCartItem(itemId: string) {
@@ -73,4 +75,5 @@ export async function removeCartItem(itemId: string) {
   await supabase.from('cart_items').delete().eq('id', itemId).eq('user_id', userId)
 
   revalidatePath('/compte/panier')
+  revalidatePath('/compte', 'layout')
 }

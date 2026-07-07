@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import Link from 'next/link'
 import { login } from '@/app/actions/auth'
 
 export function LoginForm({ next }: { next: string }) {
@@ -22,7 +23,12 @@ export function LoginForm({ next }: { next: string }) {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Mot de passe</label>
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-kawa-700">Mot de passe</label>
+          <Link href="/mot-de-passe-oublie" className="text-xs text-sky-700 underline">
+            Mot de passe oublié ?
+          </Link>
+        </div>
         <input
           type="password"
           name="password"

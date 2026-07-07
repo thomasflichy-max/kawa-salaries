@@ -3,15 +3,21 @@ import { getCoffeePricing, computeCoffeePrice } from '@/lib/coffee-pricing'
 
 type CoffeePricingRules = Awaited<ReturnType<typeof getCoffeePricing>>
 
-export function resolveProductPrice(
+export function resolveProductPricing(
   product: { price: number | null; subcategory: string | null },
   pricingRules: CoffeePricingRules
-): number | null {
+): { price: number | null; basePrice: number | null } {
   if (!product.subcategory) {
-    return product.price
+    return { price: product.price, basePrice: null }
   }
   const rule = pricingRules.get(product.subcategory)
-  return rule ? computeCoffeePrice(rule.base_price, rule.discount_percent) : product.price
+  if (!rule) {
+    return { price: product.price, basePrice: null }
+  }
+  return {
+    price: computeCoffeePrice(rule.base_price, rule.discount_percent),
+    basePrice: rule.base_price,
+  }
 }
 
 const PRODUCT_FIELDS =
@@ -42,7 +48,7 @@ export async function getActiveProducts(category?: string) {
 
   return products.map((product) => ({
     ...product,
-    price: resolveProductPrice(product, pricingRules),
+    ...resolveProductPricing(product, pricingRules),
   }))
 }
 
@@ -63,5 +69,5 @@ export async function getProductById(id: string) {
   }
 
   const pricingRules = await getCoffeePricing()
-  return { ...product, price: resolveProductPrice(product, pricingRules) }
+  return { ...product, ...resolveProductPricing(product, pricingRules) }
 }

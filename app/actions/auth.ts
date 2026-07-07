@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 
 export type AuthFormState = { error: string } | undefined
@@ -102,6 +103,77 @@ export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()
   redirect('/connexion')
+}
+
+export type RequestPasswordResetState =
+  | { error: string; success?: false }
+  | { success: true; error?: undefined }
+  | undefined
+
+export async function requestPasswordReset(
+  _prevState: RequestPasswordResetState,
+  formData: FormData
+): Promise<RequestPasswordResetState> {
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase()
+
+  if (!isValidEmail(email)) {
+    return { error: 'Adresse email invalide.' }
+  }
+
+  const headersList = await headers()
+  const origin = headersList.get('origin') ?? `https://${headersList.get('host')}`
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/mot-de-passe-oublie/nouveau`,
+  })
+
+  if (error) {
+    console.error('[requestPasswordReset] resetPasswordForEmail failed:', error)
+  }
+
+  // Always report success, whether or not the email exists — otherwise this
+  // endpoint could be used to check which emails have an account.
+  return { success: true }
+}
+
+export type UpdateProfileState =
+  | { error: string; success?: false }
+  | { success: true; error?: undefined }
+  | undefined
+
+export async function updateProfile(
+  _prevState: UpdateProfileState,
+  formData: FormData
+): Promise<UpdateProfileState> {
+  const fullName = String(formData.get('fullName') ?? '').trim()
+
+  if (!fullName) {
+    return { error: 'Le nom ne peut pas être vide.' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Session expirée, merci de vous reconnecter.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ full_name: fullName })
+    .eq('id', user.id)
+
+  if (error) {
+    console.error('[updateProfile] update failed:', error)
+    return { error: 'Une erreur est survenue, merci de réessayer.' }
+  }
+
+  return { success: true }
 }
 
 export type UpdatePasswordState = { error: string; success?: false } | { success: true; error?: undefined } | undefined

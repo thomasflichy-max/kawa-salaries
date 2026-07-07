@@ -24,7 +24,7 @@ export default async function ConnexionPage({
       <div className="bg-white p-8 rounded-2xl shadow-sm w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-kawa-800">Connexion</h1>
-          <p className="text-kawa-500 mt-2">Accédez à vos avantages café kawa</p>
+          <p className="text-kawa-500 mt-2">Accédez à vos avantages KAWA</p>
         </div>
 
         <LoginForm next={next ?? '/'} />

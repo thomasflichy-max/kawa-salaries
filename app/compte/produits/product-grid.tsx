@@ -9,9 +9,11 @@ const currency = new Intl.NumberFormat('fr-FR', {
 
 type Product = {
   id: string
+  category: string
   name: string
   description: string | null
   price: number | null
+  basePrice: number | null
   image_url: string | null
   hover_image_url: string | null
   tag: string | null
@@ -66,14 +68,21 @@ export function ProductGrid({ products }: { products: Product[] }) {
               <p className="font-semibold text-kawa-800 hover:underline decoration-sky-500">
                 {product.name}
               </p>
-              {product.description && (
+              {product.category === 'cafe' && product.description && (
                 <p className="text-sm text-kawa-500">{product.description}</p>
               )}
             </div>
           </Link>
-          <div className="flex flex-col gap-2 p-5 pt-2">
+          <div className="flex flex-col gap-2 p-5 pt-2 mt-auto">
             {product.price != null ? (
-              <p className="text-sky-700 font-bold">{currency.format(product.price)}</p>
+              <p className="flex items-baseline gap-2">
+                {product.basePrice != null && product.basePrice !== product.price && (
+                  <span className="text-kawa-400 line-through text-sm">
+                    {currency.format(product.basePrice)}
+                  </span>
+                )}
+                <span className="text-sky-700 font-bold">{currency.format(product.price)}</span>
+              </p>
             ) : (
               <p className="text-kawa-600 font-bold">Sur demande</p>
             )}

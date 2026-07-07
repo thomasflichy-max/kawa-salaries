@@ -17,7 +17,7 @@ export default async function ProduitsPage() {
       <div>
         <h1 className="text-2xl font-bold text-kawa-800">Produits</h1>
         <p className="text-kawa-500 mt-1">
-          Votre remise kawa est appliquée automatiquement à la commande.
+          Votre remise KAWA est déjà appliquée sur les produits du catalogue.
         </p>
       </div>
 

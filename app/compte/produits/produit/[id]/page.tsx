@@ -80,8 +80,15 @@ export default async function ProductDetailPage({
           <div>
             <h1 className="text-3xl font-bold text-kawa-800">{product.name}</h1>
             {product.price != null ? (
-              <span className="inline-block bg-sky-500 text-kawa-950 font-bold text-xl px-4 py-1 rounded-full mt-3">
-                {currency.format(product.price)}
+              <span className="inline-flex items-baseline gap-2 mt-3">
+                {product.basePrice != null && product.basePrice !== product.price && (
+                  <span className="text-kawa-400 line-through">
+                    {currency.format(product.basePrice)}
+                  </span>
+                )}
+                <span className="inline-block bg-sky-500 text-kawa-950 font-bold text-xl px-4 py-1 rounded-full">
+                  {currency.format(product.price)}
+                </span>
               </span>
             ) : (
               <span className="inline-block bg-kawa-100 text-kawa-700 font-bold text-xl px-4 py-1 rounded-full mt-3">
