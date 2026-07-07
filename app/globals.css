@@ -5,6 +5,34 @@
   --foreground: #171717;
 }
 
+@theme {
+  /* Pantone 298 C — primary accent (CTAs, links, focus) */
+  --color-sky-50: #f0f9fd;
+  --color-sky-100: #ddf2fb;
+  --color-sky-200: #bde5f6;
+  --color-sky-300: #97d7f1;
+  --color-sky-400: #6bc6ec;
+  --color-sky-500: #41b6e6;
+  --color-sky-600: #379bc4;
+  --color-sky-700: #2c7c9c;
+  --color-sky-800: #225f78;
+  --color-sky-900: #194557;
+  --color-sky-950: #102e3a;
+
+  /* Pantone 10398 C — neutral ink (text, surfaces, borders) */
+  --color-kawa-50: #f7f7f7;
+  --color-kawa-100: #ececec;
+  --color-kawa-200: #d6d5d4;
+  --color-kawa-300: #b8b6b5;
+  --color-kawa-400: #989694;
+  --color-kawa-500: #7b7977;
+  --color-kawa-600: #656260;
+  --color-kawa-700: #524f4d;
+  --color-kawa-800: #43403d;
+  --color-kawa-900: #32302e;
+  --color-kawa-950: #252322;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

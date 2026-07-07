@@ -1,0 +1,41 @@
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { LoginForm } from './login-form'
+
+export default async function ConnexionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>
+}) {
+  const { next } = await searchParams
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
+    redirect(next || '/compte')
+  }
+
+  return (
+    <main className="min-h-screen bg-kawa-50 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-2xl shadow-sm w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-kawa-800">Connexion</h1>
+          <p className="text-kawa-500 mt-2">Accédez à vos avantages café kawa</p>
+        </div>
+
+        <LoginForm next={next ?? '/'} />
+
+        <p className="text-center text-sm text-kawa-400 mt-6">
+          Pas encore de compte ?{' '}
+          <Link href="/" className="text-sky-700 underline">
+            Créer un compte
+          </Link>
+        </p>
+      </div>
+    </main>
+  )
+}

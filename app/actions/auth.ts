@@ -1,0 +1,152 @@
+'use server'
+
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+
+export type AuthFormState = { error: string } | undefined
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+export async function signup(
+  _prevState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const firstName = String(formData.get('firstName') ?? '').trim()
+  const lastName = String(formData.get('lastName') ?? '').trim()
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase()
+  const password = String(formData.get('password') ?? '')
+
+  if (!firstName || !lastName) {
+    return { error: 'Merci de renseigner votre prénom et votre nom.' }
+  }
+  if (!isValidEmail(email)) {
+    return { error: 'Adresse email invalide.' }
+  }
+  if (password.length < 8) {
+    return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
+  }
+
+  const domain = email.split('@')[1]
+  const supabase = await createClient()
+
+  const { data: org, error: orgError } = await supabase
+    .rpc('find_organization_by_domain', { input_domain: domain })
+    .maybeSingle()
+
+  if (orgError) {
+    console.error('[signup] find_organization_by_domain failed:', orgError)
+    return { error: 'Une erreur est survenue, merci de réessayer.' }
+  }
+  if (!org) {
+    return {
+      error: `${domain} n'est pas (encore) une entreprise cliente kawa. Contactez votre RH si vous pensez qu'il s'agit d'une erreur.`,
+    }
+  }
+
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: `${firstName} ${lastName}`,
+        organization_id: org.id,
+      },
+    },
+  })
+
+  if (signUpError) {
+    console.error('[signup] auth.signUp failed:', signUpError)
+    return {
+      error:
+        signUpError.code === 'user_already_exists'
+          ? 'Un compte existe déjà avec cet email.'
+          : 'Une erreur est survenue, merci de réessayer.',
+    }
+  }
+
+  // If email confirmation is disabled on the project, signUp already returns
+  // an active session; otherwise the user must confirm by email first.
+  redirect(signUpData.session ? '/compte' : '/inscription/confirmation')
+}
+
+export async function login(
+  _prevState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase()
+  const password = String(formData.get('password') ?? '')
+  const next = String(formData.get('next') ?? '/compte')
+
+  if (!isValidEmail(email) || !password) {
+    return { error: 'Email ou mot de passe invalide.' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+  if (error) {
+    console.error('[login] signInWithPassword failed:', error)
+    return { error: 'Email ou mot de passe incorrect.' }
+  }
+
+  redirect(next || '/compte')
+}
+
+export async function logout() {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  redirect('/connexion')
+}
+
+export type UpdatePasswordState = { error: string; success?: false } | { success: true; error?: undefined } | undefined
+
+export async function updatePassword(
+  _prevState: UpdatePasswordState,
+  formData: FormData
+): Promise<UpdatePasswordState> {
+  const currentPassword = String(formData.get('currentPassword') ?? '')
+  const newPassword = String(formData.get('newPassword') ?? '')
+  const confirmPassword = String(formData.get('confirmPassword') ?? '')
+
+  if (newPassword.length < 8) {
+    return { error: 'Le nouveau mot de passe doit contenir au moins 8 caractères.' }
+  }
+  if (newPassword !== confirmPassword) {
+    return { error: 'Les deux mots de passe ne correspondent pas.' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.email) {
+    return { error: 'Session expirée, merci de vous reconnecter.' }
+  }
+
+  // Re-verify the current password before allowing the change, rather than
+  // trusting the existing session alone (e.g. an unlocked shared browser).
+  const { error: reauthError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  })
+  if (reauthError) {
+    return { error: 'Mot de passe actuel incorrect.' }
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  })
+  if (updateError) {
+    console.error('[updatePassword] auth.updateUser failed:', updateError)
+    return { error: 'Une erreur est survenue, merci de réessayer.' }
+  }
+
+  return { success: true }
+}
