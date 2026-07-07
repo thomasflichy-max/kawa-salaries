@@ -34,6 +34,8 @@ export async function createOrganization(
   const domain = normalizeDomain(String(formData.get('domain') ?? ''))
   const discountRate = Number(formData.get('discount_rate'))
   const active = formData.get('active') === 'on'
+  const sampleEmail = String(formData.get('sample_email') ?? '').trim()
+  const deliveryAddress = String(formData.get('delivery_address') ?? '').trim()
 
   if (!name) {
     return { error: "Le nom de l'entreprise est requis." }
@@ -47,12 +49,17 @@ export async function createOrganization(
   if (!Number.isInteger(discountRate) || discountRate < 0 || discountRate > 100) {
     return { error: 'La remise doit être un entier entre 0 et 100.' }
   }
+  if (sampleEmail && !sampleEmail.toLowerCase().endsWith(`@${domain}`)) {
+    return { error: `Le mail type doit se terminer par "@${domain}".` }
+  }
 
   const { error } = await supabase.from('organizations').insert({
     name,
     domain,
     discount_rate: discountRate,
     active,
+    sample_email: sampleEmail || null,
+    delivery_address: deliveryAddress || null,
   })
 
   if (error) {
@@ -65,6 +72,8 @@ export async function createOrganization(
   }
 
   revalidatePath('/admin')
+  revalidatePath('/admin/clients')
+  revalidatePath('/admin/comptes')
   return { success: true }
 }
 
@@ -111,6 +120,7 @@ export async function updateCoffeePricing(
   }
 
   revalidatePath('/admin')
+  revalidatePath('/admin/produits')
   revalidatePath('/compte/produits')
   return { success: true }
 }

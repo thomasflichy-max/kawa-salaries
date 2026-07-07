@@ -10,6 +10,8 @@ export type Database = {
           name: string
           domain: string
           discount_rate: number
+          delivery_address: string | null
+          sample_email: string | null
           active: boolean | null
           created_at: string | null
         }
@@ -18,6 +20,8 @@ export type Database = {
           name: string
           domain: string
           discount_rate?: number
+          delivery_address?: string | null
+          sample_email?: string | null
           active?: boolean | null
           created_at?: string | null
         }
@@ -26,6 +30,8 @@ export type Database = {
           name?: string
           domain?: string
           discount_rate?: number
+          delivery_address?: string | null
+          sample_email?: string | null
           active?: boolean | null
           created_at?: string | null
         }

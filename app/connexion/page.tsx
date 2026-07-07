@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { LoginForm } from './login-form'
 
 export default async function ConnexionPage({
@@ -16,7 +17,11 @@ export default async function ConnexionPage({
   } = await supabase.auth.getUser()
 
   if (user) {
-    redirect(next || '/compte')
+    // Guard against a redirect loop: a logged-in non-staff user hitting
+    // /admin would otherwise bounce here (via the admin guard) and straight
+    // back to /admin (via this redirect) forever.
+    const wantsAdmin = next === '/admin' || next?.startsWith('/admin/')
+    redirect(wantsAdmin && !isKawaStaffEmail(user.email) ? '/compte' : next || '/compte')
   }
 
   return (
