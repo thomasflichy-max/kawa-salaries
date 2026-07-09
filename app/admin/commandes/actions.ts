@@ -12,9 +12,12 @@ import {
   addDemoOrderItem,
   updateDemoOrderItemQuantity,
   removeDemoOrderItem,
+  getDemoOrderById,
+  type DemoOrder,
   type DemoOrderStatus,
   type DemoOrderItem,
 } from '@/app/admin/demo-data'
+import { sendOrderReadyForPickupEmail } from '@/lib/emails/order-ready-for-pickup'
 
 async function requireKawaStaffActor() {
   const supabase = await createClient()
@@ -35,15 +38,32 @@ function revalidateOrderPaths(orderId: string) {
   revalidatePath('/admin')
 }
 
+// Fires only the moment an order actually transitions into "prêt à l'envoi"
+// (not on every no-op re-save of the same status) and only for pickup
+// orders — delivery orders have nothing for the client to come collect.
+async function notifyIfJustReadyForPickup(order: DemoOrder | null, wasReady: boolean) {
+  if (!order || wasReady) return
+  if (order.status !== 'pret' || order.deliveryMode !== 'pickup') return
+  try {
+    await sendOrderReadyForPickupEmail(order)
+  } catch (error) {
+    console.error('[commandes] ready-for-pickup email failed:', error)
+  }
+}
+
 export async function advanceOrderStatusAction(orderId: string) {
   const actor = await requireKawaStaffActor()
-  advanceDemoOrderStatus(orderId, actor)
+  const wasReady = getDemoOrderById(orderId)?.status === 'pret'
+  const order = advanceDemoOrderStatus(orderId, actor)
+  await notifyIfJustReadyForPickup(order, wasReady)
   revalidateOrderPaths(orderId)
 }
 
 export async function updateOrderStatusAction(orderId: string, status: DemoOrderStatus) {
   const actor = await requireKawaStaffActor()
-  setDemoOrderStatus(orderId, status, actor)
+  const wasReady = getDemoOrderById(orderId)?.status === 'pret'
+  const order = setDemoOrderStatus(orderId, status, actor)
+  await notifyIfJustReadyForPickup(order, wasReady)
   revalidateOrderPaths(orderId)
 }
 
