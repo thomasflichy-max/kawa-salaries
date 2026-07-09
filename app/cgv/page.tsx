@@ -78,12 +78,15 @@ export default function CGVPage() {
         </section>
 
         <section>
-          <h2 className="font-semibold text-kawa-800 mb-1">7. Annulation</h2>
+          <h2 className="font-semibold text-kawa-800 mb-1">7. Remboursement</h2>
           <p className="text-sm text-kawa-600 leading-relaxed">
-            Une commande peut être annulée par KAWA. Les commandes annulées ne font pas
-            l&apos;objet d&apos;un remboursement : un avoir correspondant au montant de la
-            commande est émis à la place et transmis au salarié par email. Cet avoir est
-            utilisable sans limite de durée sur une prochaine commande.
+            L&apos;annulation d&apos;une commande par KAWA n&apos;entraîne pas de remboursement
+            automatique. Un remboursement, total ou partiel, peut néanmoins être accordé par
+            KAWA, notamment dans les cas suivants : produit non conforme à la commande, produit
+            détérioré à la livraison, produit manquant, ou commande annulée après acceptation par
+            KAWA. Toute demande de remboursement doit être adressée à nantes@kawa.coffee. Un email
+            de confirmation, accompagné d&apos;un justificatif, est transmis au salarié pour tout
+            remboursement effectué.
           </p>
         </section>
 

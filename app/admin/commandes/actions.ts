@@ -18,7 +18,7 @@ import {
   type DemoOrderItem,
 } from '@/app/admin/demo-data'
 import { sendOrderReadyForPickupEmail } from '@/lib/emails/order-ready-for-pickup'
-import { sendOrderCancelledEmail } from '@/lib/emails/order-cancelled'
+import { sendOrderRefundedEmail } from '@/lib/emails/order-refunded'
 
 async function requireKawaStaffActor() {
   const supabase = await createClient()
@@ -52,19 +52,6 @@ async function notifyIfJustReadyForPickup(order: DemoOrder | null, wasReady: boo
   }
 }
 
-// Only "annulee" needs this — no other status has a "no refund, avoir
-// instead" consequence worth mailing about, and cancellation only ever
-// happens through updateOrderStatusAction's status dropdown.
-async function notifyIfJustCancelled(order: DemoOrder | null, wasCancelled: boolean) {
-  if (!order || wasCancelled) return
-  if (order.status !== 'annulee') return
-  try {
-    await sendOrderCancelledEmail(order)
-  } catch (error) {
-    console.error('[commandes] cancellation email failed:', error)
-  }
-}
-
 export async function advanceOrderStatusAction(orderId: string) {
   const actor = await requireKawaStaffActor()
   const wasReady = getDemoOrderById(orderId)?.status === 'pret'
@@ -73,12 +60,14 @@ export async function advanceOrderStatusAction(orderId: string) {
   revalidateOrderPaths(orderId)
 }
 
+// Cancelling an order only ever changes its status — no refund, no email.
+// Money only moves (and gets mailed about) when staff separately record a
+// refund via refundOrderAction below.
 export async function updateOrderStatusAction(orderId: string, status: DemoOrderStatus) {
   const actor = await requireKawaStaffActor()
-  const previousStatus = getDemoOrderById(orderId)?.status
+  const wasReady = getDemoOrderById(orderId)?.status === 'pret'
   const order = setDemoOrderStatus(orderId, status, actor)
-  await notifyIfJustReadyForPickup(order, previousStatus === 'pret')
-  await notifyIfJustCancelled(order, previousStatus === 'annulee')
+  await notifyIfJustReadyForPickup(order, wasReady)
   revalidateOrderPaths(orderId)
 }
 
@@ -100,9 +89,15 @@ export async function refundOrderAction(orderId: string, amount: number, reason:
   if (!(amount > 0) || !trimmedReason) {
     throw new Error('Montant et motif requis.')
   }
-  const result = addDemoOrderRefund(orderId, amount, trimmedReason, actor)
-  if (!result) {
+  const order = addDemoOrderRefund(orderId, amount, trimmedReason, actor)
+  if (!order) {
     throw new Error('Montant invalide (dépasse le solde restant à rembourser).')
+  }
+  const refund = order.refunds[order.refunds.length - 1]
+  try {
+    await sendOrderRefundedEmail(order, refund)
+  } catch (error) {
+    console.error('[commandes] refund confirmation email failed:', error)
   }
   revalidateOrderPaths(orderId)
 }

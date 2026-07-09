@@ -41,11 +41,6 @@ export default async function AvantagePage() {
               de votre entreprise, ou vous pouvez venir le récupérer directement dans nos
               locaux du 75 Bd Ernest Dalby, entre 9h et 18h.
             </p>
-            <p className="text-kawa-500 mt-2">
-              En cas d&apos;annulation d&apos;une commande, KAWA ne procède pas à un
-              remboursement : un avoir du même montant vous est délivré à la place,
-              utilisable sans limite de durée sur une prochaine commande.
-            </p>
           </div>
           <div className="relative w-40 sm:w-48 h-full min-h-40 mx-auto sm:mx-0 rounded-xl overflow-hidden">
             <Image
