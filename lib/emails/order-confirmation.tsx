@@ -1,6 +1,8 @@
 import { Resend } from 'resend'
+import { renderToBuffer } from '@react-pdf/renderer'
 import type { DemoOrder } from '@/app/admin/demo-data'
 import { computeOrderTotals, getDeliveryLabel } from '@/app/admin/demo-data'
+import { InvoiceDocument } from '@/app/admin/commandes/pdf/invoice-document'
 
 // Same site the rest of the app treats as canonical (see kawa-salaries-deploy-fix
 // memory) — emails need an absolute, publicly reachable URL, unlike in-app links.
@@ -29,6 +31,10 @@ function escapeHtml(value: string) {
     .replace(/>/g, '&gt;')
 }
 
+function absoluteImageUrl(imageUrl: string) {
+  return imageUrl.startsWith('http') ? imageUrl : `${SITE_URL}${imageUrl}`
+}
+
 // Inline styles + table layout throughout: email clients (Gmail, Outlook...)
 // strip <style> blocks and ignore flex/grid, so this deliberately doesn't
 // reuse the invoice PDF's stylesheet even though it echoes the same palette.
@@ -41,7 +47,10 @@ export function renderOrderConfirmationEmail(order: DemoOrder) {
     .map(
       (item) => `
         <tr>
-          <td style="padding:10px 0;border-bottom:1px solid ${KAWA_LINE};color:${KAWA_INK};font-size:14px;">
+          <td style="padding:10px 0;border-bottom:1px solid ${KAWA_LINE};width:48px;">
+            <img src="${absoluteImageUrl(item.imageUrl)}" alt="${escapeHtml(item.productName)}" width="40" height="40" style="display:block;border-radius:8px;object-fit:cover;" />
+          </td>
+          <td style="padding:10px 0 10px 12px;border-bottom:1px solid ${KAWA_LINE};color:${KAWA_INK};font-size:14px;">
             ${escapeHtml(item.productName)}
           </td>
           <td style="padding:10px 0;border-bottom:1px solid ${KAWA_LINE};color:${KAWA_MUTED};font-size:14px;text-align:center;">
@@ -84,7 +93,7 @@ export function renderOrderConfirmationEmail(order: DemoOrder) {
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
                   ${itemsRows}
                   <tr>
-                    <td style="padding:14px 0 0;color:${KAWA_INK};font-size:15px;font-weight:700;" colSpan="2">
+                    <td colspan="3" style="padding:14px 0 0;color:${KAWA_INK};font-size:15px;font-weight:700;">
                       Total TTC
                     </td>
                     <td style="padding:14px 0 0;color:${KAWA_SKY};font-size:15px;font-weight:700;text-align:right;">
@@ -180,6 +189,7 @@ export async function sendOrderConfirmationEmail(order: DemoOrder, overrides?: {
     return
   }
   const { subject, html, text } = renderOrderConfirmationEmail(order)
+  const invoiceBuffer = await renderToBuffer(<InvoiceDocument order={order} />)
   const resend = new Resend(process.env.RESEND_API_KEY)
   await resend.emails.send({
     from: 'kawa-salaries <onboarding@resend.dev>',
@@ -188,5 +198,11 @@ export async function sendOrderConfirmationEmail(order: DemoOrder, overrides?: {
     subject: overrides?.subjectPrefix ? `${overrides.subjectPrefix}${subject}` : subject,
     html,
     text,
+    attachments: [
+      {
+        filename: `facture-${order.orderNumber}.pdf`,
+        content: invoiceBuffer,
+      },
+    ],
   })
 }
