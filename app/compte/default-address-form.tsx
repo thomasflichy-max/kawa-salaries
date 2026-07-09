@@ -45,12 +45,6 @@ export function DefaultAddressForm({
         <p className="text-xs text-kawa-400 mt-1">
           Tu pourras toujours choisir un autre site au moment de la commande.
         </p>
-        {selected !== '' && (
-          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
-            Votre livraison sera effectuée lors de la prochaine commande de café de votre
-            entreprise, est-ce que c&apos;est bon pour vous ?
-          </p>
-        )}
       </div>
 
       {state?.error && (
