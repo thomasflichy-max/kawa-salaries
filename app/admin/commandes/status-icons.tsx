@@ -29,13 +29,19 @@ function PackageIcon() {
   )
 }
 
-function TruckIcon() {
+export function CheckIcon() {
   return (
     <svg {...iconProps}>
-      <path d="M3 7h11v9H3z" />
-      <path d="M14 10h4l3 3v3h-7z" />
-      <circle cx="7" cy="18" r="1.5" />
-      <circle cx="17" cy="18" r="1.5" />
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  )
+}
+
+export function XIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M18 6 6 18" />
+      <path d="M6 6l12 12" />
     </svg>
   )
 }
@@ -44,5 +50,4 @@ function TruckIcon() {
 export const ORDER_STATUS_ACTION_ICONS: Partial<Record<DemoOrderStatus, React.ReactNode>> = {
   en_cours: <WrenchIcon />,
   en_preparation: <PackageIcon />,
-  pret: <TruckIcon />,
 }

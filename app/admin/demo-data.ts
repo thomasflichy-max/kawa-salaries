@@ -383,10 +383,12 @@ export function getDemoOrderById(id: string) {
 // of the server process (resets on redeploy/restart).
 const ORDER_STATUS_FLOW: DemoOrderStatus[] = ['en_cours', 'en_preparation', 'pret', 'livree']
 
+// "pret" deliberately has no entry here — from that status, the list shows
+// the dedicated Livrée ✅ / Annulée ❌ shortcuts instead of a third "next
+// step" button, to avoid two different buttons both meaning "mark delivered".
 export const ORDER_STATUS_ACTION_LABELS: Partial<Record<DemoOrderStatus, string>> = {
   en_cours: 'Passer en préparation',
   en_preparation: "Marquer prêt à l'envoi",
-  pret: 'Marquer livrée',
 }
 
 export function getNextOrderStatus(status: DemoOrderStatus): DemoOrderStatus | null {

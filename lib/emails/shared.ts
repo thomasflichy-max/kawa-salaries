@@ -125,8 +125,14 @@ export async function sendOrderEmail({ to, subject, html, text, attachments }: S
     return
   }
   const resend = new Resend(process.env.RESEND_API_KEY)
-  await resend.emails.send({
-    from: 'kawa-salaries <onboarding@resend.dev>',
+  const { error } = await resend.emails.send({
+    // kawanantespro.com is a verified sending domain on the Resend account —
+    // required to mail real recipients. onboarding@resend.dev is a sandbox
+    // sender Resend silently restricts to the account owner's own address,
+    // so using it here meant every order email to an actual employee address
+    // was rejected — the Resend SDK returns that as `{ error }`, it doesn't
+    // throw, so it went unnoticed until an admin reported never getting mail.
+    from: 'KAWA Nantes <commandes@kawanantespro.com>',
     to,
     // KAWA staff sees every order email as it goes out, not just replies to
     // it — skipped when `to` is already that same address (test sends).
@@ -137,4 +143,7 @@ export async function sendOrderEmail({ to, subject, html, text, attachments }: S
     text,
     ...(attachments ? { attachments } : {}),
   })
+  if (error) {
+    throw new Error(`[emails] Resend rejected the send: ${error.name} — ${error.message}`)
+  }
 }
