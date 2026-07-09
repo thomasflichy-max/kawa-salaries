@@ -4,6 +4,7 @@ import { getEmployee } from '@/lib/get-employee'
 import { updateCartItemQuantity, removeCartItem } from '@/app/actions/cart'
 import { resolveProductPricing } from '@/lib/products'
 import { getCoffeePricing } from '@/lib/coffee-pricing'
+import { CheckoutSteps } from './checkout-steps'
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -17,7 +18,7 @@ const GRIND_LABELS: Record<string, string> = {
 }
 
 export default async function PanierPage() {
-  const { user, organization, coffeeDiscounts } = await getEmployee()
+  const { user, profile, organization, coffeeDiscounts, organizationAddresses } = await getEmployee()
   const supabase = await createClient()
 
   const { data: items, error } = await supabase
@@ -144,14 +145,12 @@ export default async function PanierPage() {
             </div>
           </div>
 
-          <div className="p-5 border-t border-kawa-100">
-            <button
-              disabled
-              className="w-full bg-kawa-200 text-kawa-500 py-3 rounded-lg font-medium cursor-not-allowed"
-            >
-              Passer commande — paiement bientôt disponible
-            </button>
-          </div>
+          <CheckoutSteps
+            total={total}
+            itemCount={cartItems.length}
+            addresses={organizationAddresses}
+            defaultAddressId={profile?.default_address_id ?? null}
+          />
         </div>
       )}
     </div>
