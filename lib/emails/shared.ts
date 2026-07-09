@@ -128,6 +128,9 @@ export async function sendOrderEmail({ to, subject, html, text, attachments }: S
   await resend.emails.send({
     from: 'kawa-salaries <onboarding@resend.dev>',
     to,
+    // KAWA staff sees every order email as it goes out, not just replies to
+    // it — skipped when `to` is already that same address (test sends).
+    ...(to !== REPLY_TO_EMAIL ? { cc: REPLY_TO_EMAIL } : {}),
     replyTo: REPLY_TO_EMAIL,
     subject,
     html,
