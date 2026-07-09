@@ -70,6 +70,12 @@ export type DemoOrder = {
   // Refunding is independent of status — a delivered order can still be
   // refunded after the fact (goodwill gesture, complaint, missing item...).
   refunds: DemoOrderRefund[]
+  // All seed orders are paid — per the en_cours status comment above, an
+  // order only ever appears here once payment has gone through. This field
+  // exists so the detail page can still show a clear "Payée" indicator, and
+  // so a real checkout flow can later create an order before payment
+  // confirms (e.g. waiting on a webhook) without changing the shape.
+  paid: boolean
 }
 
 export const DEMO_ORDER_STATUS_LABELS: Record<DemoOrderStatus, string> = {
@@ -94,7 +100,7 @@ export const DEMO_ORDER_STATUS_STYLES: Record<DemoOrderStatus, string> = {
 type DemoOrderItemSeed = Omit<DemoOrderItem, 'id'>
 type DemoOrderSeed = Omit<
   DemoOrder,
-  'billingAddress' | 'history' | 'amount' | 'refunds' | 'items'
+  'billingAddress' | 'history' | 'amount' | 'refunds' | 'items' | 'paid'
 > & { items: DemoOrderItemSeed[] }
 
 const DEMO_ORDER_SEEDS: DemoOrderSeed[] = [
@@ -356,6 +362,7 @@ export const DEMO_ORDERS: DemoOrder[] = DEMO_ORDER_SEEDS.map((seed, i) => {
     amount: computeOrderTotals(items).totalTTC,
     history: buildSeedHistory(seed, i),
     refunds: [],
+    paid: true,
   }
 })
 

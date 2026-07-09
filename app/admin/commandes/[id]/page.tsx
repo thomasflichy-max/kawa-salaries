@@ -14,7 +14,6 @@ import { EditableAddressField } from '../editable-address-field'
 import { InvoiceIcon, DeliveryNoteIcon } from '../document-icons'
 import { RefundForm } from '../refund-form'
 import { OrderItemsEditor, type CatalogProduct } from '../order-items-editor'
-import { TestConfirmationEmailButton } from '../test-confirmation-email-button'
 import { getActiveProducts } from '@/lib/products'
 import {
   updateOrderBillingAddressAction,
@@ -109,6 +108,20 @@ export default async function AdminOrderDetailPage({
             <dd className="text-kawa-800 mt-0.5 font-semibold">{currency.format(order.amount)}</dd>
           </div>
           <div>
+            <dt className="text-kawa-500 mb-1">Paiement</dt>
+            <dd className="mt-0.5">
+              {order.paid ? (
+                <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+                  Payée
+                </span>
+              ) : (
+                <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                  Non payée
+                </span>
+              )}
+            </dd>
+          </div>
+          <div>
             <dt className="text-kawa-500">Livraison</dt>
             <dd className="text-kawa-800 mt-0.5">
               {order.deliveryMode === 'pickup' ? 'Retrait KAWA Nantes' : 'Livraison chez le client'}
@@ -153,15 +166,6 @@ export default async function AdminOrderDetailPage({
           <div>
             <p className="text-sm font-medium text-kawa-700 mb-2">Remboursement</p>
             <RefundForm orderId={order.id} amount={order.amount} items={order.items} refunds={order.refunds} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-kawa-700 mb-2">Mail de confirmation</p>
-            <TestConfirmationEmailButton orderId={order.id} />
-            <p className="text-xs text-kawa-400 mt-2">
-              Envoie le mail de confirmation à ton adresse plutôt qu&apos;à celle (fictive) du
-              salarié, pour prévisualiser la forme avant qu&apos;il soit branché sur une vraie
-              commande passée.
-            </p>
           </div>
         </div>
       </section>

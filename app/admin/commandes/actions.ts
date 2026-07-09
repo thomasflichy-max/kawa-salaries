@@ -12,16 +12,9 @@ import {
   addDemoOrderItem,
   updateDemoOrderItemQuantity,
   removeDemoOrderItem,
-  getDemoOrderById,
   type DemoOrderStatus,
   type DemoOrderItem,
 } from '@/app/admin/demo-data'
-import { sendOrderConfirmationEmail } from '@/lib/emails/order-confirmation'
-
-// Employee inboxes on demo orders are fake company domains (@atlanticdigital.fr
-// etc.) and can't actually receive mail — this lets staff preview the real
-// confirmation template in their own inbox before it's wired to a real checkout.
-const TEST_EMAIL_RECIPIENT = 'thomas.flichy@kawa.coffee'
 
 async function requireKawaStaffActor() {
   const supabase = await createClient()
@@ -99,14 +92,4 @@ export async function removeOrderItemAction(orderId: string, itemId: string) {
   const actor = await requireKawaStaffActor()
   removeDemoOrderItem(orderId, itemId, actor)
   revalidateOrderPaths(orderId)
-}
-
-export async function sendTestOrderConfirmationEmailAction(orderId: string) {
-  await requireKawaStaffActor()
-  const order = getDemoOrderById(orderId)
-  if (!order) throw new Error('Commande introuvable.')
-  await sendOrderConfirmationEmail(order, {
-    to: TEST_EMAIL_RECIPIENT,
-    subjectPrefix: '[TEST] ',
-  })
 }
