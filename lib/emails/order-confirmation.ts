@@ -62,8 +62,10 @@ export function renderOrderConfirmationEmail(order: DemoOrder) {
         <td align="center">
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;border:1px solid ${KAWA_LINE};">
             <tr>
-              <td style="padding:20px 32px;border-bottom:1px solid ${KAWA_LINE};">
-                <img src="${SITE_URL}/logo-kawa-nantes-wordmark.png" alt="KAWA Nantes" width="260" height="76" style="display:block;margin:0 auto;" />
+              <td style="padding:20px 32px;border-bottom:1px solid ${KAWA_LINE};text-align:center;">
+                <a href="https://kawanantespro.com/" target="_blank" rel="noopener noreferrer">
+                  <img src="${SITE_URL}/logo-kawa-nantes-wordmark.png" alt="KAWA Nantes" width="260" height="76" style="display:inline-block;border:0;" />
+                </a>
               </td>
             </tr>
             <tr>
