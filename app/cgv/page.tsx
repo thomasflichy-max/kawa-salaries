@@ -78,7 +78,17 @@ export default function CGVPage() {
         </section>
 
         <section>
-          <h2 className="font-semibold text-kawa-800 mb-1">7. Données personnelles</h2>
+          <h2 className="font-semibold text-kawa-800 mb-1">7. Annulation</h2>
+          <p className="text-sm text-kawa-600 leading-relaxed">
+            Une commande peut être annulée par KAWA. Les commandes annulées ne font pas
+            l&apos;objet d&apos;un remboursement : un avoir correspondant au montant de la
+            commande est émis à la place et transmis au salarié par email. Cet avoir est
+            utilisable sans limite de durée sur une prochaine commande.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-semibold text-kawa-800 mb-1">8. Données personnelles</h2>
           <p className="text-sm text-kawa-600 leading-relaxed">
             Le traitement des données personnelles des salariés dans le cadre de
             kawa-salaries est décrit dans notre Politique de confidentialité.
@@ -86,7 +96,7 @@ export default function CGVPage() {
         </section>
 
         <section>
-          <h2 className="font-semibold text-kawa-800 mb-1">8. Droit applicable</h2>
+          <h2 className="font-semibold text-kawa-800 mb-1">9. Droit applicable</h2>
           <p className="text-sm text-kawa-600 leading-relaxed">
             Les présentes conditions sont soumises au droit français. Tout litige
             relève, à défaut de résolution amiable, des tribunaux compétents du

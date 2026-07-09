@@ -18,6 +18,7 @@ import {
   type DemoOrderItem,
 } from '@/app/admin/demo-data'
 import { sendOrderReadyForPickupEmail } from '@/lib/emails/order-ready-for-pickup'
+import { sendOrderCancelledEmail } from '@/lib/emails/order-cancelled'
 
 async function requireKawaStaffActor() {
   const supabase = await createClient()
@@ -51,6 +52,19 @@ async function notifyIfJustReadyForPickup(order: DemoOrder | null, wasReady: boo
   }
 }
 
+// Only "annulee" needs this — no other status has a "no refund, avoir
+// instead" consequence worth mailing about, and cancellation only ever
+// happens through updateOrderStatusAction's status dropdown.
+async function notifyIfJustCancelled(order: DemoOrder | null, wasCancelled: boolean) {
+  if (!order || wasCancelled) return
+  if (order.status !== 'annulee') return
+  try {
+    await sendOrderCancelledEmail(order)
+  } catch (error) {
+    console.error('[commandes] cancellation email failed:', error)
+  }
+}
+
 export async function advanceOrderStatusAction(orderId: string) {
   const actor = await requireKawaStaffActor()
   const wasReady = getDemoOrderById(orderId)?.status === 'pret'
@@ -61,9 +75,10 @@ export async function advanceOrderStatusAction(orderId: string) {
 
 export async function updateOrderStatusAction(orderId: string, status: DemoOrderStatus) {
   const actor = await requireKawaStaffActor()
-  const wasReady = getDemoOrderById(orderId)?.status === 'pret'
+  const previousStatus = getDemoOrderById(orderId)?.status
   const order = setDemoOrderStatus(orderId, status, actor)
-  await notifyIfJustReadyForPickup(order, wasReady)
+  await notifyIfJustReadyForPickup(order, previousStatus === 'pret')
+  await notifyIfJustCancelled(order, previousStatus === 'annulee')
   revalidateOrderPaths(orderId)
 }
 
