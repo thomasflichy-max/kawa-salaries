@@ -17,9 +17,10 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' })
 export default async function AdminEmployeeDetailPage({
   params,
 }: {
-  params: Promise<{ id: string; employeeId: string }>
+  params: Promise<{ id: string; email: string }>
 }) {
-  const { id, employeeId } = await params
+  const { id, email: encodedEmail } = await params
+  const email = decodeURIComponent(encodedEmail)
   const supabase = await createClient()
 
   const [{ data: org }, { data: employee }] = await Promise.all([
@@ -27,11 +28,12 @@ export default async function AdminEmployeeDetailPage({
     supabase
       .from('profiles')
       .select('id, full_name, email, organization_id, created_at')
-      .eq('id', employeeId)
+      .eq('organization_id', id)
+      .eq('email', email)
       .maybeSingle(),
   ])
 
-  if (!org || !employee || employee.organization_id !== org.id) {
+  if (!org) {
     notFound()
   }
 
@@ -39,9 +41,18 @@ export default async function AdminEmployeeDetailPage({
   // here by email, same as everywhere else demo orders are looked up. A real
   // employee's email won't match any of the fictional demo order emails, so
   // this legitimately shows "no orders" until a real orders table exists.
-  const orders = DEMO_ORDERS.filter((order) => order.employeeEmail === employee.email).sort(
+  // Keyed by email (not a profile id) so this page also works for a
+  // "Salarié ayant commandé" that only exists in the demo order data, with
+  // no matching profiles row.
+  const orders = DEMO_ORDERS.filter((order) => order.employeeEmail === email).sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
+
+  if (!employee && orders.length === 0) {
+    notFound()
+  }
+
+  const displayName = employee?.full_name ?? orders[0]?.employeeName ?? email
   const totalSpent = orders.reduce((sum, order) => sum + order.amount, 0)
 
   return (
@@ -50,8 +61,8 @@ export default async function AdminEmployeeDetailPage({
         <Link href={`/admin/comptes/${org.id}`} className="text-sky-700 hover:underline text-sm">
           ← Retour à {org.name}
         </Link>
-        <h1 className="text-xl font-bold text-kawa-800 mt-2">{employee.full_name ?? '—'}</h1>
-        <p className="text-kawa-500 text-sm mt-1">{employee.email ?? '—'}</p>
+        <h1 className="text-xl font-bold text-kawa-800 mt-2">{displayName}</h1>
+        <p className="text-kawa-500 text-sm mt-1">{email}</p>
       </div>
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
@@ -63,7 +74,9 @@ export default async function AdminEmployeeDetailPage({
           <div>
             <dt className="text-kawa-500">Inscrit le</dt>
             <dd className="text-kawa-800 mt-0.5">
-              {employee.created_at ? dateFormat.format(new Date(employee.created_at)) : '—'}
+              {employee?.created_at
+                ? dateFormat.format(new Date(employee.created_at))
+                : 'Pas encore de compte'}
             </dd>
           </div>
           <div>
