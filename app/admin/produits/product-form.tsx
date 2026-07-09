@@ -38,7 +38,12 @@ export function ProductForm({
 }) {
   const [state, formAction, pending] = useActionState(action, undefined)
   const [category, setCategory] = useState(defaults?.category ?? PRODUCT_CATEGORIES[0].key)
-  const [subcategory, setSubcategory] = useState(defaults?.subcategory ?? 'classique')
+  // `defaults?.subcategory ?? 'classique'` would be wrong here: it can't tell
+  // "no defaults at all" (new product, 'classique' is a fine starting point)
+  // apart from "editing an existing fixed-price coffee whose subcategory is
+  // genuinely null" — collapsing both to 'classique' is exactly what silently
+  // reassigned Déca KAWA back onto the shared per-kg pricing on its first re-save.
+  const [subcategory, setSubcategory] = useState(defaults ? defaults.subcategory ?? '' : 'classique')
   const isCoffee = category === 'cafe'
   // Coffee normally follows the shared per-kg pricing (Products → Tarification
   // des cafés), but a coffee with no subcategory — like the 200g Déca KAWA —
