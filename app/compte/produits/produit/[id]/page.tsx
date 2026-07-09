@@ -104,7 +104,13 @@ export default async function ProductDetailPage({
           )}
 
           {isCoffee && (
-            <p className="text-sm text-kawa-500">Conditionnement : sachet de 1 kg.</p>
+            <p className="text-sm text-kawa-500">
+              Conditionnement : sachet de{' '}
+              {product.net_weight_grams < 1000
+                ? `${product.net_weight_grams} g`
+                : `${product.net_weight_grams / 1000} kg`}
+              .
+            </p>
           )}
 
           {product.purchasable ? (

@@ -14,7 +14,7 @@ export default async function EditProductPage({
   const { data: product } = await supabase
     .from('products')
     .select(
-      'id, category, subcategory, tag, name, description, price, image_url, hover_image_url, sort_order, purchasable, active'
+      'id, category, subcategory, tag, name, description, price, image_url, hover_image_url, sort_order, purchasable, active, net_weight_grams'
     )
     .eq('id', id)
     .maybeSingle()

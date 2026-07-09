@@ -23,7 +23,7 @@ export default async function PanierPage() {
   const { data: items, error } = await supabase
     .from('cart_items')
     .select(
-      'id, quantity, grind_type, product:products(id, name, price, image_url, subcategory)'
+      'id, quantity, grind_type, product:products(id, name, price, image_url, category, subcategory)'
     )
     .eq('user_id', user.id)
     .order('created_at')
@@ -76,7 +76,7 @@ export default async function PanierPage() {
                 <div className="flex-1">
                   <p className="font-medium text-kawa-800">
                     {item.product?.name ?? '—'}
-                    {item.product?.subcategory && (
+                    {item.product?.category === 'cafe' && (
                       <span className="text-kawa-500 font-normal">
                         {' '}
                         — {GRIND_LABELS[item.grind_type ?? 'grain'] ?? item.grind_type}
@@ -84,7 +84,8 @@ export default async function PanierPage() {
                     )}
                   </p>
                   <p className="text-sm text-kawa-500">
-                    {currency.format(item.unitPrice)} / kg
+                    {currency.format(item.unitPrice)}
+                    {item.baseUnitPrice != null && ' / kg'}
                   </p>
                 </div>
 

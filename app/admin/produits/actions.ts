@@ -29,6 +29,7 @@ type ParsedProductForm =
         sort_order: number
         purchasable: boolean
         active: boolean
+        net_weight_grams: number
       }
     }
 
@@ -42,6 +43,7 @@ function parseProductForm(formData: FormData): ParsedProductForm {
   const imageUrl = String(formData.get('image_url') ?? '').trim()
   const hoverImageUrl = String(formData.get('hover_image_url') ?? '').trim()
   const sortOrderRaw = String(formData.get('sort_order') ?? '0').trim()
+  const netWeightRaw = String(formData.get('net_weight_grams') ?? '1000').trim()
   const purchasable = formData.get('purchasable') === 'on'
   const active = formData.get('active') === 'on'
 
@@ -60,6 +62,11 @@ function parseProductForm(formData: FormData): ParsedProductForm {
     return { ok: false, error: "Ordre d'affichage invalide." }
   }
 
+  const netWeightGrams = netWeightRaw === '' ? 1000 : Number(netWeightRaw)
+  if (!Number.isFinite(netWeightGrams) || netWeightGrams <= 0) {
+    return { ok: false, error: 'Poids du sachet invalide.' }
+  }
+
   return {
     ok: true,
     values: {
@@ -74,6 +81,7 @@ function parseProductForm(formData: FormData): ParsedProductForm {
       sort_order: sortOrder,
       purchasable,
       active,
+      net_weight_grams: netWeightGrams,
     },
   }
 }

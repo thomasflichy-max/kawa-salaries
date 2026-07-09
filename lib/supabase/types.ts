@@ -113,6 +113,7 @@ export type Database = {
           sort_order: number
           purchasable: boolean
           active: boolean
+          net_weight_grams: number
           created_at: string
         }
         Insert: {
@@ -128,6 +129,7 @@ export type Database = {
           sort_order?: number
           purchasable?: boolean
           active?: boolean
+          net_weight_grams?: number
           created_at?: string
         }
         Update: {
@@ -143,6 +145,7 @@ export type Database = {
           sort_order?: number
           purchasable?: boolean
           active?: boolean
+          net_weight_grams?: number
           created_at?: string
         }
         Relationships: []

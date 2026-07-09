@@ -6,6 +6,7 @@ import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
 import { ImageUploadField } from './image-upload-field'
 
 const COFFEE_SUBCATEGORIES = [
+  { key: '', label: 'Sans sous-catégorie (prix fixe)' },
   { key: 'classique', label: 'Classique' },
   { key: 'bio', label: 'Bio' },
   { key: 'decafeine', label: 'Décaféiné' },
@@ -23,6 +24,7 @@ type ProductDefaults = {
   sort_order: number
   purchasable: boolean
   active: boolean
+  net_weight_grams: number
 }
 
 export function ProductForm({
@@ -36,7 +38,12 @@ export function ProductForm({
 }) {
   const [state, formAction, pending] = useActionState(action, undefined)
   const [category, setCategory] = useState(defaults?.category ?? PRODUCT_CATEGORIES[0].key)
+  const [subcategory, setSubcategory] = useState(defaults?.subcategory ?? 'classique')
   const isCoffee = category === 'cafe'
+  // Coffee normally follows the shared per-kg pricing (Products → Tarification
+  // des cafés), but a coffee with no subcategory — like the 200g Déca KAWA —
+  // is priced directly, same as a non-coffee product.
+  const hasFixedPrice = !isCoffee || subcategory === ''
 
   return (
     <form action={formAction} className="flex flex-col gap-5 max-w-2xl">
@@ -74,8 +81,8 @@ export function ProductForm({
             <label className="text-sm font-medium text-kawa-700">Sous-catégorie</label>
             <select
               name="subcategory"
-              required
-              defaultValue={defaults?.subcategory ?? COFFEE_SUBCATEGORIES[0].key}
+              value={subcategory}
+              onChange={(e) => setSubcategory(e.target.value)}
               className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               {COFFEE_SUBCATEGORIES.map((s) => (
@@ -99,7 +106,7 @@ export function ProductForm({
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        {!isCoffee && (
+        {hasFixedPrice && (
           <div>
             <label className="text-sm font-medium text-kawa-700">Prix (€)</label>
             <input
@@ -108,6 +115,20 @@ export function ProductForm({
               min={0}
               name="price"
               defaultValue={defaults?.price ?? ''}
+              className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+            />
+          </div>
+        )}
+
+        {isCoffee && (
+          <div>
+            <label className="text-sm font-medium text-kawa-700">Poids du sachet (g)</label>
+            <input
+              type="number"
+              step="1"
+              min={1}
+              name="net_weight_grams"
+              defaultValue={defaults?.net_weight_grams ?? 1000}
               className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
@@ -124,7 +145,7 @@ export function ProductForm({
           />
         </div>
       </div>
-      {isCoffee && (
+      {isCoffee && !hasFixedPrice && (
         <p className="text-xs text-kawa-400 -mt-3">
           Le prix des cafés est calculé automatiquement depuis la tarification café (onglet
           Products → Tarification des cafés) et la remise de l&apos;entreprise du salarié.
