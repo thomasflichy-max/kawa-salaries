@@ -53,6 +53,20 @@ export function SignupForm() {
         />
       </div>
 
+      <div>
+        <label className="text-sm font-medium text-kawa-700">Adresse de facturation</label>
+        <textarea
+          name="billingAddress"
+          placeholder="12 rue de la Paix, 44000 Nantes"
+          rows={2}
+          required
+          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+        />
+        <p className="text-xs text-kawa-400 mt-1">
+          Vos factures seront établies à votre nom, à cette adresse.
+        </p>
+      </div>
+
       {state?.error && (
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
           {state.error}

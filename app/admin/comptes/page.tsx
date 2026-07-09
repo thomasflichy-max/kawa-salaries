@@ -1,14 +1,23 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
+const DISCOUNT_ABBR: Record<string, string> = {
+  classique: 'C',
+  bio: 'B',
+  decafeine: 'D',
+}
+
+const currency = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+})
+
 export default async function AdminAccountsPage() {
   const supabase = await createClient()
-  const [{ data: organizations }, { data: profiles }] = await Promise.all([
-    supabase
-      .from('organizations')
-      .select('id, name, domain, discount_rate, active')
-      .order('name'),
+  const [{ data: organizations }, { data: profiles }, { data: discounts }] = await Promise.all([
+    supabase.from('organizations').select('id, name, domain, active').order('name'),
     supabase.from('profiles').select('id, organization_id'),
+    supabase.from('organization_coffee_discounts').select('organization_id, subcategory, discount_amount'),
   ])
 
   const orgs = organizations ?? []
@@ -16,6 +25,14 @@ export default async function AdminAccountsPage() {
   for (const p of profiles ?? []) {
     if (!p.organization_id) continue
     employeeCountByOrg.set(p.organization_id, (employeeCountByOrg.get(p.organization_id) ?? 0) + 1)
+  }
+
+  const discountsByOrg = new Map<string, string>()
+  for (const rule of discounts ?? []) {
+    const existing = discountsByOrg.get(rule.organization_id) ?? ''
+    const abbr = DISCOUNT_ABBR[rule.subcategory] ?? rule.subcategory
+    const amount = `${abbr} -${currency.format(rule.discount_amount)}`
+    discountsByOrg.set(rule.organization_id, existing ? `${existing} · ${amount}` : amount)
   }
 
   return (
@@ -34,7 +51,7 @@ export default async function AdminAccountsPage() {
               <tr className="text-left text-kawa-500 border-b border-kawa-100">
                 <th className="px-5 py-3 font-medium">Nom</th>
                 <th className="px-5 py-3 font-medium">Domaine</th>
-                <th className="px-5 py-3 font-medium">Remise</th>
+                <th className="px-5 py-3 font-medium">Remise café</th>
                 <th className="px-5 py-3 font-medium">Salariés</th>
                 <th className="px-5 py-3 font-medium">Statut</th>
                 <th className="px-5 py-3 font-medium" />
@@ -45,7 +62,9 @@ export default async function AdminAccountsPage() {
                 <tr key={org.id} className="border-b border-kawa-50 last:border-0">
                   <td className="px-5 py-3 text-kawa-800 font-medium">{org.name}</td>
                   <td className="px-5 py-3 text-kawa-500">{org.domain}</td>
-                  <td className="px-5 py-3 text-kawa-500">{org.discount_rate}%</td>
+                  <td className="px-5 py-3 text-kawa-500 whitespace-nowrap">
+                    {discountsByOrg.get(org.id) ?? '—'}
+                  </td>
                   <td className="px-5 py-3 text-kawa-500">
                     {employeeCountByOrg.get(org.id) ?? 0}
                   </td>

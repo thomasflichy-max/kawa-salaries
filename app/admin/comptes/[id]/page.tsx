@@ -18,21 +18,37 @@ export default async function AdminAccountDetailPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [{ data: org }, { data: employees }] = await Promise.all([
-    supabase
-      .from('organizations')
-      .select('id, name, domain, discount_rate, delivery_address, sample_email, active, created_at')
-      .eq('id', id)
-      .maybeSingle(),
-    supabase
-      .from('profiles')
-      .select('id, full_name, created_at')
-      .eq('organization_id', id)
-      .order('full_name'),
-  ])
+  const [{ data: org }, { data: employees }, { data: addresses }, { data: discounts }] =
+    await Promise.all([
+      supabase
+        .from('organizations')
+        .select('id, name, domain, sample_email, active, created_at')
+        .eq('id', id)
+        .maybeSingle(),
+      supabase
+        .from('profiles')
+        .select('id, full_name, created_at')
+        .eq('organization_id', id)
+        .order('full_name'),
+      supabase
+        .from('organization_addresses')
+        .select('id, label, address')
+        .eq('organization_id', id)
+        .order('label'),
+      supabase
+        .from('organization_coffee_discounts')
+        .select('subcategory, discount_amount')
+        .eq('organization_id', id),
+    ])
 
   if (!org) {
     notFound()
+  }
+
+  const discountLabels: Record<string, string> = {
+    classique: 'Classique',
+    bio: 'Bio',
+    decafeine: 'Décaféiné',
   }
 
   // Orders aren't wired to real organizations yet (no checkout pipeline) —
@@ -71,10 +87,6 @@ export default async function AdminAccountDetailPage({
             <dd className="text-kawa-800 mt-0.5">{org.sample_email ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-kawa-500">Lieu de livraison</dt>
-            <dd className="text-kawa-800 mt-0.5">{org.delivery_address ?? '—'}</dd>
-          </div>
-          <div>
             <dt className="text-kawa-500">Client depuis</dt>
             <dd className="text-kawa-800 mt-0.5">
               {org.created_at ? dateFormat.format(new Date(org.created_at)) : '—'}
@@ -97,12 +109,37 @@ export default async function AdminAccountDetailPage({
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
         <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
+          Sites de livraison
+        </h2>
+        <div className="p-5 flex flex-col gap-2 text-sm">
+          {(addresses ?? []).map((site) => (
+            <p key={site.id}>
+              <span className="font-medium text-kawa-800">{site.label}</span>{' '}
+              <span className="text-kawa-500">— {site.address}</span>
+            </p>
+          ))}
+          {(addresses ?? []).length === 0 && (
+            <p className="text-kawa-400">
+              Aucun site renseigné — les salariés ne pourront choisir que le retrait KAWA Nantes.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
+        <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
           Tarification
         </h2>
-        <div className="p-5 text-sm text-kawa-700">
-          Remise entreprise appliquée à toutes les commandes des salariés :{' '}
-          <span className="font-semibold text-kawa-800">{org.discount_rate}%</span>
-        </div>
+        <dl className="p-5 grid sm:grid-cols-3 gap-4 text-sm">
+          {(discounts ?? []).map((rule) => (
+            <div key={rule.subcategory}>
+              <dt className="text-kawa-500">{discountLabels[rule.subcategory] ?? rule.subcategory}</dt>
+              <dd className="text-kawa-800 font-semibold mt-0.5">
+                -{currency.format(rule.discount_amount)}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">

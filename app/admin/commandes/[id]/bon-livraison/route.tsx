@@ -1,0 +1,38 @@
+import { NextResponse } from 'next/server'
+import { renderToBuffer } from '@react-pdf/renderer'
+import { createClient } from '@/lib/supabase/server'
+import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
+import { getDemoOrderById } from '@/app/admin/demo-data'
+import { DeliveryNoteDocument } from '@/app/admin/commandes/pdf/delivery-note-document'
+
+export const runtime = 'nodejs'
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!isKawaStaffEmail(user?.email)) {
+    return NextResponse.json({ error: 'Non autorisé.' }, { status: 403 })
+  }
+
+  const { id } = await params
+  const order = getDemoOrderById(id)
+
+  if (!order) {
+    return NextResponse.json({ error: 'Commande introuvable.' }, { status: 404 })
+  }
+
+  const buffer = await renderToBuffer(<DeliveryNoteDocument order={order} />)
+
+  return new NextResponse(new Uint8Array(buffer), {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="bon-livraison-${order.orderNumber}.pdf"`,
+    },
+  })
+}

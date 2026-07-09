@@ -1,8 +1,15 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import type { ProductFormState } from './actions'
 import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
+import { ImageUploadField } from './image-upload-field'
+
+const COFFEE_SUBCATEGORIES = [
+  { key: 'classique', label: 'Classique' },
+  { key: 'bio', label: 'Bio' },
+  { key: 'decafeine', label: 'Décaféiné' },
+] as const
 
 type ProductDefaults = {
   category: string
@@ -28,6 +35,8 @@ export function ProductForm({
   submitLabel: string
 }) {
   const [state, formAction, pending] = useActionState(action, undefined)
+  const [category, setCategory] = useState(defaults?.category ?? PRODUCT_CATEGORIES[0].key)
+  const isCoffee = category === 'cafe'
 
   return (
     <form action={formAction} className="flex flex-col gap-5 max-w-2xl">
@@ -48,7 +57,8 @@ export function ProductForm({
           <select
             name="category"
             required
-            defaultValue={defaults?.category ?? PRODUCT_CATEGORIES[0].key}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
             className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
           >
             {PRODUCT_CATEGORIES.map((c) => (
@@ -59,16 +69,23 @@ export function ProductForm({
           </select>
         </div>
 
-        <div>
-          <label className="text-sm font-medium text-kawa-700">Sous-catégorie</label>
-          <input
-            type="text"
-            name="subcategory"
-            placeholder="classique ou bio (cafés uniquement)"
-            defaultValue={defaults?.subcategory ?? ''}
-            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-          />
-        </div>
+        {isCoffee && (
+          <div>
+            <label className="text-sm font-medium text-kawa-700">Sous-catégorie</label>
+            <select
+              name="subcategory"
+              required
+              defaultValue={defaults?.subcategory ?? COFFEE_SUBCATEGORIES[0].key}
+              className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+            >
+              {COFFEE_SUBCATEGORIES.map((s) => (
+                <option key={s.key} value={s.key}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div>
@@ -82,21 +99,19 @@ export function ProductForm({
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium text-kawa-700">Prix (€)</label>
-          <input
-            type="number"
-            step="0.01"
-            min={0}
-            name="price"
-            placeholder="Laisser vide pour les cafés (prix calculé)"
-            defaultValue={defaults?.price ?? ''}
-            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-          />
-          <p className="text-xs text-kawa-400 mt-1">
-            Pour les cafés, le prix est calculé depuis la tarification café (Tableau de bord → tarifs).
-          </p>
-        </div>
+        {!isCoffee && (
+          <div>
+            <label className="text-sm font-medium text-kawa-700">Prix (€)</label>
+            <input
+              type="number"
+              step="0.01"
+              min={0}
+              name="price"
+              defaultValue={defaults?.price ?? ''}
+              className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+            />
+          </div>
+        )}
 
         <div>
           <label className="text-sm font-medium text-kawa-700">Étiquette (tag)</label>
@@ -109,28 +124,24 @@ export function ProductForm({
           />
         </div>
       </div>
+      {isCoffee && (
+        <p className="text-xs text-kawa-400 -mt-3">
+          Le prix des cafés est calculé automatiquement depuis la tarification café (onglet
+          Products → Tarification des cafés) et la remise de l&apos;entreprise du salarié.
+        </p>
+      )}
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium text-kawa-700">Image (URL)</label>
-          <input
-            type="text"
-            name="image_url"
-            placeholder="/products/cafes/blend-kawa-600.jpg"
-            defaultValue={defaults?.image_url ?? ''}
-            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-kawa-700">Image au survol (URL)</label>
-          <input
-            type="text"
-            name="hover_image_url"
-            placeholder="Optionnel"
-            defaultValue={defaults?.hover_image_url ?? ''}
-            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-          />
-        </div>
+        <ImageUploadField
+          name="image_url"
+          label="Image"
+          defaultValue={defaults?.image_url}
+        />
+        <ImageUploadField
+          name="hover_image_url"
+          label="Image au survol (optionnel)"
+          defaultValue={defaults?.hover_image_url}
+        />
       </div>
 
       <div className="grid sm:grid-cols-3 gap-4 items-end">

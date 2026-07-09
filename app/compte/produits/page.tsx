@@ -1,9 +1,11 @@
 import { getActiveProducts } from '@/lib/products'
+import { getEmployee } from '@/lib/get-employee'
 import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
 import { ProductGrid } from './product-grid'
 
 export default async function ProduitsPage() {
-  const products = await getActiveProducts()
+  const { coffeeDiscounts } = await getEmployee()
+  const products = await getActiveProducts(undefined, coffeeDiscounts)
 
   const productsByCategory = new Map<string, typeof products>()
   for (const product of products) {

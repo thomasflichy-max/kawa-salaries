@@ -42,21 +42,35 @@ export type Database = {
           id: string
           full_name: string | null
           organization_id: string | null
+          billing_address: string | null
+          default_address_id: string | null
           created_at: string | null
         }
         Insert: {
           id: string
           full_name?: string | null
           organization_id?: string | null
+          billing_address?: string | null
+          default_address_id?: string | null
           created_at?: string | null
         }
         Update: {
           id?: string
           full_name?: string | null
           organization_id?: string | null
+          billing_address?: string | null
+          default_address_id?: string | null
           created_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_default_address_id_fkey'
+            columns: ['default_address_id']
+            isOneToOne: false
+            referencedRelation: 'organization_addresses'
+            referencedColumns: ['id']
+          }
+        ]
       }
       orders: {
         Row: {
@@ -150,6 +164,64 @@ export type Database = {
           discount_percent?: number
         }
         Relationships: []
+      }
+      organization_addresses: {
+        Row: {
+          id: string
+          organization_id: string
+          label: string
+          address: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          label: string
+          address: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          label?: string
+          address?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'organization_addresses_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      organization_coffee_discounts: {
+        Row: {
+          organization_id: string
+          subcategory: string
+          discount_amount: number
+        }
+        Insert: {
+          organization_id: string
+          subcategory: string
+          discount_amount?: number
+        }
+        Update: {
+          organization_id?: string
+          subcategory?: string
+          discount_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'organization_coffee_discounts_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
       }
       cart_items: {
         Row: {

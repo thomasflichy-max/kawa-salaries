@@ -172,3 +172,41 @@ export async function toggleProductActive(productId: string, active: boolean) {
   revalidatePath('/admin/produits')
   revalidatePath('/compte/produits')
 }
+
+export type UploadProductImageResult = { ok: true; url: string } | { ok: false; error: string }
+
+export async function uploadProductImageAction(
+  formData: FormData
+): Promise<UploadProductImageResult> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!isKawaStaffEmail(user?.email)) {
+    return { ok: false, error: 'Non autorisé.' }
+  }
+
+  const file = formData.get('file')
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: 'Fichier manquant.' }
+  }
+  if (!file.type.startsWith('image/')) {
+    return { ok: false, error: 'Le fichier doit être une image.' }
+  }
+
+  const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const path = `${crypto.randomUUID()}.${extension}`
+
+  const { error } = await supabase.storage.from('product-images').upload(path, file, {
+    contentType: file.type,
+  })
+
+  if (error) {
+    console.error('[uploadProductImage] upload failed:', error)
+    return { ok: false, error: "Échec de l'envoi de l'image." }
+  }
+
+  const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+  return { ok: true, url: data.publicUrl }
+}

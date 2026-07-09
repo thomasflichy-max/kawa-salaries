@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProductById } from '@/lib/products'
+import { getEmployee } from '@/lib/get-employee'
 import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
 import { QuantityAddForm } from '../../quantity-add-form'
 import { InterestForm } from '../../interest-form'
@@ -17,7 +18,8 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const product = await getProductById(id)
+  const { coffeeDiscounts } = await getEmployee()
+  const product = await getProductById(id, coffeeDiscounts)
 
   if (!product) {
     notFound()

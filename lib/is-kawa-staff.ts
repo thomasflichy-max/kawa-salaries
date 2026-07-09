@@ -15,3 +15,14 @@ export function isKawaStaffEmail(email: string | null | undefined) {
   if (!email) return false
   return ADMIN_EMAILS.includes(email.toLowerCase())
 }
+
+const STAFF_DISPLAY_NAMES: Record<string, string> = {
+  'thomas.flichy@kawa.coffee': 'Thomas Flichy',
+  'brieuc@kawa.coffee': 'Brieuc',
+  'jean@kawa.coffee': 'Jean',
+}
+
+export function getStaffDisplayName(email: string | null | undefined) {
+  if (!email) return 'Admin'
+  return STAFF_DISPLAY_NAMES[email.toLowerCase()] ?? email
+}

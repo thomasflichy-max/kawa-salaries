@@ -1,7 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { resolveDateRange, toInputDate } from './date-range'
 import { DateRangePicker } from './date-range-picker'
-import { DEMO_ORDERS, DEMO_CLIENT_PINS, DEMO_NOTICE } from './demo-data'
+import {
+  DEMO_ORDERS,
+  ACTIVE_ORDER_STATUSES,
+  computeOrderTotals,
+  getClientMapPins,
+  DEMO_NOTICE,
+} from './demo-data'
 import { DemoBadge } from './demo-badge'
 import { ClientsMap } from './clients-map'
 
@@ -10,11 +16,22 @@ const currency = new Intl.NumberFormat('fr-FR', {
   currency: 'EUR',
 })
 
-function StatTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function StatTile({
+  label,
+  value,
+  subValue,
+  hint,
+}: {
+  label: string
+  value: string
+  subValue?: string
+  hint?: string
+}) {
   return (
     <div className="bg-white rounded-2xl border border-kawa-200 p-5">
       <p className="text-sm text-kawa-500">{label}</p>
       <p className="text-2xl font-bold text-kawa-800 mt-1">{value}</p>
+      {subValue && <p className="text-sm text-kawa-500 mt-0.5">{subValue}</p>}
       {hint && <p className="text-xs text-kawa-400 mt-1">{hint}</p>}
     </div>
   )
@@ -39,12 +56,16 @@ export default async function AdminDashboardPage({
 
   const ordersInRange = DEMO_ORDERS.filter((order) => {
     const createdAt = new Date(order.createdAt)
-    return createdAt >= range.from && createdAt <= range.to && order.status !== 'cancelled'
+    return createdAt >= range.from && createdAt <= range.to && order.status !== 'annulee'
   })
 
-  const revenue = ordersInRange.reduce((sum, o) => sum + o.amount, 0)
-  const pendingDeliveries = DEMO_ORDERS.filter(
-    (o) => o.status === 'pending' || o.status === 'processing'
+  const revenueTTC = ordersInRange.reduce((sum, o) => sum + o.amount, 0)
+  const revenueHT = ordersInRange.reduce(
+    (sum, o) => sum + computeOrderTotals(o.items).totalHT,
+    0
+  )
+  const pendingDeliveries = DEMO_ORDERS.filter((o) =>
+    ACTIVE_ORDER_STATUSES.includes(o.status)
   ).length
 
   const quantityByProduct = new Map<string, number>()
@@ -70,16 +91,29 @@ export default async function AdminDashboardPage({
         </p>
       </div>
 
-      <DateRangePicker
-        preset={range.preset}
-        from={toInputDate(range.from)}
-        to={toInputDate(range.to)}
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <DateRangePicker
+          preset={range.preset}
+          from={toInputDate(range.from)}
+          to={toInputDate(range.to)}
+        />
+        <a
+          href={`/admin/export/factures?from=${toInputDate(range.from)}&to=${toInputDate(range.to)}`}
+          className="inline-flex items-center gap-2 rounded-lg bg-kawa-800 text-white px-4 py-2 text-sm font-medium hover:bg-kawa-900 transition"
+        >
+          Export factures (PDF)
+        </a>
+      </div>
 
       <DemoBadge text={DEMO_NOTICE} />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatTile label="Chiffre d'affaires TTC" value={currency.format(revenue)} hint="Sur la période" />
+        <StatTile
+          label="Chiffre d'affaires HT"
+          value={currency.format(revenueHT)}
+          subValue={`${currency.format(revenueTTC)} TTC`}
+          hint="Sur la période"
+        />
         <StatTile label="Commandes" value={String(ordersInRange.length)} hint="Sur la période" />
         <StatTile
           label="Commandes en cours à livrer"
@@ -118,7 +152,7 @@ export default async function AdminDashboardPage({
             Adresses clients
           </h2>
           <div className="p-5">
-            <ClientsMap pins={DEMO_CLIENT_PINS} />
+            <ClientsMap pins={getClientMapPins()} />
           </div>
         </section>
       </div>

@@ -28,7 +28,7 @@ export default async function AdminLayout({
       <aside className="w-64 shrink-0 border-r border-kawa-200 bg-white flex flex-col">
         <div className="px-5 py-5 border-b border-kawa-200">
           <Link href="/admin" className="font-bold text-kawa-800">
-            kawa admin
+            KAWA admin
           </Link>
         </div>
         <div className="flex-1 px-3 py-4">

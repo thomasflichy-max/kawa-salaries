@@ -22,7 +22,7 @@ export default async function AdminProductsPage() {
       .order('category')
       .order('sort_order')
       .order('name'),
-    supabase.from('coffee_pricing').select('subcategory, base_price, discount_percent'),
+    supabase.from('coffee_pricing').select('subcategory, base_price'),
   ])
 
   const categoryLabel = new Map<string, string>(PRODUCT_CATEGORIES.map((c) => [c.key, c.label]))
@@ -71,7 +71,10 @@ export default async function AdminProductsPage() {
               {allProducts.map((product) => (
                 <tr key={product.id} className="border-b border-kawa-50 last:border-0">
                   <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
+                    <Link
+                      href={`/admin/produits/${product.id}`}
+                      className="flex items-center gap-3 group w-fit"
+                    >
                       {product.image_url && (
                         <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-kawa-50 shrink-0">
                           <Image
@@ -83,8 +86,10 @@ export default async function AdminProductsPage() {
                           />
                         </div>
                       )}
-                      <span className="text-kawa-800 font-medium">{product.name}</span>
-                    </div>
+                      <span className="text-kawa-800 font-medium group-hover:underline">
+                        {product.name}
+                      </span>
+                    </Link>
                   </td>
                   <td className="px-5 py-3 text-kawa-500">
                     {categoryLabel.get(product.category) ?? product.category}

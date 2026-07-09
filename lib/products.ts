@@ -2,10 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { getCoffeePricing, computeCoffeePrice } from '@/lib/coffee-pricing'
 
 type CoffeePricingRules = Awaited<ReturnType<typeof getCoffeePricing>>
+export type CoffeeDiscounts = Record<string, number>
 
 export function resolveProductPricing(
   product: { price: number | null; subcategory: string | null },
-  pricingRules: CoffeePricingRules
+  pricingRules: CoffeePricingRules,
+  coffeeDiscounts: CoffeeDiscounts = {}
 ): { price: number | null; basePrice: number | null } {
   if (!product.subcategory) {
     return { price: product.price, basePrice: null }
@@ -15,7 +17,7 @@ export function resolveProductPricing(
     return { price: product.price, basePrice: null }
   }
   return {
-    price: computeCoffeePrice(rule.base_price, rule.discount_percent),
+    price: computeCoffeePrice(rule.base_price, coffeeDiscounts[product.subcategory] ?? 0),
     basePrice: rule.base_price,
   }
 }
@@ -23,7 +25,7 @@ export function resolveProductPricing(
 const PRODUCT_FIELDS =
   'id, category, subcategory, tag, name, description, price, image_url, hover_image_url, purchasable'
 
-export async function getActiveProducts(category?: string) {
+export async function getActiveProducts(category?: string, coffeeDiscounts: CoffeeDiscounts = {}) {
   const supabase = await createClient()
   let query = supabase
     .from('products')
@@ -48,11 +50,11 @@ export async function getActiveProducts(category?: string) {
 
   return products.map((product) => ({
     ...product,
-    ...resolveProductPricing(product, pricingRules),
+    ...resolveProductPricing(product, pricingRules, coffeeDiscounts),
   }))
 }
 
-export async function getProductById(id: string) {
+export async function getProductById(id: string, coffeeDiscounts: CoffeeDiscounts = {}) {
   const supabase = await createClient()
   const { data: product, error } = await supabase
     .from('products')
@@ -69,5 +71,5 @@ export async function getProductById(id: string) {
   }
 
   const pricingRules = await getCoffeePricing()
-  return { ...product, ...resolveProductPricing(product, pricingRules) }
+  return { ...product, ...resolveProductPricing(product, pricingRules, coffeeDiscounts) }
 }

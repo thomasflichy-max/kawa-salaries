@@ -1,8 +1,10 @@
 import { getActiveProducts } from '@/lib/products'
+import { getEmployee } from '@/lib/get-employee'
 import { ProductGrid } from '../product-grid'
 
 export default async function EntretienPage() {
-  const products = await getActiveProducts('entretien')
+  const { coffeeDiscounts } = await getEmployee()
+  const products = await getActiveProducts('entretien', coffeeDiscounts)
 
   return (
     <div className="flex flex-col gap-6">

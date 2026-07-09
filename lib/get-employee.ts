@@ -13,21 +13,47 @@ export async function getEmployee() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, organization_id')
+    .select('full_name, organization_id, billing_address, default_address_id')
     .eq('id', user.id)
     .single()
 
-  const { data: organization, error: organizationError } = profile?.organization_id
-    ? await supabase
-        .from('organizations')
-        .select('name, discount_rate')
-        .eq('id', profile.organization_id)
-        .single()
-    : { data: null, error: null }
+  const [
+    { data: organization, error: organizationError },
+    { data: discountRows },
+    { data: addresses },
+  ] = profile?.organization_id
+    ? await Promise.all([
+        supabase
+          .from('organizations')
+          .select('name')
+          .eq('id', profile.organization_id)
+          .single(),
+        supabase
+          .from('organization_coffee_discounts')
+          .select('subcategory, discount_amount')
+          .eq('organization_id', profile.organization_id),
+        supabase
+          .from('organization_addresses')
+          .select('id, label, address')
+          .eq('organization_id', profile.organization_id)
+          .order('label'),
+      ])
+    : [{ data: null, error: null }, { data: null }, { data: null }]
 
   if (organizationError) {
     console.error('[compte] failed to load organization:', organizationError)
   }
 
-  return { user, profile, organization }
+  const coffeeDiscounts: Record<string, number> = {}
+  for (const row of discountRows ?? []) {
+    coffeeDiscounts[row.subcategory] = row.discount_amount
+  }
+
+  return {
+    user,
+    profile,
+    organization,
+    coffeeDiscounts,
+    organizationAddresses: addresses ?? [],
+  }
 }

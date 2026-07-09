@@ -20,6 +20,7 @@ export async function signup(
     .trim()
     .toLowerCase()
   const password = String(formData.get('password') ?? '')
+  const billingAddress = String(formData.get('billingAddress') ?? '').trim()
 
   if (!firstName || !lastName) {
     return { error: 'Merci de renseigner votre prénom et votre nom.' }
@@ -29,6 +30,9 @@ export async function signup(
   }
   if (password.length < 8) {
     return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
+  }
+  if (!billingAddress) {
+    return { error: 'Merci de renseigner votre adresse de facturation.' }
   }
 
   const domain = email.split('@')[1]
@@ -55,6 +59,7 @@ export async function signup(
       data: {
         full_name: `${firstName} ${lastName}`,
         organization_id: org.id,
+        billing_address: billingAddress,
       },
     },
   })
@@ -149,9 +154,13 @@ export async function updateProfile(
   formData: FormData
 ): Promise<UpdateProfileState> {
   const fullName = String(formData.get('fullName') ?? '').trim()
+  const billingAddress = String(formData.get('billingAddress') ?? '').trim()
 
   if (!fullName) {
     return { error: 'Le nom ne peut pas être vide.' }
+  }
+  if (!billingAddress) {
+    return { error: "L'adresse de facturation ne peut pas être vide." }
   }
 
   const supabase = await createClient()
@@ -165,11 +174,64 @@ export async function updateProfile(
 
   const { error } = await supabase
     .from('profiles')
-    .update({ full_name: fullName })
+    .update({ full_name: fullName, billing_address: billingAddress })
     .eq('id', user.id)
 
   if (error) {
     console.error('[updateProfile] update failed:', error)
+    return { error: 'Une erreur est survenue, merci de réessayer.' }
+  }
+
+  return { success: true }
+}
+
+export type UpdateDefaultAddressState =
+  | { error: string; success?: false }
+  | { success: true; error?: undefined }
+  | undefined
+
+export async function updateDefaultAddress(
+  _prevState: UpdateDefaultAddressState,
+  formData: FormData
+): Promise<UpdateDefaultAddressState> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Session expirée, merci de vous reconnecter.' }
+  }
+
+  const addressId = String(formData.get('default_address_id') ?? '').trim()
+
+  if (addressId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single()
+
+    // Defense-in-depth: the dropdown only ever lists the employee's own
+    // organization's sites, but don't trust that client-side.
+    const { data: address } = await supabase
+      .from('organization_addresses')
+      .select('organization_id')
+      .eq('id', addressId)
+      .maybeSingle()
+
+    if (!address || address.organization_id !== profile?.organization_id) {
+      return { error: 'Site invalide.' }
+    }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ default_address_id: addressId || null })
+    .eq('id', user.id)
+
+  if (error) {
+    console.error('[updateDefaultAddress] update failed:', error)
     return { error: 'Une erreur est survenue, merci de réessayer.' }
   }
 

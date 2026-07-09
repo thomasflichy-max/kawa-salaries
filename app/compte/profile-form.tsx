@@ -3,7 +3,13 @@
 import { useActionState } from 'react'
 import { updateProfile } from '@/app/actions/auth'
 
-export function ProfileForm({ fullName }: { fullName: string | null }) {
+export function ProfileForm({
+  fullName,
+  billingAddress,
+}: {
+  fullName: string | null
+  billingAddress: string | null
+}) {
   const [state, action, pending] = useActionState(updateProfile, undefined)
 
   return (
@@ -14,6 +20,17 @@ export function ProfileForm({ fullName }: { fullName: string | null }) {
           type="text"
           name="fullName"
           defaultValue={fullName ?? ''}
+          required
+          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-kawa-700">Adresse de facturation</label>
+        <textarea
+          name="billingAddress"
+          defaultValue={billingAddress ?? ''}
+          rows={2}
           required
           className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
         />

@@ -17,7 +17,7 @@ const GRIND_LABELS: Record<string, string> = {
 }
 
 export default async function PanierPage() {
-  const { user, organization } = await getEmployee()
+  const { user, organization, coffeeDiscounts } = await getEmployee()
   const supabase = await createClient()
 
   const { data: items, error } = await supabase
@@ -35,7 +35,7 @@ export default async function PanierPage() {
   const pricingRules = await getCoffeePricing()
   const cartItems = (items ?? []).map((item) => {
     const { price, basePrice } = item.product
-      ? resolveProductPricing(item.product, pricingRules)
+      ? resolveProductPricing(item.product, pricingRules, coffeeDiscounts)
       : { price: 0, basePrice: null }
     return { ...item, unitPrice: price ?? 0, baseUnitPrice: basePrice }
   })

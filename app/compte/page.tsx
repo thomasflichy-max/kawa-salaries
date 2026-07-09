@@ -2,9 +2,10 @@ import { getEmployee } from '@/lib/get-employee'
 import { logout } from '@/app/actions/auth'
 import { ChangePasswordForm } from './change-password-form'
 import { ProfileForm } from './profile-form'
+import { DefaultAddressForm } from './default-address-form'
 
 export default async function ComptePage() {
-  const { user, profile, organization } = await getEmployee()
+  const { user, profile, organization, organizationAddresses } = await getEmployee()
 
   return (
     <div className="flex flex-col gap-10">
@@ -28,7 +29,18 @@ export default async function ComptePage() {
 
       <div>
         <h2 className="text-lg font-semibold text-kawa-800 mb-4">Mon profil</h2>
-        <ProfileForm fullName={profile?.full_name ?? null} />
+        <ProfileForm
+          fullName={profile?.full_name ?? null}
+          billingAddress={profile?.billing_address ?? null}
+        />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-kawa-800 mb-4">Livraison</h2>
+        <DefaultAddressForm
+          addresses={organizationAddresses}
+          defaultAddressId={profile?.default_address_id ?? null}
+        />
       </div>
 
       <div>
