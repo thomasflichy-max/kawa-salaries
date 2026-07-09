@@ -44,6 +44,7 @@ export type Database = {
           organization_id: string | null
           billing_address: string | null
           default_address_id: string | null
+          email: string | null
           created_at: string | null
         }
         Insert: {
@@ -52,6 +53,7 @@ export type Database = {
           organization_id?: string | null
           billing_address?: string | null
           default_address_id?: string | null
+          email?: string | null
           created_at?: string | null
         }
         Update: {
@@ -60,6 +62,7 @@ export type Database = {
           organization_id?: string | null
           billing_address?: string | null
           default_address_id?: string | null
+          email?: string | null
           created_at?: string | null
         }
         Relationships: [

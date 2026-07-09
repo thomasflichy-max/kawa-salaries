@@ -27,7 +27,7 @@ export default async function AdminAccountDetailPage({
         .maybeSingle(),
       supabase
         .from('profiles')
-        .select('id, full_name, created_at')
+        .select('id, full_name, email, created_at')
         .eq('organization_id', id)
         .order('full_name'),
       supabase
@@ -193,7 +193,14 @@ export default async function AdminAccountDetailPage({
             <tbody>
               {(employees ?? []).map((employee) => (
                 <tr key={employee.id} className="border-b border-kawa-50 last:border-0">
-                  <td className="px-5 py-3 text-kawa-800">{employee.full_name ?? '—'}</td>
+                  <td className="px-5 py-3">
+                    <Link
+                      href={`/admin/comptes/${org.id}/salaries/${employee.id}`}
+                      className="text-kawa-800 hover:underline"
+                    >
+                      {employee.full_name ?? '—'}
+                    </Link>
+                  </td>
                   <td className="px-5 py-3 text-kawa-500">
                     {employee.created_at ? dateFormat.format(new Date(employee.created_at)) : '—'}
                   </td>

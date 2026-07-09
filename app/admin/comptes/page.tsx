@@ -60,7 +60,14 @@ export default async function AdminAccountsPage() {
             <tbody>
               {orgs.map((org) => (
                 <tr key={org.id} className="border-b border-kawa-50 last:border-0">
-                  <td className="px-5 py-3 text-kawa-800 font-medium">{org.name}</td>
+                  <td className="px-5 py-3">
+                    <Link
+                      href={`/admin/comptes/${org.id}`}
+                      className="text-kawa-800 font-medium hover:underline"
+                    >
+                      {org.name}
+                    </Link>
+                  </td>
                   <td className="px-5 py-3 text-kawa-500">{org.domain}</td>
                   <td className="px-5 py-3 text-kawa-500 whitespace-nowrap">
                     {discountsByOrg.get(org.id) ?? '—'}
