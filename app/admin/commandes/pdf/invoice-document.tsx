@@ -73,7 +73,7 @@ export function InvoiceDocument({ order }: { order: DemoOrder }) {
           {order.items.map((item) => {
             const imageDataUri = readPublicImageAsDataUri(item.imageUrl)
             return (
-              <View key={item.productName} style={pdfStyles.tableRow}>
+              <View key={item.id} style={pdfStyles.tableRow}>
                 <View style={[pdfStyles.colProduct, pdfStyles.productCell]}>
                   {imageDataUri && (
                     // eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer's Image is a PDF-only node, not a DOM <img>

@@ -8,6 +8,7 @@ import {
   DEMO_ORDER_STATUS_LABELS,
   DEMO_ORDER_STATUS_STYLES,
   getDeliveryLabel,
+  getOrderRefundStatus,
 } from '@/app/admin/demo-data'
 
 function EyeIcon() {
@@ -98,7 +99,7 @@ export function OrderPreviewButton({ order }: { order: DemoOrder }) {
                 <p className="text-kawa-500 mb-2">Produits</p>
                 <ul className="flex flex-col gap-2">
                   {order.items.map((item) => (
-                    <li key={item.productName} className="flex items-center gap-3">
+                    <li key={item.id} className="flex items-center gap-3">
                       <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-kawa-50 shrink-0">
                         <Image
                           src={item.imageUrl}
@@ -123,9 +124,9 @@ export function OrderPreviewButton({ order }: { order: DemoOrder }) {
                 >
                   {DEMO_ORDER_STATUS_LABELS[order.status]}
                 </span>
-                {order.refundedAt && (
+                {getOrderRefundStatus(order) !== 'none' && (
                   <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
-                    Remboursée
+                    {getOrderRefundStatus(order) === 'full' ? 'Remboursée' : 'Remb. partiel'}
                   </span>
                 )}
               </div>

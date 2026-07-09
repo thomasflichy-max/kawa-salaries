@@ -16,6 +16,10 @@ export type DemoOrderStatus = 'en_cours' | 'en_preparation' | 'pret' | 'livree' 
 export type DemoDeliveryMode = 'delivery' | 'pickup'
 
 export type DemoOrderItem = {
+  // Stable identity for edit/remove operations — independent from
+  // productName, which is just a display label and isn't unique (two lines
+  // of the same product with different grinds would otherwise collide).
+  id: string
   productName: string
   quantity: number
   imageUrl: string
@@ -36,6 +40,18 @@ export type DemoOrderHistoryEntry = {
   at: string
 }
 
+// A refund is its own record (not a boolean) so an order can accumulate
+// several partial refunds over time — e.g. one now for a missing item,
+// another later for a complaint — as long as the running total never
+// exceeds what was actually paid.
+export type DemoOrderRefund = {
+  id: string
+  amount: number
+  reason: string
+  actor: string
+  at: string
+}
+
 export type DemoOrder = {
   id: string
   orderNumber: string
@@ -52,8 +68,8 @@ export type DemoOrder = {
   items: DemoOrderItem[]
   history: DemoOrderHistoryEntry[]
   // Refunding is independent of status — a delivered order can still be
-  // refunded after the fact (goodwill gesture, complaint, etc).
-  refundedAt: string | null
+  // refunded after the fact (goodwill gesture, complaint, missing item...).
+  refunds: DemoOrderRefund[]
 }
 
 export const DEMO_ORDER_STATUS_LABELS: Record<DemoOrderStatus, string> = {
@@ -72,7 +88,14 @@ export const DEMO_ORDER_STATUS_STYLES: Record<DemoOrderStatus, string> = {
   annulee: 'bg-red-50 text-red-700',
 }
 
-type DemoOrderSeed = Omit<DemoOrder, 'billingAddress' | 'history' | 'amount' | 'refundedAt'>
+// Seed items don't carry an id — it's generated once when DEMO_ORDERS is
+// built below, so every server restart gets fresh stable ids without having
+// to hand-write one per seed line.
+type DemoOrderItemSeed = Omit<DemoOrderItem, 'id'>
+type DemoOrderSeed = Omit<
+  DemoOrder,
+  'billingAddress' | 'history' | 'amount' | 'refunds' | 'items'
+> & { items: DemoOrderItemSeed[] }
 
 const DEMO_ORDER_SEEDS: DemoOrderSeed[] = [
   {
@@ -321,13 +344,20 @@ export function computeOrderTotals(items: DemoOrderItem[]): OrderTotals {
 // out identical to the company address. `amount` (Total TTC) is derived
 // from the items' real unit price + VAT rate rather than hand-entered, so
 // it can never drift from what the invoice actually itemizes.
-export const DEMO_ORDERS: DemoOrder[] = DEMO_ORDER_SEEDS.map((seed, i) => ({
-  ...seed,
-  billingAddress: seed.address,
-  amount: computeOrderTotals(seed.items).totalTTC,
-  history: buildSeedHistory(seed, i),
-  refundedAt: null,
-}))
+export const DEMO_ORDERS: DemoOrder[] = DEMO_ORDER_SEEDS.map((seed, i) => {
+  const items: DemoOrderItem[] = seed.items.map((item, itemIndex) => ({
+    ...item,
+    id: `${seed.id}-item-${itemIndex}`,
+  }))
+  return {
+    ...seed,
+    items,
+    billingAddress: seed.address,
+    amount: computeOrderTotals(items).totalTTC,
+    history: buildSeedHistory(seed, i),
+    refunds: [],
+  }
+})
 
 // Delivery mode drives what the "Livraison" column/detail should show:
 // the client's own address, or the KAWA office when it's a pickup order.
@@ -402,14 +432,88 @@ export function updateDemoOrderShippingAddress(id: string, value: string, actor:
   return order
 }
 
+export function getOrderRefundTotal(order: Pick<DemoOrder, 'refunds'>) {
+  return order.refunds.reduce((sum, refund) => sum + refund.amount, 0)
+}
+
+export type OrderRefundStatus = 'none' | 'partial' | 'full'
+
+export function getOrderRefundStatus(order: Pick<DemoOrder, 'refunds' | 'amount'>): OrderRefundStatus {
+  const refunded = getOrderRefundTotal(order)
+  if (refunded <= 0) return 'none'
+  // Small epsilon guards against float rounding ever leaving a fully-refunded
+  // order stuck showing as "partial" by a fraction of a cent.
+  return refunded >= order.amount - 0.005 ? 'full' : 'partial'
+}
+
 // Refunding is a separate track from the delivery status — there's no real
 // payment/refund pipeline yet, so this only records the fact for now (who
-// refunded, when), it doesn't move any money.
-export function refundDemoOrder(id: string, actor: string) {
+// refunded how much, when, and why), it doesn't move any money. Several
+// partial refunds can accumulate over time as long as the running total
+// never exceeds what was actually paid.
+export function addDemoOrderRefund(id: string, amount: number, reason: string, actor: string) {
   const order = DEMO_ORDERS.find((o) => o.id === id)
-  if (!order || order.refundedAt) return null
-  order.refundedAt = new Date().toISOString()
-  pushHistory(order, actor, 'Remboursement effectué')
+  if (!order) return null
+  const remaining = order.amount - getOrderRefundTotal(order)
+  if (amount <= 0 || amount > remaining + 0.005) return null
+  order.refunds.push({
+    id: crypto.randomUUID(),
+    amount,
+    reason,
+    actor,
+    at: new Date().toISOString(),
+  })
+  const amountLabel = amount.toFixed(2).replace('.', ',')
+  const isFull = getOrderRefundStatus(order) === 'full'
+  pushHistory(
+    order,
+    actor,
+    `Remboursement ${isFull ? 'total' : 'partiel'} de ${amountLabel} € — ${reason}`
+  )
+  return order
+}
+
+// Snapshots the picked catalog product's current name/image/price/VAT rate
+// into the order line (rather than a live reference to it), matching how the
+// rest of the order already works — a placed order must never silently
+// change because the catalog changed later.
+export function addDemoOrderItem(orderId: string, item: Omit<DemoOrderItem, 'id'>, actor: string) {
+  const order = DEMO_ORDERS.find((o) => o.id === orderId)
+  if (!order || item.quantity < 1) return null
+  order.items.push({ ...item, id: crypto.randomUUID() })
+  order.amount = computeOrderTotals(order.items).totalTTC
+  pushHistory(order, actor, `Article ajouté : ${item.productName} (× ${item.quantity})`)
+  return order
+}
+
+export function updateDemoOrderItemQuantity(
+  orderId: string,
+  itemId: string,
+  quantity: number,
+  actor: string
+) {
+  const order = DEMO_ORDERS.find((o) => o.id === orderId)
+  if (!order || quantity < 1) return null
+  const item = order.items.find((i) => i.id === itemId)
+  if (!item) return null
+  const previousQuantity = item.quantity
+  if (previousQuantity === quantity) return order
+  item.quantity = quantity
+  order.amount = computeOrderTotals(order.items).totalTTC
+  pushHistory(order, actor, `Quantité modifiée : ${item.productName} (${previousQuantity} → ${quantity})`)
+  return order
+}
+
+// Keeps at least one line on the order — an order with zero items has no
+// invoice to generate and no delivery to fulfill, so it isn't a valid state.
+export function removeDemoOrderItem(orderId: string, itemId: string, actor: string) {
+  const order = DEMO_ORDERS.find((o) => o.id === orderId)
+  if (!order || order.items.length <= 1) return null
+  const item = order.items.find((i) => i.id === itemId)
+  if (!item) return null
+  order.items = order.items.filter((i) => i.id !== itemId)
+  order.amount = computeOrderTotals(order.items).totalTTC
+  pushHistory(order, actor, `Article retiré : ${item.productName} (× ${item.quantity})`)
   return order
 }
 

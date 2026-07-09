@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import {
   DEMO_ORDER_STATUS_LABELS,
@@ -7,12 +6,16 @@ import {
   DEMO_NOTICE,
   getDeliveryLabel,
   getDemoOrderById,
+  getOrderRefundStatus,
 } from '@/app/admin/demo-data'
 import { DemoBadge } from '@/app/admin/demo-badge'
 import { StatusUpdateForm } from '../status-update-form'
 import { EditableAddressField } from '../editable-address-field'
 import { InvoiceIcon, DeliveryNoteIcon } from '../document-icons'
-import { RefundOrderButton } from '../refund-order-button'
+import { RefundForm } from '../refund-form'
+import { OrderItemsEditor, type CatalogProduct } from '../order-items-editor'
+import { TestConfirmationEmailButton } from '../test-confirmation-email-button'
+import { getActiveProducts } from '@/lib/products'
 import {
   updateOrderBillingAddressAction,
   updateOrderShippingAddressAction,
@@ -41,6 +44,15 @@ export default async function AdminOrderDetailPage({
 
   const shippingValue =
     order.deliveryMode === 'pickup' ? getDeliveryLabel(order) : order.address
+  const refundStatus = getOrderRefundStatus(order)
+
+  const catalogProducts: CatalogProduct[] = (await getActiveProducts()).map((product) => ({
+    id: product.id,
+    name: product.name,
+    category: product.category,
+    price: product.price,
+    imageUrl: product.image_url,
+  }))
 
   return (
     <div className="flex flex-col gap-6">
@@ -115,12 +127,16 @@ export default async function AdminOrderDetailPage({
           <div>
             <dt className="text-kawa-500 mb-1">Remboursement</dt>
             <dd className="mt-0.5">
-              {order.refundedAt ? (
-                <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
-                  Remboursée le {dateFormat.format(new Date(order.refundedAt))}
+              {refundStatus === 'none' && <span className="text-kawa-400 text-sm">Aucun</span>}
+              {refundStatus === 'partial' && (
+                <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+                  Partiellement remboursée
                 </span>
-              ) : (
-                <span className="text-kawa-400 text-sm">Aucun</span>
+              )}
+              {refundStatus === 'full' && (
+                <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                  Intégralement remboursée
+                </span>
               )}
             </dd>
           </div>
@@ -134,16 +150,19 @@ export default async function AdminOrderDetailPage({
               en faire la demande.
             </p>
           </div>
-          {!order.refundedAt && (
-            <div>
-              <p className="text-sm font-medium text-kawa-700 mb-2">Remboursement</p>
-              <RefundOrderButton orderId={order.id} />
-              <p className="text-xs text-kawa-400 mt-2">
-                Ne déclenche aucun virement — il n&apos;y a pas encore de module de paiement. Ça
-                garde juste une trace de qui a remboursé et quand.
-              </p>
-            </div>
-          )}
+          <div>
+            <p className="text-sm font-medium text-kawa-700 mb-2">Remboursement</p>
+            <RefundForm orderId={order.id} amount={order.amount} items={order.items} refunds={order.refunds} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-kawa-700 mb-2">Mail de confirmation</p>
+            <TestConfirmationEmailButton orderId={order.id} />
+            <p className="text-xs text-kawa-400 mt-2">
+              Envoie le mail de confirmation à ton adresse plutôt qu&apos;à celle (fictive) du
+              salarié, pour prévisualiser la forme avant qu&apos;il soit branché sur une vraie
+              commande passée.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -174,60 +193,12 @@ export default async function AdminOrderDetailPage({
         </div>
       </section>
 
-      <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
-        <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
-          Articles commandés
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-kawa-500 border-b border-kawa-100">
-                <th className="px-5 py-3 font-medium">Produit</th>
-                <th className="px-5 py-3 font-medium text-right">Quantité</th>
-                <th className="px-5 py-3 font-medium text-right">Prix unitaire TTC</th>
-                <th className="px-5 py-3 font-medium text-right">Total TTC</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.items.map((item) => (
-                <tr key={item.productName} className="border-b border-kawa-50 last:border-0">
-                  <td className="px-5 py-3 text-kawa-800">
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-kawa-50 shrink-0">
-                        <Image
-                          src={item.imageUrl}
-                          alt={item.productName}
-                          fill
-                          className="object-cover"
-                          sizes="48px"
-                        />
-                      </div>
-                      {item.productName}
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-kawa-500 text-right">{item.quantity}</td>
-                  <td className="px-5 py-3 text-kawa-500 text-right">
-                    {currency.format(item.unitPriceTTC)}
-                  </td>
-                  <td className="px-5 py-3 text-kawa-800 text-right font-medium">
-                    {currency.format(item.unitPriceTTC * item.quantity)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={3} className="px-5 py-3 text-right text-kawa-500 font-medium">
-                  Total TTC
-                </td>
-                <td className="px-5 py-3 text-right text-kawa-800 font-semibold">
-                  {currency.format(order.amount)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </section>
+      <OrderItemsEditor
+        orderId={order.id}
+        items={order.items}
+        amount={order.amount}
+        products={catalogProducts}
+      />
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
         <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
