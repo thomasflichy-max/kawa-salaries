@@ -7,6 +7,8 @@ import {
   computeOrderTotals,
   getClientMapPins,
   DEMO_NOTICE,
+  type DemoOrder,
+  type DemoOrderRefund,
 } from './demo-data'
 import { DemoBadge } from './demo-badge'
 import { ClientsMap } from './clients-map'
@@ -15,6 +17,7 @@ const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
   currency: 'EUR',
 })
+const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' })
 
 function StatTile({
   label,
@@ -82,6 +85,21 @@ export default async function AdminDashboardPage({
     .slice(0, 6)
   const maxQuantity = topProducts[0]?.[1] ?? 1
 
+  // Keyed by when the refund itself happened, not when the order was placed
+  // — a refund on an older order still belongs to the period it was issued
+  // in, same filtering the export/remboursements zip uses.
+  const refundsInRange: { order: DemoOrder; refund: DemoOrderRefund }[] = DEMO_ORDERS.flatMap(
+    (order) =>
+      order.refunds
+        .filter((refund) => {
+          const refundedAt = new Date(refund.at)
+          return refundedAt >= range.from && refundedAt <= range.to
+        })
+        .map((refund) => ({ order, refund }))
+  ).sort((a, b) => new Date(b.refund.at).getTime() - new Date(a.refund.at).getTime())
+
+  const totalRefunded = refundsInRange.reduce((sum, r) => sum + r.refund.amount, 0)
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -97,17 +115,25 @@ export default async function AdminDashboardPage({
           from={toInputDate(range.from)}
           to={toInputDate(range.to)}
         />
-        <a
-          href={`/admin/export/factures?from=${toInputDate(range.from)}&to=${toInputDate(range.to)}`}
-          className="inline-flex items-center gap-2 rounded-lg bg-kawa-800 text-white px-4 py-2 text-sm font-medium hover:bg-kawa-900 transition"
-        >
-          Export factures (PDF)
-        </a>
+        <div className="flex items-center gap-3">
+          <a
+            href={`/admin/export/factures?from=${toInputDate(range.from)}&to=${toInputDate(range.to)}`}
+            className="inline-flex items-center gap-2 rounded-lg bg-kawa-800 text-white px-4 py-2 text-sm font-medium hover:bg-kawa-900 transition"
+          >
+            Export factures (PDF)
+          </a>
+          <a
+            href={`/admin/export/remboursements?from=${toInputDate(range.from)}&to=${toInputDate(range.to)}`}
+            className="inline-flex items-center gap-2 rounded-lg bg-kawa-800 text-white px-4 py-2 text-sm font-medium hover:bg-kawa-900 transition"
+          >
+            Export justificatifs remboursement (PDF)
+          </a>
+        </div>
       </div>
 
       <DemoBadge text={DEMO_NOTICE} />
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <StatTile
           label="Chiffre d'affaires HT"
           value={currency.format(revenueHT)}
@@ -121,7 +147,68 @@ export default async function AdminDashboardPage({
           hint="À date d'aujourd'hui"
         />
         <StatTile label="Entreprises actives" value={String(orgs.filter((o) => o.active).length)} />
+        <StatTile
+          label="Remboursements"
+          value={currency.format(totalRefunded)}
+          subValue={`${refundsInRange.length} remboursement${refundsInRange.length > 1 ? 's' : ''}`}
+          hint="Sur la période"
+        />
       </div>
+
+      <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
+        <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
+          Remboursements
+        </h2>
+        {refundsInRange.length === 0 ? (
+          <p className="text-sm text-kawa-400 p-5">Aucun remboursement sur la période.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-kawa-500 border-b border-kawa-100">
+                  <th className="px-5 py-3 font-medium">Date</th>
+                  <th className="px-5 py-3 font-medium">Commande</th>
+                  <th className="px-5 py-3 font-medium">Motif</th>
+                  <th className="px-5 py-3 font-medium text-right">Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                {refundsInRange.map(({ order, refund }) => (
+                  <tr key={refund.id} className="border-b border-kawa-50 last:border-0">
+                    <td className="px-5 py-3 text-kawa-500 whitespace-nowrap">
+                      {dateFormat.format(new Date(refund.at))}
+                    </td>
+                    <td className="px-5 py-3">
+                      <a
+                        href={`/admin/commandes/${order.id}`}
+                        className="text-sky-700 hover:underline"
+                      >
+                        {order.orderNumber}
+                      </a>
+                    </td>
+                    <td className="px-5 py-3 text-kawa-500 max-w-[320px] truncate" title={refund.reason}>
+                      {refund.reason}
+                    </td>
+                    <td className="px-5 py-3 text-right font-medium text-kawa-800">
+                      {currency.format(refund.amount)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={3} className="px-5 py-3 text-right text-kawa-500 font-medium">
+                    Total
+                  </td>
+                  <td className="px-5 py-3 text-right text-kawa-800 font-semibold">
+                    {currency.format(totalRefunded)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
+      </section>
 
       <div className="grid lg:grid-cols-2 gap-6">
         <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
