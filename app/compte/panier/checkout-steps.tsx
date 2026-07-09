@@ -123,10 +123,14 @@ export function CheckoutSteps({
                 </option>
               ))}
             </select>
-            {selectedAddress !== '' && (
+            {selectedAddress !== '' ? (
               <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                 Votre livraison sera effectuée lors de la prochaine commande de café passée par
                 votre entreprise, est-ce que c&apos;est bon pour vous ?
+              </p>
+            ) : (
+              <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                Nous vous enverrons un mail quand votre commande sera prête à être récupérée.
               </p>
             )}
             {state?.error && (
