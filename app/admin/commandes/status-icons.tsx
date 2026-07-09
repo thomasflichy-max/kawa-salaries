@@ -29,7 +29,18 @@ function PackageIcon() {
   )
 }
 
-export function CheckIcon() {
+function TruckIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M3 7h11v9H3z" />
+      <path d="M14 10h4l3 3v3h-7z" />
+      <circle cx="7" cy="18" r="1.5" />
+      <circle cx="17" cy="18" r="1.5" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
   return (
     <svg {...iconProps}>
       <path d="M20 6 9 17l-5-5" />
@@ -37,7 +48,7 @@ export function CheckIcon() {
   )
 }
 
-export function XIcon() {
+function XIcon() {
   return (
     <svg {...iconProps}>
       <path d="M18 6 6 18" />
@@ -46,8 +57,13 @@ export function XIcon() {
   )
 }
 
-// Icon shown for the action that moves an order OUT of this status.
-export const ORDER_STATUS_ACTION_ICONS: Partial<Record<DemoOrderStatus, React.ReactNode>> = {
+// Icon shown for a status in the order list's single sequential action
+// button — one entry per DemoOrderStatus, so every status (including the
+// two terminal ones, where the button is just disabled) has one.
+export const ORDER_STATUS_ACTION_ICONS: Record<DemoOrderStatus, React.ReactNode> = {
   en_cours: <WrenchIcon />,
   en_preparation: <PackageIcon />,
+  pret: <TruckIcon />,
+  livree: <CheckIcon />,
+  annulee: <XIcon />,
 }

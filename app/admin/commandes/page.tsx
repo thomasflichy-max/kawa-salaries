@@ -3,15 +3,13 @@ import {
   DEMO_ORDER_STATUS_LABELS,
   DEMO_ORDER_STATUS_STYLES,
   DEMO_NOTICE,
-  ORDER_STATUS_ACTION_LABELS,
   getDeliveryLabel,
+  getNextOrderStatus,
   type DemoOrderStatus,
 } from '@/app/admin/demo-data'
 import { DemoBadge } from '@/app/admin/demo-badge'
 import { OrderRow } from './order-row'
 import { AdvanceStatusButton } from './advance-status-button'
-import { MarkDeliveredButton } from './mark-delivered-button'
-import { CancelOrderButton } from './cancel-order-button'
 import { DocumentDownloadLinks } from './document-download-links'
 import { OrderPreviewButton } from './order-preview-button'
 import { StatusFilter } from './status-filter'
@@ -69,8 +67,6 @@ export default async function AdminOrdersPage({
             </thead>
             <tbody>
               {orders.map((order) => {
-                const advanceLabel = ORDER_STATUS_ACTION_LABELS[order.status]
-                const isActive = order.status !== 'livree' && order.status !== 'annulee'
                 return (
                   <OrderRow key={order.id} id={order.id}>
                     <td className="px-5 py-3 text-kawa-500 whitespace-nowrap">
@@ -96,21 +92,12 @@ export default async function AdminOrdersPage({
                     </td>
                     <td className="px-5 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {isActive ? (
-                          <>
-                            {advanceLabel && (
-                              <AdvanceStatusButton
-                                orderId={order.id}
-                                status={order.status}
-                                label={advanceLabel}
-                              />
-                            )}
-                            <MarkDeliveredButton orderId={order.id} />
-                            <CancelOrderButton orderId={order.id} />
-                          </>
-                        ) : (
-                          <span className="text-kawa-300 w-8 text-center">—</span>
-                        )}
+                        <AdvanceStatusButton
+                          orderId={order.id}
+                          status={order.status}
+                          label={DEMO_ORDER_STATUS_LABELS[order.status]}
+                          disabled={!getNextOrderStatus(order.status)}
+                        />
                         <DocumentDownloadLinks orderId={order.id} />
                       </div>
                     </td>
