@@ -12,6 +12,7 @@ function normalizeDomain(input: string) {
     .toLowerCase()
     .replace(/^https?:\/\//, '')
     .replace(/^www\./, '')
+    .replace(/^@/, '')
     .split('/')[0]
 }
 
