@@ -48,7 +48,7 @@ export function CreateOrganizationForm() {
         </div>
 
         <div>
-          <label className="text-sm font-medium text-kawa-700">Domaine email</label>
+          <label className="text-sm font-medium text-kawa-700">Domaine email (sans le @)</label>
           <input
             type="text"
             name="domain"
