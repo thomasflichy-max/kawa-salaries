@@ -47,7 +47,7 @@ export function DefaultAddressForm({
         </p>
         {selected !== '' && (
           <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
-            La livraison sera effectuée lors de la prochaine commande de café pour votre
+            Votre livraison sera effectuée lors de la prochaine commande de café de votre
             entreprise, est-ce que c&apos;est bon pour vous ?
           </p>
         )}
