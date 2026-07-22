@@ -4,11 +4,13 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 import { createOrganization } from '@/app/admin/actions'
 
 type Site = { label: string; address: string }
+type SampleEmail = { email: string }
 
 export function CreateOrganizationForm() {
   const formRef = useRef<HTMLFormElement>(null)
   const [state, action, pending] = useActionState(createOrganization, undefined)
   const [sites, setSites] = useState<Site[]>([{ label: '', address: '' }])
+  const [sampleEmails, setSampleEmails] = useState<SampleEmail[]>([{ email: '' }])
 
   // Imperative DOM reset stays in an effect (that's what effects are for);
   // it doesn't call setState so it doesn't trip the set-state-in-effect rule.
@@ -18,19 +20,24 @@ export function CreateOrganizationForm() {
     }
   }, [state])
 
-  // Resetting the `sites` array on success is a state adjustment driven by a
-  // state change, so it's done during render (React's documented pattern),
-  // not in a useEffect.
+  // Resetting the `sites`/`sampleEmails` arrays on success is a state
+  // adjustment driven by a state change, so it's done during render (React's
+  // documented pattern), not in a useEffect.
   const [lastHandledState, setLastHandledState] = useState(state)
   if (state !== lastHandledState) {
     setLastHandledState(state)
     if (state?.success) {
       setSites([{ label: '', address: '' }])
+      setSampleEmails([{ email: '' }])
     }
   }
 
   function updateSite(index: number, field: keyof Site, value: string) {
     setSites((prev) => prev.map((site, i) => (i === index ? { ...site, [field]: value } : site)))
+  }
+
+  function updateSampleEmail(index: number, value: string) {
+    setSampleEmails((prev) => prev.map((entry, i) => (i === index ? { email: value } : entry)))
   }
 
   return (
@@ -60,13 +67,37 @@ export function CreateOrganizationForm() {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Mail type d&apos;un salarié</label>
-        <input
-          type="email"
-          name="sample_email"
-          placeholder="jean.dupont@colbertgroupe.com"
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-        />
+        <label className="text-sm font-medium text-kawa-700">Mails types de salariés</label>
+        <div className="mt-1 flex flex-col gap-2">
+          {sampleEmails.map((entry, index) => (
+            <div key={index} className="flex gap-3 items-start">
+              <input
+                type="email"
+                name="sample_email"
+                value={entry.email}
+                onChange={(e) => updateSampleEmail(index, e.target.value)}
+                placeholder="jean.dupont@colbertgroupe.com"
+                className="flex-1 border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+              />
+              {sampleEmails.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setSampleEmails((prev) => prev.filter((_, i) => i !== index))}
+                  className="text-sm text-red-600 hover:underline px-2 py-2"
+                >
+                  Retirer
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setSampleEmails((prev) => [...prev, { email: '' }])}
+          className="mt-2 text-sm text-sky-700 hover:underline"
+        >
+          + Ajouter un mail type
+        </button>
       </div>
 
       <div>

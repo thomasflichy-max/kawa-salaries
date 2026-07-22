@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
-import { getDemoOrderById } from '@/app/admin/demo-data'
+import { getAdminOrderById } from '@/app/admin/commandes/manual-orders'
 import { InvoiceDocument } from '@/app/admin/commandes/pdf/invoice-document'
 
 export const runtime = 'nodejs'
@@ -21,7 +21,7 @@ export async function GET(
   }
 
   const { id } = await params
-  const order = getDemoOrderById(id)
+  const order = await getAdminOrderById(id)
 
   if (!order) {
     return NextResponse.json({ error: 'Commande introuvable.' }, { status: 404 })

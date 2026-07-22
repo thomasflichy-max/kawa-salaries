@@ -1,5 +1,5 @@
+import Link from 'next/link'
 import {
-  DEMO_ORDERS,
   DEMO_ORDER_STATUS_LABELS,
   DEMO_ORDER_STATUS_STYLES,
   DEMO_NOTICE,
@@ -8,11 +8,14 @@ import {
   type DemoOrderStatus,
 } from '@/app/admin/demo-data'
 import { DemoBadge } from '@/app/admin/demo-badge'
+import { createClient } from '@/lib/supabase/server'
+import { getAllAdminOrders } from './manual-orders'
 import { OrderRow } from './order-row'
 import { AdvanceStatusButton } from './advance-status-button'
 import { DocumentDownloadLinks } from './document-download-links'
 import { OrderPreviewButton } from './order-preview-button'
 import { StatusFilter } from './status-filter'
+import { OrganizationFilter } from './organization-filter'
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -25,14 +28,22 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', {
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; entreprise?: string }>
 }) {
-  const { status } = await searchParams
+  const { status, entreprise } = await searchParams
   const isValidStatus = (s: string): s is DemoOrderStatus =>
     s in DEMO_ORDER_STATUS_LABELS
 
-  const orders = [...DEMO_ORDERS]
+  const supabase = await createClient()
+  const [{ data: organizations }, allOrders] = await Promise.all([
+    supabase.from('organizations').select('name').order('name'),
+    getAllAdminOrders(),
+  ])
+  const organizationNames = (organizations ?? []).map((org) => org.name)
+
+  const orders = allOrders
     .filter((order) => !status || (isValidStatus(status) && order.status === status))
+    .filter((order) => !entreprise || order.organizationName === entreprise)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   return (
@@ -45,7 +56,16 @@ export default async function AdminOrdersPage({
             une commande pour voir le détail.
           </p>
         </div>
-        <StatusFilter value={status ?? ''} />
+        <div className="flex flex-wrap items-center gap-2">
+          <OrganizationFilter value={entreprise ?? ''} organizations={organizationNames} />
+          <StatusFilter value={status ?? ''} />
+          <Link
+            href="/admin/commandes/nouvelle"
+            className="bg-sky-500 text-kawa-950 px-4 py-2 rounded-lg text-sm font-medium hover:bg-sky-600 transition"
+          >
+            + Créer une commande
+          </Link>
+        </div>
       </div>
 
       <DemoBadge text={DEMO_NOTICE} />
@@ -61,6 +81,7 @@ export default async function AdminOrdersPage({
                 <th className="px-5 py-3 font-medium">Entreprise</th>
                 <th className="px-5 py-3 font-medium">Livraison</th>
                 <th className="px-5 py-3 font-medium">Statut</th>
+                <th className="px-5 py-3 font-medium">Paiement</th>
                 <th className="px-5 py-3 font-medium text-right">Montant TTC</th>
                 <th className="px-5 py-3 font-medium text-right">Actions</th>
               </tr>
@@ -81,10 +102,23 @@ export default async function AdminOrdersPage({
                       {getDeliveryLabel(order)}
                     </td>
                     <td className="px-5 py-3">
+                      {order.source === 'manual' ? (
+                        <span className="text-kawa-400">—</span>
+                      ) : (
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
+                        >
+                          {DEMO_ORDER_STATUS_LABELS[order.status]}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
                       <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
+                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                          order.paid ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                        }`}
                       >
-                        {DEMO_ORDER_STATUS_LABELS[order.status]}
+                        {order.paid ? 'Payée' : 'En attente'}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-kawa-800 text-right whitespace-nowrap">
@@ -96,7 +130,7 @@ export default async function AdminOrdersPage({
                           orderId={order.id}
                           status={order.status}
                           label={DEMO_ORDER_STATUS_LABELS[order.status]}
-                          disabled={!getNextOrderStatus(order.status)}
+                          disabled={order.source === 'manual' || !getNextOrderStatus(order.status)}
                         />
                         <DocumentDownloadLinks orderId={order.id} />
                       </div>
@@ -106,9 +140,9 @@ export default async function AdminOrdersPage({
               })}
               {orders.length === 0 && (
                 <tr>
-                  <td className="px-5 py-6 text-kawa-400 text-center" colSpan={8}>
-                    {status
-                      ? 'Aucune commande avec ce statut.'
+                  <td className="px-5 py-6 text-kawa-400 text-center" colSpan={9}>
+                    {status || entreprise
+                      ? 'Aucune commande ne correspond à ce filtre.'
                       : 'Aucune commande pour le moment.'}
                   </td>
                 </tr>

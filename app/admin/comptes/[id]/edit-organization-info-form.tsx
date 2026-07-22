@@ -7,13 +7,11 @@ export function EditOrganizationInfoForm({
   organizationId,
   name,
   domain,
-  sampleEmail,
   active,
 }: {
   organizationId: string
   name: string
   domain: string
-  sampleEmail: string | null
   active: boolean
 }) {
   const boundAction = updateOrganizationInfo.bind(null, organizationId)
@@ -42,16 +40,6 @@ export function EditOrganizationInfoForm({
             className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
           />
         </div>
-      </div>
-
-      <div>
-        <label className="text-sm font-medium text-kawa-700">Mail type d&apos;un salarié</label>
-        <input
-          type="email"
-          name="sample_email"
-          defaultValue={sampleEmail ?? ''}
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-        />
       </div>
 
       <div className="flex items-center justify-between">

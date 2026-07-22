@@ -31,15 +31,19 @@ export type CatalogProduct = {
   category: string
   price: number | null
   imageUrl: string | null
+  // Pre-discount price, only set when it differs from `price` (i.e. a coffee
+  // product with an organization discount applied) — lets the "create order"
+  // picker show the remise instead of just the already-discounted number.
+  basePrice?: number | null
 }
 
 // Coffee (category "cafe") is taxed as a food product at 5.5%, everything
 // else (machines, entretien) at the standard 20% rate — same split used
 // everywhere else in the app, from the cart to the invoice PDF.
-function vatRateFor(category: string) {
+export function vatRateFor(category: string) {
   return category === 'cafe' ? 0.055 : 0.2
 }
-function unitFor(category: string) {
+export function unitFor(category: string) {
   return category === 'cafe' ? ('Kg' as const) : ('unité' as const)
 }
 
@@ -234,11 +238,13 @@ export function OrderItemsEditor({
   items,
   amount,
   products,
+  readOnly,
 }: {
   orderId: string
   items: DemoOrderItem[]
   amount: number
   products: CatalogProduct[]
+  readOnly?: boolean
 }) {
   const [editing, setEditing] = useState(false)
   const sortedProducts = useMemo(
@@ -250,14 +256,16 @@ export function OrderItemsEditor({
     <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-kawa-200">
         <h2 className="text-sm font-semibold text-kawa-800">Articles commandés</h2>
-        <button
-          type="button"
-          onClick={() => setEditing((v) => !v)}
-          className="flex items-center gap-1.5 text-kawa-400 hover:text-sky-700 transition text-xs font-medium"
-        >
-          <PencilIcon />
-          {editing ? 'Terminer' : 'Modifier'}
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            className="flex items-center gap-1.5 text-kawa-400 hover:text-sky-700 transition text-xs font-medium"
+          >
+            <PencilIcon />
+            {editing ? 'Terminer' : 'Modifier'}
+          </button>
+        )}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">

@@ -7,6 +7,7 @@ import {
   computeOrderTotals,
   getClientMapPins,
   DEMO_NOTICE,
+  type DemoClientPin,
   type DemoOrder,
   type DemoOrderRefund,
 } from './demo-data'
@@ -49,13 +50,27 @@ export default async function AdminDashboardPage({
   const range = resolveDateRange(params)
 
   const supabase = await createClient()
-  const [{ data: organizations }, { data: profiles }] = await Promise.all([
-    supabase.from('organizations').select('id, active').order('name'),
-    supabase.from('profiles').select('id, organization_id'),
-  ])
+  const [{ data: organizations }, { data: profiles }, { data: addresses, error: addressesError }] =
+    await Promise.all([
+      supabase.from('organizations').select('id, name, active').order('name'),
+      supabase.from('profiles').select('id, organization_id'),
+      supabase
+        .from('organization_addresses')
+        .select('address, lat, lng, organizations(name)')
+        .not('lat', 'is', null)
+        .not('lng', 'is', null),
+    ])
+  if (addressesError) {
+    console.error('[AdminDashboardPage] organization_addresses fetch failed:', addressesError)
+  }
 
   const orgs = organizations ?? []
   const allProfiles = profiles ?? []
+  const clientPins: DemoClientPin[] = (addresses ?? []).flatMap((site) => {
+    const organizationName = (site.organizations as { name: string } | null)?.name
+    if (!organizationName || site.lat == null || site.lng == null) return []
+    return [{ organizationName, address: site.address, lat: site.lat, lng: site.lng }]
+  })
 
   const ordersInRange = DEMO_ORDERS.filter((order) => {
     const createdAt = new Date(order.createdAt)
@@ -239,7 +254,7 @@ export default async function AdminDashboardPage({
             Adresses clients
           </h2>
           <div className="p-5">
-            <ClientsMap pins={getClientMapPins()} />
+            <ClientsMap pins={getClientMapPins(clientPins)} />
           </div>
         </section>
       </div>

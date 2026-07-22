@@ -177,6 +177,8 @@ export type Database = {
           organization_id: string
           label: string
           address: string
+          lat: number | null
+          lng: number | null
           created_at: string
         }
         Insert: {
@@ -184,6 +186,8 @@ export type Database = {
           organization_id: string
           label: string
           address: string
+          lat?: number | null
+          lng?: number | null
           created_at?: string
         }
         Update: {
@@ -191,11 +195,42 @@ export type Database = {
           organization_id?: string
           label?: string
           address?: string
+          lat?: number | null
+          lng?: number | null
           created_at?: string
         }
         Relationships: [
           {
             foreignKeyName: 'organization_addresses_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      organization_sample_emails: {
+        Row: {
+          id: string
+          organization_id: string
+          email: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          email: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          email?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'organization_sample_emails_organization_id_fkey'
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
@@ -225,6 +260,122 @@ export type Database = {
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      manual_orders: {
+        Row: {
+          id: string
+          order_number: string
+          profile_id: string
+          organization_id: string
+          employee_name: string
+          employee_email: string
+          billing_address: string
+          delivery_mode: string
+          address: string
+          amount: number
+          paid: boolean
+          payment_link: string | null
+          order_date: string
+          comment: string | null
+          payment_method: string
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          order_number: string
+          profile_id: string
+          organization_id: string
+          employee_name: string
+          employee_email: string
+          billing_address: string
+          delivery_mode: string
+          address: string
+          amount: number
+          paid?: boolean
+          payment_link?: string | null
+          order_date?: string
+          comment?: string | null
+          payment_method?: string
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          order_number?: string
+          profile_id?: string
+          organization_id?: string
+          employee_name?: string
+          employee_email?: string
+          billing_address?: string
+          delivery_mode?: string
+          address?: string
+          amount?: number
+          paid?: boolean
+          payment_link?: string | null
+          order_date?: string
+          comment?: string | null
+          payment_method?: string
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'manual_orders_profile_id_fkey'
+            columns: ['profile_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'manual_orders_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      manual_order_items: {
+        Row: {
+          id: string
+          manual_order_id: string
+          product_name: string
+          quantity: number
+          image_url: string
+          unit: string
+          unit_price_ttc: number
+          vat_rate: number
+        }
+        Insert: {
+          id?: string
+          manual_order_id: string
+          product_name: string
+          quantity: number
+          image_url: string
+          unit: string
+          unit_price_ttc: number
+          vat_rate: number
+        }
+        Update: {
+          id?: string
+          manual_order_id?: string
+          product_name?: string
+          quantity?: number
+          image_url?: string
+          unit?: string
+          unit_price_ttc?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'manual_order_items_manual_order_id_fkey'
+            columns: ['manual_order_id']
+            isOneToOne: false
+            referencedRelation: 'manual_orders'
             referencedColumns: ['id']
           }
         ]

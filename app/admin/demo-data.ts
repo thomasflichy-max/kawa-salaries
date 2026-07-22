@@ -415,6 +415,15 @@ export function setDemoOrderStatus(id: string, status: DemoOrderStatus, actor: s
   return order
 }
 
+export function setDemoOrderPaid(id: string, paid: boolean, actor: string) {
+  const order = DEMO_ORDERS.find((o) => o.id === id)
+  if (!order) return null
+  if (order.paid === paid) return order
+  order.paid = paid
+  pushHistory(order, actor, paid ? 'Marquée comme payée' : 'Marquée en attente de paiement')
+  return order
+}
+
 export function updateDemoOrderBillingAddress(id: string, value: string, actor: string) {
   const order = DEMO_ORDERS.find((o) => o.id === id)
   if (!order) return null
@@ -562,8 +571,13 @@ export const ACTIVE_ORDER_STATUSES: DemoOrderStatus[] = ['en_cours', 'en_prepara
 // with one employee picking up and another getting delivered never has to
 // pick a single color for both: the company pin only tracks deliveries to
 // its address, the KAWA office pin only tracks pending pickups.
-export function getClientMapPins(): ClientMapPin[] {
-  const companyPins: ClientMapPin[] = DEMO_CLIENT_PINS.map((pin) => {
+//
+// `companyPins` are the real geocoded client sites (organization_addresses,
+// see app/admin/page.tsx) — orders are still demo data (no checkout
+// pipeline yet), so pending-delivery status is matched by organization name
+// only, same fragile-by-name link used elsewhere in this file.
+export function getClientMapPins(companyPins: DemoClientPin[] = DEMO_CLIENT_PINS): ClientMapPin[] {
+  const mappedCompanyPins: ClientMapPin[] = companyPins.map((pin) => {
     const hasPendingDelivery = DEMO_ORDERS.some(
       (order) =>
         order.organizationName === pin.organizationName &&
@@ -595,5 +609,5 @@ export function getClientMapPins(): ClientMapPin[] {
     kind: 'office',
   }
 
-  return [...companyPins, officePin]
+  return [...mappedCompanyPins, officePin]
 }

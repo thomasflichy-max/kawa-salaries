@@ -7,6 +7,7 @@ import { resolveDateRange, toInputDate } from '@/app/admin/date-range'
 import { DateRangePicker } from '@/app/admin/date-range-picker'
 import { EditOrganizationInfoForm } from './edit-organization-info-form'
 import { EditOrganizationSitesForm } from './edit-organization-sites-form'
+import { EditOrganizationSampleEmailsForm } from './edit-organization-sample-emails-form'
 import { EditOrganizationDiscountsForm } from './edit-organization-discounts-form'
 
 const currency = new Intl.NumberFormat('fr-FR', {
@@ -26,11 +27,11 @@ export default async function AdminAccountDetailPage({
   const range = resolveDateRange(await searchParams)
   const supabase = await createClient()
 
-  const [{ data: org }, { data: employees }, { data: addresses }, { data: discounts }] =
+  const [{ data: org }, { data: employees }, { data: addresses }, { data: sampleEmails }, { data: discounts }] =
     await Promise.all([
       supabase
         .from('organizations')
-        .select('id, name, domain, sample_email, active, created_at')
+        .select('id, name, domain, active, created_at')
         .eq('id', id)
         .maybeSingle(),
       supabase
@@ -43,6 +44,11 @@ export default async function AdminAccountDetailPage({
         .select('id, label, address')
         .eq('organization_id', id)
         .order('label'),
+      supabase
+        .from('organization_sample_emails')
+        .select('id, email')
+        .eq('organization_id', id)
+        .order('email'),
       supabase
         .from('organization_coffee_discounts')
         .select('subcategory, discount_amount')
@@ -101,8 +107,20 @@ export default async function AdminAccountDetailPage({
           organizationId={org.id}
           name={org.name}
           domain={org.domain}
-          sampleEmail={org.sample_email}
           active={org.active ?? false}
+        />
+      </section>
+
+      <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
+        <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
+          Mails types
+        </h2>
+        <EditOrganizationSampleEmailsForm
+          organizationId={org.id}
+          initialEmails={(sampleEmails ?? []).map((entry) => ({
+            id: entry.id,
+            email: entry.email,
+          }))}
         />
       </section>
 

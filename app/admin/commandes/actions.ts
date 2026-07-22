@@ -6,6 +6,7 @@ import { isKawaStaffEmail, getStaffDisplayName } from '@/lib/is-kawa-staff'
 import {
   advanceDemoOrderStatus,
   setDemoOrderStatus,
+  setDemoOrderPaid,
   updateDemoOrderBillingAddress,
   updateDemoOrderShippingAddress,
   addDemoOrderRefund,
@@ -68,6 +69,12 @@ export async function updateOrderStatusAction(orderId: string, status: DemoOrder
   const wasReady = getDemoOrderById(orderId)?.status === 'pret'
   const order = setDemoOrderStatus(orderId, status, actor)
   await notifyIfJustReadyForPickup(order, wasReady)
+  revalidateOrderPaths(orderId)
+}
+
+export async function setOrderPaidAction(orderId: string, paid: boolean) {
+  const actor = await requireKawaStaffActor()
+  setDemoOrderPaid(orderId, paid, actor)
   revalidateOrderPaths(orderId)
 }
 
