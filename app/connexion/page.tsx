@@ -10,6 +10,7 @@ export default async function ConnexionPage({
   searchParams: Promise<{ next?: string }>
 }) {
   const { next } = await searchParams
+  const wantsAdmin = next === '/admin' || next?.startsWith('/admin/')
 
   const supabase = await createClient()
   const {
@@ -20,7 +21,6 @@ export default async function ConnexionPage({
     // Guard against a redirect loop: a logged-in non-staff user hitting
     // /admin would otherwise bounce here (via the admin guard) and straight
     // back to /admin (via this redirect) forever.
-    const wantsAdmin = next === '/admin' || next?.startsWith('/admin/')
     redirect(wantsAdmin && !isKawaStaffEmail(user.email) ? '/compte/avantage' : next || '/compte/avantage')
   }
 
@@ -40,6 +40,14 @@ export default async function ConnexionPage({
             Créer un compte
           </Link>
         </p>
+        {wantsAdmin && (
+          <p className="text-center text-sm text-kawa-400 mt-2">
+            Équipe KAWA sans accès admin ?{' '}
+            <Link href="/inscription-staff" className="text-sky-700 underline">
+              Créer mon accès
+            </Link>
+          </p>
+        )}
       </div>
     </main>
   )

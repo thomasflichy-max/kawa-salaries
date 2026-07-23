@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 
 export type AuthFormState = { error: string } | undefined
 
@@ -77,6 +78,55 @@ export async function signup(
   // If email confirmation is disabled on the project, signUp already returns
   // an active session; otherwise the user must confirm by email first.
   redirect(signUpData.session ? '/compte' : '/inscription/confirmation')
+}
+
+// Staff (@kawa.coffee) can't go through the regular signup flow above — it
+// requires the email's domain to match a client organization, and kawa.coffee
+// is KAWA's own domain, not a client's. This is the only way an admin email
+// (KAWA_ADMIN_EMAILS) can get an initial account/password, since there's no
+// invite flow — gated by the same allowlist as /admin itself rather than an
+// organization lookup.
+export async function adminSignup(
+  _prevState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const email = String(formData.get('email') ?? '')
+    .trim()
+    .toLowerCase()
+  const password = String(formData.get('password') ?? '')
+
+  if (!isValidEmail(email)) {
+    return { error: 'Adresse email invalide.' }
+  }
+  if (password.length < 8) {
+    return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
+  }
+  if (!isKawaStaffEmail(email)) {
+    return {
+      error:
+        "Cette adresse n'est pas autorisée pour l'accès admin. Contactez un administrateur si vous pensez qu'il s'agit d'une erreur.",
+    }
+  }
+
+  const supabase = await createClient()
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+  })
+
+  if (signUpError) {
+    console.error('[adminSignup] auth.signUp failed:', signUpError)
+    return {
+      error:
+        signUpError.code === 'user_already_exists'
+          ? 'Un compte existe déjà avec cet email — utilisez "Mot de passe oublié" sur la page de connexion.'
+          : 'Une erreur est survenue, merci de réessayer.',
+    }
+  }
+
+  // If email confirmation is disabled on the project, signUp already returns
+  // an active session; otherwise the user must confirm by email first.
+  redirect(signUpData.session ? '/admin' : '/inscription/confirmation')
 }
 
 export async function login(
