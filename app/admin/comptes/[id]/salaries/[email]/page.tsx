@@ -10,6 +10,7 @@ import {
 } from '@/app/admin/demo-data'
 import { DemoBadge } from '@/app/admin/demo-badge'
 import { DocumentDownloadLinks } from '@/app/admin/commandes/document-download-links'
+import { ResendConfirmationButton } from './resend-confirmation-button'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' })
@@ -84,6 +85,11 @@ export default async function AdminEmployeeDetailPage({
             <dd className="text-kawa-800 mt-0.5 font-semibold">{currency.format(totalSpent)}</dd>
           </div>
         </dl>
+        {employee && (
+          <div className="px-5 pb-5">
+            <ResendConfirmationButton email={email} />
+          </div>
+        )}
       </section>
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">

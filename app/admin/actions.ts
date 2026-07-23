@@ -493,3 +493,40 @@ export async function updateOrganizationSampleEmails(
   revalidatePath(`/admin/comptes/${organizationId}`)
   return { success: true }
 }
+
+export type ResendConfirmationState =
+  | { error: string; success?: false }
+  | { success: true; error?: undefined }
+  | undefined
+
+// For an employee whose "Confirm signup" email never arrived (spam, typo,
+// expired link...) — re-triggers Supabase's own confirmation email rather
+// than creating a second account. Uses the anon-key client like every other
+// action here; auth.resend() is a public, rate-limited endpoint, not one
+// that needs the service role key (which this project doesn't have).
+export async function resendSignupConfirmation(
+  email: string
+): Promise<ResendConfirmationState> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!isKawaStaffEmail(user?.email)) {
+    return { error: 'Non autorisé.' }
+  }
+
+  const { error } = await supabase.auth.resend({ type: 'signup', email })
+
+  if (error) {
+    console.error('[resendSignupConfirmation] resend failed:', error)
+    return {
+      error:
+        error.code === 'email_not_confirmed' || error.message?.includes('already confirmed')
+          ? 'Ce compte est déjà confirmé — le salarié peut se connecter directement.'
+          : "L'envoi a échoué, merci de réessayer.",
+    }
+  }
+
+  return { success: true }
+}
