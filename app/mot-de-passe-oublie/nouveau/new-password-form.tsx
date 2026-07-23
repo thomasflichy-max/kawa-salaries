@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { PasswordInput } from '@/app/password-input'
 
 export function NewPasswordForm() {
   const router = useRouter()
@@ -43,25 +44,21 @@ export function NewPasswordForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div>
         <label className="text-sm font-medium text-kawa-700">Nouveau mot de passe</label>
-        <input
-          type="password"
+        <PasswordInput
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={8}
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
       </div>
 
       <div>
         <label className="text-sm font-medium text-kawa-700">Confirmer le mot de passe</label>
-        <input
-          type="password"
+        <PasswordInput
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           required
           minLength={8}
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
       </div>
 

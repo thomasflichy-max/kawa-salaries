@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import Link from 'next/link'
 import { login } from '@/app/actions/auth'
+import { PasswordInput } from '@/app/password-input'
 
 export function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState(login, undefined)
@@ -29,13 +30,7 @@ export function LoginForm({ next }: { next: string }) {
             Mot de passe oublié ?
           </Link>
         </div>
-        <input
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          required
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-        />
+        <PasswordInput name="password" placeholder="••••••••" required />
       </div>
 
       {state?.error && (

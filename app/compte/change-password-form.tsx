@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from 'react'
 import { updatePassword } from '@/app/actions/auth'
+import { PasswordInput } from '@/app/password-input'
 
 export function ChangePasswordForm() {
   const formRef = useRef<HTMLFormElement>(null)
@@ -17,34 +18,17 @@ export function ChangePasswordForm() {
     <form ref={formRef} action={action} className="flex flex-col gap-4 max-w-sm">
       <div>
         <label className="text-sm font-medium text-kawa-700">Mot de passe actuel</label>
-        <input
-          type="password"
-          name="currentPassword"
-          required
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-        />
+        <PasswordInput name="currentPassword" required />
       </div>
 
       <div>
         <label className="text-sm font-medium text-kawa-700">Nouveau mot de passe</label>
-        <input
-          type="password"
-          name="newPassword"
-          required
-          minLength={8}
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-        />
+        <PasswordInput name="newPassword" required minLength={8} />
       </div>
 
       <div>
         <label className="text-sm font-medium text-kawa-700">Confirmer le nouveau mot de passe</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          required
-          minLength={8}
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-        />
+        <PasswordInput name="confirmPassword" required minLength={8} />
       </div>
 
       {state?.error && (

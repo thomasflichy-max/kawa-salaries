@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import { signup } from '@/app/actions/auth'
+import { PasswordInput } from '@/app/password-input'
 
 export function SignupForm() {
   const [state, action, pending] = useActionState(signup, undefined)
@@ -43,14 +44,7 @@ export function SignupForm() {
 
       <div>
         <label className="text-sm font-medium text-kawa-700">Mot de passe</label>
-        <input
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          required
-          minLength={8}
-          className="mt-1 w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-        />
+        <PasswordInput name="password" placeholder="••••••••" required minLength={8} />
       </div>
 
       <div>
