@@ -49,7 +49,7 @@ export async function signup(
   }
   if (!org) {
     return {
-      error: `${domain} n'est pas (encore) une entreprise cliente kawa. Contactez votre RH si vous pensez qu'il s'agit d'une erreur.`,
+      error: `${domain} n'est pas (encore) une entreprise cliente KAWA. Contactez votre RH si vous pensez qu'il s'agit d'une erreur ou bien envoyez-nous un mail à nantes@kawa.coffee pour déguster nos cafés dans votre entreprise ☕️`,
     }
   }
 
