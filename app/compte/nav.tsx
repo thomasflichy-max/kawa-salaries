@@ -31,7 +31,7 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
           if (tab.href === '/compte/produits') {
             const isActive = pathname.startsWith('/compte/produits')
             return (
-              <div key={tab.href} className="relative flex items-stretch">
+              <div key={tab.href} className="relative flex items-stretch group">
                 <Link href={tab.href} className={tabClasses(isActive)}>
                   {tab.label}
                 </Link>
@@ -47,34 +47,37 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </button>
+                {/* Backdrop only needed for the tap-to-open path (mobile) — hover
+                    dismisses on its own via group-hover when the mouse leaves. */}
                 {produitsOpen && (
-                  <>
-                    {/* Transparent, full-viewport backdrop — same click-outside-to-close
-                        idiom used by the overlays in app/admin/commandes (dark version
-                        there since those are modals; this one stays invisible since the
-                        dropdown sits inline in the page, not over it). */}
-                    <div className="fixed inset-0 z-10" onClick={() => setProduitsOpen(false)} />
-                    <div className="absolute left-0 top-full bg-white border border-kawa-200 rounded-lg shadow-lg py-2 min-w-[220px] z-20">
-                      <Link
-                        href="/compte/produits"
-                        onClick={() => setProduitsOpen(false)}
-                        className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
-                      >
-                        Tous les produits
-                      </Link>
-                      {PRODUCT_CATEGORIES.map((category) => (
-                        <Link
-                          key={category.slug}
-                          href={`/compte/produits/${category.slug}`}
-                          onClick={() => setProduitsOpen(false)}
-                          className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
-                        >
-                          {category.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </>
+                  <div className="fixed inset-0 z-10" onClick={() => setProduitsOpen(false)} />
                 )}
+                {/* Shown on hover (instant, mouse/trackpad — same fluid feel as
+                    before) or via the chevron tap-toggle above (touch devices,
+                    which have no hover). */}
+                <div
+                  className={`absolute left-0 top-full bg-white border border-kawa-200 rounded-lg shadow-lg py-2 min-w-[220px] z-20 ${
+                    produitsOpen ? 'block' : 'hidden group-hover:block'
+                  }`}
+                >
+                  <Link
+                    href="/compte/produits"
+                    onClick={() => setProduitsOpen(false)}
+                    className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
+                  >
+                    Tous les produits
+                  </Link>
+                  {PRODUCT_CATEGORIES.map((category) => (
+                    <Link
+                      key={category.slug}
+                      href={`/compte/produits/${category.slug}`}
+                      onClick={() => setProduitsOpen(false)}
+                      className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
+                    >
+                      {category.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             )
           }
