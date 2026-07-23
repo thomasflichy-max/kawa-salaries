@@ -14,7 +14,7 @@ const TABS = [
 ]
 
 const tabClasses = (isActive: boolean) =>
-  `px-3 py-3 text-sm sm:px-4 sm:py-4 sm:text-lg font-medium whitespace-nowrap border-b-2 transition ${
+  `flex items-center justify-center sm:justify-start px-3 py-3 text-sm sm:px-4 sm:py-4 sm:text-lg font-medium whitespace-nowrap border-b-2 transition ${
     isActive
       ? 'border-sky-500 text-kawa-900'
       : 'border-transparent text-kawa-500 hover:text-kawa-800 hover:border-sky-500'
@@ -26,13 +26,17 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
 
   return (
     <nav className="bg-white border-b border-kawa-200">
+      {/* basis-1/2 on each item below gives mobile a clean, even 2-column
+          grid instead of tabs packed to the left at their natural text
+          width — sm:basis-auto reverts to the original single-row bar once
+          there's room for it. */}
       <div className="max-w-4xl mx-auto px-6 flex flex-wrap">
         {TABS.map((tab) => {
           if (tab.href === '/compte/produits') {
             const isActive = pathname.startsWith('/compte/produits')
             return (
-              <div key={tab.href} className="relative flex items-stretch group">
-                <Link href={tab.href} className={tabClasses(isActive)}>
+              <div key={tab.href} className="relative flex items-stretch group basis-1/2 sm:basis-auto">
+                <Link href={tab.href} className={`${tabClasses(isActive)} flex-1`}>
                   {tab.label}
                 </Link>
                 <button
@@ -84,7 +88,11 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
 
           const isActive = pathname === tab.href
           return (
-            <Link key={tab.href} href={tab.href} className={`${tabClasses(isActive)} flex items-center gap-1.5`}>
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`${tabClasses(isActive)} basis-1/2 sm:basis-auto gap-1.5`}
+            >
               {tab.label}
               {tab.href === '/compte/panier' && cartItemCount > 0 && (
                 <span className="bg-sky-500 text-kawa-950 text-xs font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
