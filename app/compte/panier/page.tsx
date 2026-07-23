@@ -61,71 +61,77 @@ export default async function PanierPage() {
         <div className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
           <ul className="divide-y divide-kawa-100">
             {cartItems.map((item) => (
-              <li key={item.id} className="flex items-center gap-4 p-5">
-                <div className="relative w-16 h-16 shrink-0 bg-kawa-50 rounded-lg overflow-hidden">
-                  {item.product?.image_url && (
-                    <Image
-                      src={item.product.image_url}
-                      alt={item.product.name}
-                      fill
-                      sizes="64px"
-                      className="object-contain"
-                    />
-                  )}
-                </div>
-
-                <div className="flex-1">
-                  <p className="font-medium text-kawa-800">
-                    {item.product?.name ?? '—'}
-                    {item.product?.category === 'cafe' && (
-                      <span className="text-kawa-500 font-normal">
-                        {' '}
-                        — {GRIND_LABELS[item.grind_type ?? 'grain'] ?? item.grind_type}
-                      </span>
+              <li key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-5">
+                <div className="flex items-center gap-4 sm:flex-1">
+                  <div className="relative w-16 h-16 shrink-0 bg-kawa-50 rounded-lg overflow-hidden">
+                    {item.product?.image_url && (
+                      <Image
+                        src={item.product.image_url}
+                        alt={item.product.name}
+                        fill
+                        sizes="64px"
+                        className="object-contain"
+                      />
                     )}
-                  </p>
-                  <p className="text-sm text-kawa-500">
-                    {currency.format(item.unitPrice)}
-                    {item.baseUnitPrice != null && ' / kg'}
-                  </p>
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="font-medium text-kawa-800">
+                      {item.product?.name ?? '—'}
+                      {item.product?.category === 'cafe' && (
+                        <span className="text-kawa-500 font-normal">
+                          {' '}
+                          — {GRIND_LABELS[item.grind_type ?? 'grain'] ?? item.grind_type}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-kawa-500">
+                      {currency.format(item.unitPrice)}
+                      {item.baseUnitPrice != null && ' / kg'}
+                    </p>
+                  </div>
                 </div>
 
-                <form
-                  action={updateCartItemQuantity.bind(null, item.id, item.quantity - 1)}
-                >
-                  <button
-                    type="submit"
-                    className="w-8 h-8 rounded-full border border-kawa-200 text-kawa-600 hover:bg-kawa-50 transition"
-                  >
-                    −
-                  </button>
-                </form>
-                <span className="w-6 text-center text-kawa-800 font-medium">
-                  {item.quantity}
-                </span>
-                <form
-                  action={updateCartItemQuantity.bind(null, item.id, item.quantity + 1)}
-                >
-                  <button
-                    type="submit"
-                    className="w-8 h-8 rounded-full border border-kawa-200 text-kawa-600 hover:bg-kawa-50 transition"
-                  >
-                    +
-                  </button>
-                </form>
+                <div className="flex items-center justify-between sm:justify-start gap-4">
+                  <div className="flex items-center gap-2">
+                    <form
+                      action={updateCartItemQuantity.bind(null, item.id, item.quantity - 1)}
+                    >
+                      <button
+                        type="submit"
+                        className="w-8 h-8 rounded-full border border-kawa-200 text-kawa-600 hover:bg-kawa-50 transition"
+                      >
+                        −
+                      </button>
+                    </form>
+                    <span className="w-6 text-center text-kawa-800 font-medium">
+                      {item.quantity}
+                    </span>
+                    <form
+                      action={updateCartItemQuantity.bind(null, item.id, item.quantity + 1)}
+                    >
+                      <button
+                        type="submit"
+                        className="w-8 h-8 rounded-full border border-kawa-200 text-kawa-600 hover:bg-kawa-50 transition"
+                      >
+                        +
+                      </button>
+                    </form>
+                  </div>
 
-                <p className="w-24 text-right font-semibold text-kawa-800">
-                  {currency.format(item.unitPrice * item.quantity)}
-                </p>
+                  <p className="w-20 sm:w-24 text-right font-semibold text-kawa-800">
+                    {currency.format(item.unitPrice * item.quantity)}
+                  </p>
 
-                <form action={removeCartItem.bind(null, item.id)}>
-                  <button
-                    type="submit"
-                    className="text-sm text-red-600 hover:underline"
-                  >
-                    Retirer
-                  </button>
-                </form>
+                  <form action={removeCartItem.bind(null, item.id)}>
+                    <button
+                      type="submit"
+                      className="text-sm text-red-600 hover:underline"
+                    >
+                      Retirer
+                    </button>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>

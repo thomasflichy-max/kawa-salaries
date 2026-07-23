@@ -57,7 +57,7 @@ export function DateRangePicker({
           {p.label}
         </button>
       ))}
-      <div className="flex items-center gap-2 bg-white border border-kawa-200 rounded-lg px-2 py-1">
+      <div className="flex flex-wrap items-center gap-2 bg-white border border-kawa-200 rounded-lg px-2 py-1">
         <input
           type="date"
           value={customFrom}

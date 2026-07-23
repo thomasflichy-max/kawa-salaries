@@ -130,7 +130,7 @@ export default async function AdminDashboardPage({
           from={toInputDate(range.from)}
           to={toInputDate(range.to)}
         />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <a
             href={`/admin/export/factures?from=${toInputDate(range.from)}&to=${toInputDate(range.to)}`}
             className="inline-flex items-center gap-2 rounded-lg bg-kawa-800 text-white px-4 py-2 text-sm font-medium hover:bg-kawa-900 transition"
@@ -148,7 +148,7 @@ export default async function AdminDashboardPage({
 
       <DemoBadge text={DEMO_NOTICE} />
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatTile
           label="Chiffre d'affaires HT"
           value={currency.format(revenueHT)}

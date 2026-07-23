@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
@@ -13,7 +14,7 @@ const TABS = [
 ]
 
 const tabClasses = (isActive: boolean) =>
-  `px-4 py-4 text-lg font-medium whitespace-nowrap border-b-2 transition ${
+  `px-3 py-3 text-sm sm:px-4 sm:py-4 sm:text-lg font-medium whitespace-nowrap border-b-2 transition ${
     isActive
       ? 'border-sky-500 text-kawa-900'
       : 'border-transparent text-kawa-500 hover:text-kawa-800 hover:border-sky-500'
@@ -21,29 +22,51 @@ const tabClasses = (isActive: boolean) =>
 
 export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
   const pathname = usePathname()
+  const [produitsOpen, setProduitsOpen] = useState(false)
 
   return (
     <nav className="bg-white border-b border-kawa-200">
-      <div className="w-[80%] mx-auto flex justify-between">
+      <div className="max-w-4xl mx-auto px-6 flex overflow-x-auto">
         {TABS.map((tab) => {
           if (tab.href === '/compte/produits') {
             const isActive = pathname.startsWith('/compte/produits')
             return (
-              <div key={tab.href} className="relative group flex">
-                <Link href={tab.href} className={tabClasses(isActive)}>
+              <div key={tab.href} className="relative flex">
+                <button
+                  type="button"
+                  onClick={() => setProduitsOpen((v) => !v)}
+                  className={tabClasses(isActive)}
+                >
                   {tab.label}
-                </Link>
-                <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-kawa-200 rounded-lg shadow-lg py-2 min-w-[220px] z-10">
-                  {PRODUCT_CATEGORIES.map((category) => (
-                    <Link
-                      key={category.slug}
-                      href={`/compte/produits/${category.slug}`}
-                      className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
-                    >
-                      {category.label}
-                    </Link>
-                  ))}
-                </div>
+                </button>
+                {produitsOpen && (
+                  <>
+                    {/* Transparent, full-viewport backdrop — same click-outside-to-close
+                        idiom used by the overlays in app/admin/commandes (dark version
+                        there since those are modals; this one stays invisible since the
+                        dropdown sits inline in the page, not over it). */}
+                    <div className="fixed inset-0 z-10" onClick={() => setProduitsOpen(false)} />
+                    <div className="absolute left-0 top-full bg-white border border-kawa-200 rounded-lg shadow-lg py-2 min-w-[220px] z-20">
+                      <Link
+                        href="/compte/produits"
+                        onClick={() => setProduitsOpen(false)}
+                        className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
+                      >
+                        Tous les produits
+                      </Link>
+                      {PRODUCT_CATEGORIES.map((category) => (
+                        <Link
+                          key={category.slug}
+                          href={`/compte/produits/${category.slug}`}
+                          onClick={() => setProduitsOpen(false)}
+                          className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
+                        >
+                          {category.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )
           }

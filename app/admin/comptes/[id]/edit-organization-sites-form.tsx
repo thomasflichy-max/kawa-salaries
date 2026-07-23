@@ -25,7 +25,7 @@ export function EditOrganizationSitesForm({
   return (
     <form action={action} className="flex flex-col gap-3 p-5">
       {sites.map((site, index) => (
-        <div key={site.id ?? `new-${index}`} className="flex gap-3 items-start">
+        <div key={site.id ?? `new-${index}`} className="flex flex-wrap gap-3 items-start">
           <input type="hidden" name="site_id" value={site.id ?? ''} />
           <input
             type="text"
@@ -33,7 +33,7 @@ export function EditOrganizationSitesForm({
             value={site.label}
             onChange={(e) => updateSite(index, 'label', e.target.value)}
             placeholder="Siège social"
-            className="w-1/3 border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+            className="w-full sm:w-1/3 border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
           />
           <input
             type="text"

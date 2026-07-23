@@ -81,7 +81,7 @@ export default async function AdminOrderDetailPage({
           </Link>
           <h1 className="text-xl font-bold text-kawa-800 mt-2">{order.orderNumber}</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <a
             href={`/admin/commandes/${order.id}/facture`}
             target="_blank"

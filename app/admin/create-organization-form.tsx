@@ -70,7 +70,7 @@ export function CreateOrganizationForm() {
         <label className="text-sm font-medium text-kawa-700">Mails types de salariés</label>
         <div className="mt-1 flex flex-col gap-2">
           {sampleEmails.map((entry, index) => (
-            <div key={index} className="flex gap-3 items-start">
+            <div key={index} className="flex flex-wrap gap-3 items-start">
               <input
                 type="email"
                 name="sample_email"
@@ -153,14 +153,14 @@ export function CreateOrganizationForm() {
         </p>
         <div className="flex flex-col gap-3">
           {sites.map((site, index) => (
-            <div key={index} className="flex gap-3 items-start">
+            <div key={index} className="flex flex-wrap gap-3 items-start">
               <input
                 type="text"
                 name="site_label"
                 value={site.label}
                 onChange={(e) => updateSite(index, 'label', e.target.value)}
                 placeholder="Siège social"
-                className="w-1/3 border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                className="w-full sm:w-1/3 border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
               />
               <input
                 type="text"

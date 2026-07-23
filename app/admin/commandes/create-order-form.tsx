@@ -264,7 +264,7 @@ export function CreateOrderForm({
           <ul className="flex flex-col gap-2 mb-3">
             {items.map((item, i) =>
               editingIndex === i ? (
-                <li key={i} className="flex items-center gap-2 text-sm bg-kawa-50 rounded-lg px-2 py-1.5">
+                <li key={i} className="flex flex-wrap items-center gap-2 text-sm bg-kawa-50 rounded-lg px-2 py-1.5">
                   <span className="flex-1 text-kawa-800">{item.productName}</span>
                   <input
                     type="number"
@@ -292,7 +292,7 @@ export function CreateOrderForm({
                   </button>
                 </li>
               ) : (
-                <li key={i} className="flex items-center gap-3 text-sm">
+                <li key={i} className="flex flex-wrap items-center gap-3 text-sm">
                   <span className="flex-1 text-kawa-800">{item.productName}</span>
                   <span className="text-kawa-500">× {item.quantity}</span>
                   <span className="text-kawa-800 w-24 text-right">

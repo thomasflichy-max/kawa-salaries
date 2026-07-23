@@ -25,7 +25,7 @@ export function EditOrganizationSampleEmailsForm({
   return (
     <form action={action} className="flex flex-col gap-3 p-5">
       {emails.map((entry, index) => (
-        <div key={entry.id ?? `new-${index}`} className="flex gap-3 items-start">
+        <div key={entry.id ?? `new-${index}`} className="flex flex-wrap gap-3 items-start">
           <input type="hidden" name="email_id" value={entry.id ?? ''} />
           <input
             type="email"

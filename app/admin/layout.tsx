@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/actions/auth'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { AdminNav } from './nav'
+import { AdminMobileNav } from './mobile-nav'
 
 export const metadata: Metadata = {
   title: 'KAWA admin',
@@ -29,8 +30,9 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-kawa-50 flex">
-      <aside className="w-64 shrink-0 border-r border-kawa-200 bg-white flex flex-col">
+    <div className="min-h-screen bg-kawa-50 flex flex-col md:flex-row">
+      <AdminMobileNav userEmail={user.email ?? ''} logoutAction={logout} />
+      <aside className="hidden md:flex w-64 shrink-0 border-r border-kawa-200 bg-white flex-col">
         <div className="px-5 py-5 border-b border-kawa-200">
           <Link href="/admin" className="font-bold text-kawa-800">
             KAWA admin
