@@ -521,10 +521,9 @@ export async function resendSignupConfirmation(
   if (error) {
     console.error('[resendSignupConfirmation] resend failed:', error)
     return {
-      error:
-        error.code === 'email_not_confirmed' || error.message?.includes('already confirmed')
-          ? 'Ce compte est déjà confirmé — le salarié peut se connecter directement.'
-          : "L'envoi a échoué, merci de réessayer.",
+      error: error.message?.toLowerCase().includes('already confirmed')
+        ? 'Ce compte est déjà confirmé — le salarié peut se connecter directement.'
+        : "L'envoi a échoué, merci de réessayer.",
     }
   }
 
