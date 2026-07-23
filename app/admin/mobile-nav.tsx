@@ -69,6 +69,13 @@ export function AdminMobileNav({
             </div>
             <div className="px-5 py-4 border-t border-kawa-200 text-sm">
               <p className="text-kawa-500 truncate">{userEmail}</p>
+              <Link
+                href="/compte/avantage"
+                onClick={() => setOpen(false)}
+                className="block mt-2 text-sky-700 underline"
+              >
+                Voir l&apos;espace salarié
+              </Link>
               <form action={logoutAction} className="mt-2">
                 <button className="text-sky-700 underline">Se déconnecter</button>
               </form>

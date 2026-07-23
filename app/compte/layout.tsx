@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
 import { createClient } from '@/lib/supabase/server'
+import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { EmployeeNav } from './nav'
 import { SupportButton } from './support-button'
 
@@ -16,6 +17,7 @@ export default async function CompteLayout({
   children: React.ReactNode
 }) {
   const { user } = await getEmployee()
+  const isStaff = isKawaStaffEmail(user.email)
 
   const supabase = await createClient()
   const { data: cartItems } = await supabase
@@ -27,7 +29,7 @@ export default async function CompteLayout({
   return (
     <div className="min-h-screen bg-kawa-50">
       <header className="bg-white border-b border-kawa-100">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/compte/avantage">
             <Image
               src="/logo-kawa-nantes.png"
@@ -37,6 +39,11 @@ export default async function CompteLayout({
               className="h-16 w-auto"
             />
           </Link>
+          {isStaff && (
+            <Link href="/admin" className="text-sm text-sky-700 hover:underline whitespace-nowrap">
+              Espace admin →
+            </Link>
+          )}
         </div>
       </header>
       <EmployeeNav cartItemCount={cartItemCount} />

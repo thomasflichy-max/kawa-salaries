@@ -43,6 +43,9 @@ export default async function AdminLayout({
         </div>
         <div className="px-5 py-4 border-t border-kawa-200 text-sm">
           <p className="text-kawa-500 truncate">{user.email}</p>
+          <Link href="/compte/avantage" className="block mt-2 text-sky-700 underline">
+            Voir l&apos;espace salarié
+          </Link>
           <form action={logout} className="mt-2">
             <button className="text-sky-700 underline">Se déconnecter</button>
           </form>
