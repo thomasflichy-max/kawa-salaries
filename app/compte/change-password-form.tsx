@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { updatePassword } from '@/app/actions/auth'
 import { PasswordInput } from '@/app/password-input'
 
@@ -17,7 +18,12 @@ export function ChangePasswordForm() {
   return (
     <form ref={formRef} action={action} className="flex flex-col gap-4 max-w-sm">
       <div>
-        <label className="text-sm font-medium text-kawa-700">Mot de passe actuel</label>
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-kawa-700">Mot de passe actuel</label>
+          <Link href="/mot-de-passe-oublie" className="text-xs text-sky-700 underline">
+            Mot de passe oublié ?
+          </Link>
+        </div>
         <PasswordInput name="currentPassword" required />
       </div>
 
