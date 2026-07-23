@@ -1,9 +1,14 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
 import { createClient } from '@/lib/supabase/server'
 import { EmployeeNav } from './nav'
 import { SupportButton } from './support-button'
+
+export const metadata: Metadata = {
+  title: 'KAWA salarié',
+}
 
 export default async function CompteLayout({
   children,

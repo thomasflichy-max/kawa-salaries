@@ -1,9 +1,14 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/actions/auth'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { AdminNav } from './nav'
+
+export const metadata: Metadata = {
+  title: 'KAWA admin',
+}
 
 export default async function AdminLayout({
   children,
