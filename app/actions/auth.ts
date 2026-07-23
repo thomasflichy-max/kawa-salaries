@@ -87,7 +87,7 @@ export async function login(
     .trim()
     .toLowerCase()
   const password = String(formData.get('password') ?? '')
-  const next = String(formData.get('next') ?? '/compte')
+  const next = String(formData.get('next') ?? '/compte/avantage')
 
   if (!isValidEmail(email) || !password) {
     return { error: 'Email ou mot de passe invalide.' }
@@ -101,7 +101,7 @@ export async function login(
     return { error: 'Email ou mot de passe incorrect.' }
   }
 
-  redirect(next || '/compte')
+  redirect(next || '/compte/avantage')
 }
 
 export async function logout() {

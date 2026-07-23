@@ -21,7 +21,7 @@ export default async function ConnexionPage({
     // /admin would otherwise bounce here (via the admin guard) and straight
     // back to /admin (via this redirect) forever.
     const wantsAdmin = next === '/admin' || next?.startsWith('/admin/')
-    redirect(wantsAdmin && !isKawaStaffEmail(user.email) ? '/compte' : next || '/compte')
+    redirect(wantsAdmin && !isKawaStaffEmail(user.email) ? '/compte/avantage' : next || '/compte/avantage')
   }
 
   return (
@@ -32,7 +32,7 @@ export default async function ConnexionPage({
           <p className="text-kawa-500 mt-2">Accédez à vos avantages KAWA</p>
         </div>
 
-        <LoginForm next={next ?? '/'} />
+        <LoginForm next={next ?? '/compte/avantage'} />
 
         <p className="text-center text-sm text-kawa-400 mt-6">
           Pas encore de compte ?{' '}
