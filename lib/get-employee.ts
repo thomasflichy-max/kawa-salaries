@@ -8,7 +8,7 @@ export async function getEmployee() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/connexion?next=/compte')
+    redirect('/connexion?next=/compte/avantage')
   }
 
   const { data: profile } = await supabase
