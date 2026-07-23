@@ -26,7 +26,7 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
 
   return (
     <nav className="bg-white border-b border-kawa-200">
-      <div className="max-w-4xl mx-auto px-6 flex overflow-x-auto">
+      <div className="max-w-4xl mx-auto px-6 flex flex-wrap">
         {TABS.map((tab) => {
           if (tab.href === '/compte/produits') {
             const isActive = pathname.startsWith('/compte/produits')
