@@ -31,13 +31,21 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
           if (tab.href === '/compte/produits') {
             const isActive = pathname.startsWith('/compte/produits')
             return (
-              <div key={tab.href} className="relative flex">
+              <div key={tab.href} className="relative flex items-stretch">
+                <Link href={tab.href} className={tabClasses(isActive)}>
+                  {tab.label}
+                </Link>
                 <button
                   type="button"
                   onClick={() => setProduitsOpen((v) => !v)}
-                  className={tabClasses(isActive)}
+                  aria-label="Voir les catégories de produits"
+                  className={`px-1.5 flex items-center border-b-2 transition ${
+                    isActive ? 'border-sky-500 text-kawa-900' : 'border-transparent text-kawa-500 hover:text-kawa-800'
+                  }`}
                 >
-                  {tab.label}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
                 </button>
                 {produitsOpen && (
                   <>
