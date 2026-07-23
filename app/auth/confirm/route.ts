@@ -22,5 +22,8 @@ export async function GET(request: Request) {
     }
   }
 
-  redirect('/mot-de-passe-oublie?erreur=lien_invalide')
+  // Recovery links fail into the "forgot password" form (right place to
+  // retry that specific flow) — everything else (signup confirmation...)
+  // falls back to /connexion, which has its own generic error message.
+  redirect(type === 'recovery' ? '/mot-de-passe-oublie?erreur=lien_invalide' : '/connexion?erreur=lien_invalide')
 }

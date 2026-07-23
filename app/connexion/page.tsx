@@ -7,9 +7,9 @@ import { LoginForm } from './login-form'
 export default async function ConnexionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>
+  searchParams: Promise<{ next?: string; erreur?: string }>
 }) {
-  const { next } = await searchParams
+  const { next, erreur } = await searchParams
   const wantsAdmin = next === '/admin' || next?.startsWith('/admin/')
 
   const supabase = await createClient()
@@ -31,6 +31,13 @@ export default async function ConnexionPage({
           <h1 className="text-2xl font-bold text-kawa-800">Connexion</h1>
           <p className="text-kawa-500 mt-2">Accédez à vos avantages KAWA</p>
         </div>
+
+        {erreur === 'lien_invalide' && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
+            Ce lien n&apos;est plus valide. Si c&apos;était un lien de confirmation de compte,
+            réessayez de vous connecter — il se peut que le compte soit déjà actif.
+          </p>
+        )}
 
         <LoginForm next={next ?? '/compte/avantage'} />
 
