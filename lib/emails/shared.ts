@@ -3,7 +3,9 @@ import type { DemoOrderItem } from '@/app/admin/demo-data'
 
 // Same site the rest of the app treats as canonical (see kawa-salaries-deploy-fix
 // memory) — emails need an absolute, publicly reachable URL, unlike in-app links.
-export const SITE_URL = 'https://kawa-salaries.vercel.app'
+// kawa-salaries.vercel.app still works (both domains point at the same
+// deployment) but salarie.kawanantespro.com is now the canonical one.
+export const SITE_URL = 'https://salarie.kawanantespro.com'
 
 export const KAWA_SKY = '#41b6e6'
 export const KAWA_INK = '#282623'
