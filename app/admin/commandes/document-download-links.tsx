@@ -9,7 +9,7 @@ const buttonClass =
 export function DocumentDownloadLinks({ orderId }: { orderId: string }) {
   return (
     <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-      <Tooltip label="Télécharger la facture">
+      <Tooltip label="PDF Facture" align="right">
         <a
           href={`/admin/commandes/${orderId}/facture`}
           target="_blank"
@@ -20,7 +20,7 @@ export function DocumentDownloadLinks({ orderId }: { orderId: string }) {
           <InvoiceIcon />
         </a>
       </Tooltip>
-      <Tooltip label="Télécharger le BDL">
+      <Tooltip label="PDF Bon de livraison" align="right">
         <a
           href={`/admin/commandes/${orderId}/bon-livraison`}
           target="_blank"
