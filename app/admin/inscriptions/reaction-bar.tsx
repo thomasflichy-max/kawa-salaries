@@ -5,7 +5,24 @@ import { toggleReaction } from './actions'
 import { Tooltip } from '@/app/admin/tooltip'
 import { getStaffDisplayName } from '@/lib/is-kawa-staff'
 
-const QUICK_EMOJIS = ['👍', '✅', '🎉', '👀', '❤️', '😂']
+const QUICK_EMOJIS = [
+  '👍',
+  '👎',
+  '✅',
+  '❌',
+  '🎉',
+  '👀',
+  '❤️',
+  '😂',
+  '😮',
+  '🤔',
+  '🔥',
+  '🙏',
+  '💪',
+  '🚀',
+  '⚠️',
+  '🤝',
+]
 
 export function ReactionBar({
   attemptId,
@@ -68,13 +85,13 @@ export function ReactionBar({
         {pickerOpen && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setPickerOpen(false)} />
-            <div className="absolute left-0 top-full mt-1 bg-white border border-kawa-200 rounded-lg shadow-lg p-1.5 flex gap-1 z-20">
+            <div className="absolute left-0 top-full mt-1 bg-white border border-kawa-200 rounded-lg shadow-lg p-1.5 grid grid-cols-4 gap-1 z-20">
               {QUICK_EMOJIS.map((emoji) => (
                 <button
                   key={emoji}
                   type="button"
                   onClick={() => handleToggle(emoji)}
-                  className="w-7 h-7 flex items-center justify-center rounded hover:bg-kawa-50 text-base"
+                  className="w-8 h-8 flex items-center justify-center rounded hover:bg-kawa-50 text-base"
                 >
                   {emoji}
                 </button>
