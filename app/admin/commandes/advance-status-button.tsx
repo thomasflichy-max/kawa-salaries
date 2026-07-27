@@ -4,6 +4,7 @@ import { useTransition } from 'react'
 import type { DemoOrderStatus } from '@/app/admin/demo-data'
 import { advanceOrderStatusAction } from './actions'
 import { ORDER_STATUS_ACTION_ICONS } from './status-icons'
+import { Tooltip } from './tooltip'
 
 // One button per row showing the order's CURRENT status — clicking it
 // advances to the next one in the en_cours → en_preparation → pret → livree
@@ -34,14 +35,15 @@ export function AdvanceStatusButton({
   }
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={disabled || isPending}
-      title={label}
-      aria-label={label}
-      className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500 text-kawa-950 hover:bg-sky-600 transition disabled:opacity-50 disabled:cursor-default"
-    >
-      {icon}
-    </button>
+    <Tooltip label={label}>
+      <button
+        onClick={handleClick}
+        disabled={disabled || isPending}
+        aria-label={label}
+        className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500 text-kawa-950 hover:bg-sky-600 transition disabled:opacity-50 disabled:cursor-default"
+      >
+        {icon}
+      </button>
+    </Tooltip>
   )
 }
