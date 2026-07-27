@@ -60,13 +60,13 @@ export function ReactionBar({
             type="button"
             onClick={() => handleToggle(emoji)}
             disabled={isPending}
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition disabled:opacity-50 ${
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs leading-none border transition disabled:opacity-50 ${
               mine
                 ? 'bg-sky-50 border-sky-300 text-sky-700'
                 : 'bg-white border-kawa-200 text-kawa-600 hover:bg-kawa-50'
             }`}
           >
-            <span>{emoji}</span>
+            <span className="leading-none">{emoji}</span>
             <span>{count}</span>
           </button>
         </Tooltip>
@@ -85,13 +85,13 @@ export function ReactionBar({
         {pickerOpen && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setPickerOpen(false)} />
-            <div className="absolute left-0 top-full mt-1 bg-white border border-kawa-200 rounded-lg shadow-lg p-1.5 grid grid-cols-4 gap-1 z-20">
+            <div className="absolute left-0 top-full mt-1 bg-white border border-kawa-200 rounded-lg shadow-lg p-1.5 grid grid-cols-4 gap-0.5 z-20">
               {QUICK_EMOJIS.map((emoji) => (
                 <button
                   key={emoji}
                   type="button"
                   onClick={() => handleToggle(emoji)}
-                  className="w-8 h-8 flex items-center justify-center rounded hover:bg-kawa-50 text-base"
+                  className="w-8 h-8 flex items-center justify-center rounded hover:bg-kawa-50 text-lg leading-none overflow-hidden"
                 >
                   {emoji}
                 </button>
