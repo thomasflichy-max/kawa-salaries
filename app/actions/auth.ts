@@ -48,6 +48,21 @@ export async function signup(
     return { error: 'Une erreur est survenue, merci de réessayer.' }
   }
   if (!org) {
+    // Fire-and-forget: a logging failure shouldn't block the user from
+    // seeing their actual error, so this isn't awaited into the response.
+    supabase
+      .from('signup_attempts')
+      .insert({
+        email,
+        full_name: `${firstName} ${lastName}`,
+        domain,
+        success: false,
+        reason: 'domain_not_recognized',
+      })
+      .then(({ error }) => {
+        if (error) console.error('[signup] failed to log signup attempt:', error)
+      })
+
     return {
       error: `${domain} n'est pas (encore) une entreprise cliente KAWA. Contactez votre RH si vous pensez qu'il s'agit d'une erreur ou bien envoyez-nous un mail à nantes@kawa.coffee pour déguster nos cafés dans votre entreprise ☕️`,
     }
@@ -75,9 +90,20 @@ export async function signup(
     }
   }
 
+  const { error: logError } = await supabase.from('signup_attempts').insert({
+    email,
+    full_name: `${firstName} ${lastName}`,
+    domain,
+    organization_id: org.id,
+    success: true,
+  })
+  if (logError) {
+    console.error('[signup] failed to log signup attempt:', logError)
+  }
+
   // If email confirmation is disabled on the project, signUp already returns
   // an active session; otherwise the user must confirm by email first.
-  redirect(signUpData.session ? '/compte' : '/inscription/confirmation')
+  redirect(signUpData.session ? '/compte/avantage' : '/inscription/confirmation')
 }
 
 // Staff (@kawa.coffee) can't go through the regular signup flow above — it

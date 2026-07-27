@@ -37,6 +37,47 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_attempts: {
+        Row: {
+          id: string
+          email: string
+          full_name: string | null
+          domain: string
+          organization_id: string | null
+          success: boolean
+          reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          full_name?: string | null
+          domain: string
+          organization_id?: string | null
+          success: boolean
+          reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string | null
+          domain?: string
+          organization_id?: string | null
+          success?: boolean
+          reason?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'signup_attempts_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       profiles: {
         Row: {
           id: string
