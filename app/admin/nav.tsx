@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { href: '/admin/produits', label: 'Products' },
   { href: '/admin/clients', label: 'Ajout Client' },
   { href: '/admin/comptes', label: 'Comptes' },
-  { href: '/admin/inscriptions', label: 'Inscriptions' },
+  { href: '/admin/inscriptions', label: "Canal d'inscriptions" },
 ]
 
 export function AdminNav() {
