@@ -1,11 +1,12 @@
 // Small hover tooltip, pure CSS (group-hover), no library — same
 // hand-rolled convention as every other overlay in this codebase. Shown
-// below the trigger, not above: these buttons live inside table cells
-// wrapped in an overflow-x-auto container (app/admin/commandes/page.tsx),
-// and an absolutely-positioned tooltip above the very first row would risk
-// spilling past that container's top edge and getting clipped (the same
-// "overflow-x-auto silently clips the y-axis too" quirk fixed earlier in
-// app/compte/nav.tsx).
+// below the trigger by default: originally built for the commandes list's
+// action buttons, which live inside a table cell wrapped in an
+// overflow-x-auto container — an absolutely-positioned tooltip above the
+// very first row would risk spilling past that container's top edge and
+// getting clipped (the same "overflow-x-auto silently clips the y-axis
+// too" quirk fixed earlier in app/compte/nav.tsx). Shared across admin
+// sub-pages (commandes, inscriptions) rather than duplicated.
 export function Tooltip({
   label,
   children,
@@ -14,9 +15,9 @@ export function Tooltip({
   label: string
   children: React.ReactNode
   // 'right' anchors the tooltip's right edge to the trigger instead of
-  // centering it — needed for triggers sitting at the right edge of the
-  // table's overflow-x-auto wrapper (the Actions column), where a centered
-  // tooltip would extend past the container and get clipped on that side.
+  // centering it — needed for triggers sitting at the right edge of a
+  // horizontally-scrollable container, where a centered tooltip would
+  // extend past it and get clipped on that side.
   align?: 'center' | 'right'
 }) {
   return (

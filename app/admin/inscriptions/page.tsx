@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { ReactionBar } from './reaction-bar'
 import { CommentThread } from './comment-thread'
+import { MarkSeen } from './mark-seen'
 
 const timeFormat = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short' })
 const dayLabelFormat = new Intl.DateTimeFormat('fr-FR', {
@@ -171,6 +172,7 @@ export default async function AdminInscriptionsPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <MarkSeen />
       <div>
         <h1 className="text-xl font-bold text-kawa-800">Canal d&apos;inscriptions</h1>
         <p className="text-kawa-500 text-sm mt-1">

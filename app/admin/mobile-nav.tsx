@@ -20,9 +20,11 @@ function MenuIcon() {
 export function AdminMobileNav({
   userEmail,
   logoutAction,
+  inscriptionsUnreadCount = 0,
 }: {
   userEmail: string
   logoutAction: () => void
+  inscriptionsUnreadCount?: number
 }) {
   const [open, setOpen] = useState(false)
 
@@ -36,9 +38,12 @@ export function AdminMobileNav({
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Ouvrir le menu"
-          className="text-kawa-700 p-1"
+          className="relative text-kawa-700 p-1"
         >
           <MenuIcon />
+          {inscriptionsUnreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500" />
+          )}
         </button>
       </div>
 
@@ -65,7 +70,7 @@ export function AdminMobileNav({
               </button>
             </div>
             <div className="flex-1 px-3 py-4" onClick={() => setOpen(false)}>
-              <AdminNav />
+              <AdminNav inscriptionsUnreadCount={inscriptionsUnreadCount} />
             </div>
             <div className="px-5 py-4 border-t border-kawa-200 text-sm">
               <p className="text-kawa-500 truncate">{userEmail}</p>

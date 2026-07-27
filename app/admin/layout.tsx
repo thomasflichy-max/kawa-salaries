@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/actions/auth'
@@ -29,9 +30,24 @@ export default async function AdminLayout({
     redirect('/connexion?next=/admin')
   }
 
+  // Unread badge for "Canal d'inscriptions" — count of signup_attempts
+  // since this browser's last visit (see app/admin/inscriptions/actions.ts,
+  // MarkSeen). No cookie yet (first time in the channel) counts everything,
+  // which is the right default: draw attention to it at least once.
+  const cookieStore = await cookies()
+  const lastSeen = cookieStore.get('inscriptions_last_seen')?.value
+  const { count: inscriptionsUnreadCount } = await supabase
+    .from('signup_attempts')
+    .select('id', { count: 'exact', head: true })
+    .gt('created_at', lastSeen ?? '1970-01-01')
+
   return (
     <div className="min-h-screen bg-kawa-50 flex flex-col md:flex-row">
-      <AdminMobileNav userEmail={user.email ?? ''} logoutAction={logout} />
+      <AdminMobileNav
+        userEmail={user.email ?? ''}
+        logoutAction={logout}
+        inscriptionsUnreadCount={inscriptionsUnreadCount ?? 0}
+      />
       <aside className="hidden md:flex w-64 shrink-0 border-r border-kawa-200 bg-white flex-col">
         <div className="px-5 py-5 border-b border-kawa-200">
           <Link href="/admin" className="font-bold text-kawa-800">
@@ -39,7 +55,7 @@ export default async function AdminLayout({
           </Link>
         </div>
         <div className="flex-1 px-3 py-4">
-          <AdminNav />
+          <AdminNav inscriptionsUnreadCount={inscriptionsUnreadCount ?? 0} />
         </div>
         <div className="px-5 py-4 border-t border-kawa-200 text-sm">
           <p className="text-kawa-500 truncate">{user.email}</p>

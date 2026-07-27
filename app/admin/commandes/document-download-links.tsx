@@ -1,7 +1,7 @@
 'use client'
 
 import { InvoiceIcon, DeliveryNoteIcon } from './document-icons'
-import { Tooltip } from './tooltip'
+import { Tooltip } from '@/app/admin/tooltip'
 
 const buttonClass =
   'inline-flex items-center justify-center w-8 h-8 rounded-lg bg-kawa-800 text-white hover:bg-kawa-900 transition'

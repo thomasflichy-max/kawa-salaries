@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { addComment } from './actions'
+import { getStaffDisplayName } from '@/lib/is-kawa-staff'
 
 const dateTimeFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
 
@@ -41,7 +42,7 @@ export function CommentThread({ attemptId, comments }: { attemptId: string; comm
         <div className="mt-2 flex flex-col gap-2 pl-3 border-l-2 border-kawa-100">
           {comments.map((comment) => (
             <div key={comment.id} className="text-xs">
-              <span className="font-medium text-kawa-700">{comment.author_email}</span>{' '}
+              <span className="font-medium text-kawa-700">{getStaffDisplayName(comment.author_email)}</span>{' '}
               <span className="text-kawa-400">{dateTimeFormat.format(new Date(comment.created_at))}</span>
               <p className="text-kawa-600 mt-0.5">{comment.body}</p>
             </div>

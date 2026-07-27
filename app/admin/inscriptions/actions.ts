@@ -1,8 +1,24 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
+
+// Per-browser "last visited" marker for the unread badge in AdminNav — a
+// plain cookie rather than a Supabase table, since this is a personal UI
+// convenience (not data anyone else needs to see or that must survive a
+// browser switch), and it avoids adding a table + RLS just for this.
+const LAST_SEEN_COOKIE = 'inscriptions_last_seen'
+
+export async function markInscriptionsSeen() {
+  const cookieStore = await cookies()
+  cookieStore.set(LAST_SEEN_COOKIE, new Date().toISOString(), {
+    path: '/',
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: 'lax',
+  })
+}
 
 async function requireStaffEmail() {
   const supabase = await createClient()

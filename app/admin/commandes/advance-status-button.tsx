@@ -4,7 +4,7 @@ import { useTransition } from 'react'
 import type { DemoOrderStatus } from '@/app/admin/demo-data'
 import { advanceOrderStatusAction } from './actions'
 import { ORDER_STATUS_ACTION_ICONS } from './status-icons'
-import { Tooltip } from './tooltip'
+import { Tooltip } from '@/app/admin/tooltip'
 
 // One button per row showing the order's CURRENT status — clicking it
 // advances to the next one in the en_cours → en_preparation → pret → livree

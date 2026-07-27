@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { toggleReaction } from './actions'
+import { Tooltip } from '@/app/admin/tooltip'
+import { getStaffDisplayName } from '@/lib/is-kawa-staff'
 
 const QUICK_EMOJIS = ['👍', '✅', '🎉', '👀', '❤️', '😂']
 
@@ -17,10 +19,11 @@ export function ReactionBar({
   const [isPending, startTransition] = useTransition()
   const [pickerOpen, setPickerOpen] = useState(false)
 
-  const counts = new Map<string, { count: number; mine: boolean }>()
+  const counts = new Map<string, { count: number; mine: boolean; staffEmails: string[] }>()
   for (const r of reactions) {
-    const entry = counts.get(r.emoji) ?? { count: 0, mine: false }
+    const entry = counts.get(r.emoji) ?? { count: 0, mine: false, staffEmails: [] }
     entry.count += 1
+    entry.staffEmails.push(r.staff_email)
     if (r.staff_email === currentUserEmail) entry.mine = true
     counts.set(r.emoji, entry)
   }
@@ -34,21 +37,22 @@ export function ReactionBar({
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap mt-2">
-      {[...counts.entries()].map(([emoji, { count, mine }]) => (
-        <button
-          key={emoji}
-          type="button"
-          onClick={() => handleToggle(emoji)}
-          disabled={isPending}
-          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition disabled:opacity-50 ${
-            mine
-              ? 'bg-sky-50 border-sky-300 text-sky-700'
-              : 'bg-white border-kawa-200 text-kawa-600 hover:bg-kawa-50'
-          }`}
-        >
-          <span>{emoji}</span>
-          <span>{count}</span>
-        </button>
+      {[...counts.entries()].map(([emoji, { count, mine, staffEmails }]) => (
+        <Tooltip key={emoji} label={staffEmails.map((e) => getStaffDisplayName(e)).join(', ')}>
+          <button
+            type="button"
+            onClick={() => handleToggle(emoji)}
+            disabled={isPending}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition disabled:opacity-50 ${
+              mine
+                ? 'bg-sky-50 border-sky-300 text-sky-700'
+                : 'bg-white border-kawa-200 text-kawa-600 hover:bg-kawa-50'
+            }`}
+          >
+            <span>{emoji}</span>
+            <span>{count}</span>
+          </button>
+        </Tooltip>
       ))}
 
       <div className="relative">

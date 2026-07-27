@@ -10,7 +10,7 @@ import {
   getDeliveryLabel,
   getOrderRefundStatus,
 } from '@/app/admin/demo-data'
-import { Tooltip } from './tooltip'
+import { Tooltip } from '@/app/admin/tooltip'
 
 function EyeIcon() {
   return (

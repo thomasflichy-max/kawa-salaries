@@ -17,7 +17,7 @@ export function isKawaStaffEmail(email: string | null | undefined) {
 }
 
 const STAFF_DISPLAY_NAMES: Record<string, string> = {
-  'thomas.flichy@kawa.coffee': 'Thomas Flichy',
+  'thomas.flichy@kawa.coffee': 'Thomas',
   'brieuc@kawa.coffee': 'Brieuc',
   'jean@kawa.coffee': 'Jean',
 }
