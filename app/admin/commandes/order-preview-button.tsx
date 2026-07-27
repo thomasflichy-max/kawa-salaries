@@ -10,6 +10,7 @@ import {
   getDeliveryLabel,
   getOrderRefundStatus,
 } from '@/app/admin/demo-data'
+import { Tooltip } from './tooltip'
 
 function EyeIcon() {
   return (
@@ -32,17 +33,18 @@ export function OrderPreviewButton({ order }: { order: DemoOrder }) {
 
   return (
     <>
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          setOpen(true)
-        }}
-        title="Aperçu rapide"
-        aria-label="Aperçu rapide"
-        className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-kawa-100 transition"
-      >
-        <EyeIcon />
-      </button>
+      <Tooltip label="Aperçu rapide">
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setOpen(true)
+          }}
+          aria-label="Aperçu rapide"
+          className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-kawa-100 transition"
+        >
+          <EyeIcon />
+        </button>
+      </Tooltip>
 
       {open && (
         <div

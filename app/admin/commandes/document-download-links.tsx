@@ -20,7 +20,7 @@ export function DocumentDownloadLinks({ orderId }: { orderId: string }) {
           <InvoiceIcon />
         </a>
       </Tooltip>
-      <Tooltip label="Télécharger le bon de livraison">
+      <Tooltip label="Télécharger le BDL">
         <a
           href={`/admin/commandes/${orderId}/bon-livraison`}
           target="_blank"
