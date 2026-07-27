@@ -12,7 +12,7 @@ export default async function AdminInscriptionsPage() {
     .from('signup_attempts')
     .select('id, email, full_name, domain, success, reason, created_at, organizations(name)')
     .order('created_at', { ascending: false })
-    .limit(200)
+    .limit(500)
 
   if (error) {
     console.error('[admin/inscriptions] failed to load signup attempts:', error)
@@ -26,7 +26,7 @@ export default async function AdminInscriptionsPage() {
         <h1 className="text-xl font-bold text-kawa-800">Inscriptions salariés</h1>
         <p className="text-kawa-500 text-sm mt-1">
           Historique des créations de compte, réussies et échouées (domaine d&apos;entreprise
-          non reconnu). Les 200 dernières tentatives.
+          non reconnu). Les 500 dernières tentatives.
         </p>
       </div>
 
