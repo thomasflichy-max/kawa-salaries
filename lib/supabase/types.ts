@@ -78,6 +78,70 @@ export type Database = {
           }
         ]
       }
+      signup_attempt_reactions: {
+        Row: {
+          id: string
+          attempt_id: string
+          emoji: string
+          staff_email: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          attempt_id: string
+          emoji: string
+          staff_email: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          attempt_id?: string
+          emoji?: string
+          staff_email?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'signup_attempt_reactions_attempt_id_fkey'
+            columns: ['attempt_id']
+            isOneToOne: false
+            referencedRelation: 'signup_attempts'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      signup_attempt_comments: {
+        Row: {
+          id: string
+          attempt_id: string
+          author_email: string
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          attempt_id: string
+          author_email: string
+          body: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          attempt_id?: string
+          author_email?: string
+          body?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'signup_attempt_comments_attempt_id_fkey'
+            columns: ['attempt_id']
+            isOneToOne: false
+            referencedRelation: 'signup_attempts'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       profiles: {
         Row: {
           id: string
