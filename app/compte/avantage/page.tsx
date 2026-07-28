@@ -18,7 +18,7 @@ export default async function AvantagePage() {
           <div className="bg-white rounded-2xl border border-kawa-200 p-8">
             <p className="font-semibold text-kawa-800 text-lg">Remise sur le café</p>
             <p className="text-kawa-500 mt-2">
-              {`Parce que ${organization?.name ?? 'votre entreprise'} est cliente de KAWA Nantes, vous bénéficiez d'une réduction sur nos cafés ainsi que l'accès à nos produits d'entretiens et à nos machines reconditionnées. C'est une offre réservée exclusivement aux salariés des entreprises clientes de KAWA, basés à Nantes.`}
+              {`Parce que ${organization?.name ?? 'votre entreprise'} est client de KAWA Nantes, vous bénéficiez d'une réduction sur nos cafés ainsi que l'accès à nos produits d'entretiens et à nos machines reconditionnées. C'est une offre réservée exclusivement aux salariés des entreprises clientes de KAWA, basés à Nantes.`}
             </p>
           </div>
           <div className="relative w-40 sm:w-48 h-full min-h-40 mx-auto sm:mx-0 rounded-xl overflow-hidden">
