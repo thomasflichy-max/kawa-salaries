@@ -25,7 +25,7 @@ export async function getEmployee() {
     ? await Promise.all([
         supabase
           .from('organizations')
-          .select('name')
+          .select('name, active')
           .eq('id', profile.organization_id)
           .single(),
         supabase
@@ -42,6 +42,14 @@ export async function getEmployee() {
 
   if (organizationError) {
     console.error('[compte] failed to load organization:', organizationError)
+  }
+
+  // An admin can deactivate a client organization (app/admin/comptes) once
+  // it stops working with KAWA — its employees must lose access immediately,
+  // not just be blocked from future signups.
+  if (organization && organization.active === false) {
+    await supabase.auth.signOut()
+    redirect('/connexion?erreur=compte_desactive')
   }
 
   const coffeeDiscounts: Record<string, number> = {}

@@ -38,6 +38,13 @@ export default async function ConnexionPage({
             réessayez de vous connecter — il se peut que le compte soit déjà actif.
           </p>
         )}
+        {erreur === 'compte_desactive' && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
+            L&apos;accès de votre entreprise à KAWA est actuellement désactivé. Contactez votre
+            RH ou écrivez-nous à nantes@kawa.coffee si vous pensez qu&apos;il s&apos;agit d&apos;une
+            erreur.
+          </p>
+        )}
 
         <LoginForm next={next ?? '/compte/avantage'} />
 
