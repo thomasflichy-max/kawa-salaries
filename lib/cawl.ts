@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 
 // CAWL (Crédit Agricole) hosted checkout — redirect-only integration (PCI
 // DSS SAQ A, see payment module notes): we never touch card data, just
@@ -130,14 +130,19 @@ export type CawlWebhookPaymentEvent = {
 // signature header is `x-gcs-signature` (HMAC-SHA256 of the raw request
 // body, keyed by CAWL_WEBHOOK_SECRET, base64-encoded), `x-gcs-keyid` echoes
 // back CAWL_WEBHOOK_ID — "signature match: true" logged in production.
-// Locked down: now actually rejects requests with a missing/wrong signature.
+// Locked down: rejects requests with a missing/wrong signature or keyId,
+// and compares with a constant-time equality (a plain `===` on the two
+// strings would leak timing information proportional to how many leading
+// bytes match, letting a remote attacker recover the correct signature
+// byte-by-byte over enough requests — this closes that side channel).
 export function verifyWebhookSignature(headers: Headers, rawBody: string): boolean {
   const secret = requiredEnv('CAWL_WEBHOOK_SECRET')
   const keyId = headers.get('x-gcs-keyid')
   const received = headers.get('x-gcs-signature')
 
   if (keyId !== process.env.CAWL_WEBHOOK_ID) {
-    console.warn('[cawl webhook] x-gcs-keyid does not match CAWL_WEBHOOK_ID:', keyId)
+    console.warn('[cawl webhook] x-gcs-keyid does not match CAWL_WEBHOOK_ID, rejecting:', keyId)
+    return false
   }
   if (!received) {
     console.warn('[cawl webhook] no x-gcs-signature header found, rejecting')
@@ -145,7 +150,12 @@ export function verifyWebhookSignature(headers: Headers, rawBody: string): boole
   }
 
   const expected = createHmac('sha256', secret).update(rawBody, 'utf8').digest('base64')
-  const matches = received === expected
+  const receivedBuffer = Buffer.from(received)
+  const expectedBuffer = Buffer.from(expected)
+  const matches =
+    receivedBuffer.length === expectedBuffer.length &&
+    timingSafeEqual(receivedBuffer, expectedBuffer)
+
   if (!matches) {
     console.warn('[cawl webhook] signature mismatch, rejecting')
   }
