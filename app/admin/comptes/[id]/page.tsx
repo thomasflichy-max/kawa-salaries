@@ -1,9 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { DEMO_NOTICE } from '@/app/admin/demo-data'
 import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
-import { DemoBadge } from '@/app/admin/demo-badge'
 import { resolveDateRange, toInputDate } from '@/app/admin/date-range'
 import { DateRangePicker } from '@/app/admin/date-range-picker'
 import { EditOrganizationInfoForm } from './edit-organization-info-form'
@@ -159,7 +157,6 @@ export default async function AdminAccountDetailPage({
         <div className="px-5 py-4 border-b border-kawa-200 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-semibold text-kawa-800">Salariés ayant commandé</h2>
-            <DemoBadge text={DEMO_NOTICE} />
           </div>
           <DateRangePicker preset={range.preset} from={toInputDate(range.from)} to={toInputDate(range.to)} />
         </div>

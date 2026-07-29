@@ -4,11 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 import {
   DEMO_ORDER_STATUS_LABELS,
   DEMO_ORDER_STATUS_STYLES,
-  DEMO_NOTICE,
   getDeliveryLabel,
 } from '@/app/admin/demo-data'
 import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
-import { DemoBadge } from '@/app/admin/demo-badge'
 import { DocumentDownloadLinks } from '@/app/admin/commandes/document-download-links'
 import { ResendConfirmationButton } from './resend-confirmation-button'
 
@@ -92,7 +90,6 @@ export default async function AdminEmployeeDetailPage({
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
         <div className="px-5 py-4 border-b border-kawa-200 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-kawa-800">Historique des commandes</h2>
-          <DemoBadge text={DEMO_NOTICE} />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

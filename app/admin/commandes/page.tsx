@@ -2,12 +2,10 @@ import Link from 'next/link'
 import {
   DEMO_ORDER_STATUS_LABELS,
   DEMO_ORDER_STATUS_STYLES,
-  DEMO_NOTICE,
   getDeliveryLabel,
   getNextOrderStatus,
   type DemoOrderStatus,
 } from '@/app/admin/demo-data'
-import { DemoBadge } from '@/app/admin/demo-badge'
 import { createClient } from '@/lib/supabase/server'
 import { getAllAdminOrders } from './manual-orders'
 import { OrderRow } from './order-row'
@@ -67,8 +65,6 @@ export default async function AdminOrdersPage({
           </Link>
         </div>
       </div>
-
-      <DemoBadge text={DEMO_NOTICE} />
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
         <div className="overflow-x-auto">

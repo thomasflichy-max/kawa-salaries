@@ -5,12 +5,10 @@ import {
   ACTIVE_ORDER_STATUSES,
   computeOrderTotals,
   getClientMapPins,
-  DEMO_NOTICE,
   type DemoClientPin,
   type DemoOrderRefund,
 } from './demo-data'
 import { getAllAdminOrders, type AdminOrder } from './commandes/manual-orders'
-import { DemoBadge } from './demo-badge'
 import { ClientsMap } from './clients-map'
 
 const currency = new Intl.NumberFormat('fr-FR', {
@@ -148,8 +146,6 @@ export default async function AdminDashboardPage({
           </a>
         </div>
       </div>
-
-      <DemoBadge text={DEMO_NOTICE} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatTile

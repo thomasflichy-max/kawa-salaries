@@ -4,12 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import {
   DEMO_ORDER_STATUS_LABELS,
   DEMO_ORDER_STATUS_STYLES,
-  DEMO_NOTICE,
   getDeliveryLabel,
   getOrderRefundStatus,
 } from '@/app/admin/demo-data'
 import { getAdminOrderById, type ManualOrderPaymentMethod } from '../manual-orders'
-import { DemoBadge } from '@/app/admin/demo-badge'
 import { StatusUpdateForm } from '../status-update-form'
 import { EditableAddressField } from '../editable-address-field'
 import { InvoiceIcon, DeliveryNoteIcon } from '../document-icons'
@@ -102,8 +100,6 @@ export default async function AdminOrderDetailPage({
           </a>
         </div>
       </div>
-
-      <DemoBadge text={DEMO_NOTICE} />
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
         <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
