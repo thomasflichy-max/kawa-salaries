@@ -120,18 +120,11 @@ export type CawlWebhookPaymentEvent = {
   }
 }
 
-// Confirmed against a real sandbox webhook delivery (2026-07-29): the
-// signature header is `x-gcs-signature`, and `x-gcs-keyid` echoes back our
-// CAWL_WEBHOOK_ID. Still STAGE 2, not fully locked down: the exact bytes
-// CAWL hashes (raw body vs. some canonical string, like the outbound
-// request signing scheme) aren't documented, so this logs whether our
-// best-guess HMAC(raw body) matches without rejecting on mismatch yet — a
-// wrong guess must not silently drop every future payment confirmation.
-// Once a real delivery logs "signature match: true", flip MATCH_REQUIRED to
-// true (or just delete the fallback) to actually start rejecting bad
-// signatures.
-const MATCH_REQUIRED = false
-
+// Confirmed against two real sandbox webhook deliveries (2026-07-29): the
+// signature header is `x-gcs-signature` (HMAC-SHA256 of the raw request
+// body, keyed by CAWL_WEBHOOK_SECRET, base64-encoded), `x-gcs-keyid` echoes
+// back CAWL_WEBHOOK_ID — "signature match: true" logged in production.
+// Locked down: now actually rejects requests with a missing/wrong signature.
 export function verifyWebhookSignature(headers: Headers, rawBody: string): boolean {
   const secret = requiredEnv('CAWL_WEBHOOK_SECRET')
   const keyId = headers.get('x-gcs-keyid')
@@ -141,13 +134,15 @@ export function verifyWebhookSignature(headers: Headers, rawBody: string): boole
     console.warn('[cawl webhook] x-gcs-keyid does not match CAWL_WEBHOOK_ID:', keyId)
   }
   if (!received) {
-    console.warn('[cawl webhook] no x-gcs-signature header found — accepting anyway (stage 2)')
-    return true
+    console.warn('[cawl webhook] no x-gcs-signature header found, rejecting')
+    return false
   }
 
   const expected = createHmac('sha256', secret).update(rawBody, 'utf8').digest('base64')
   const matches = received === expected
-  console.log('[cawl webhook] signature match:', matches, matches ? '' : `(expected ${expected}, got ${received})`)
+  if (!matches) {
+    console.warn('[cawl webhook] signature mismatch, rejecting')
+  }
 
-  return matches || !MATCH_REQUIRED
+  return matches
 }
