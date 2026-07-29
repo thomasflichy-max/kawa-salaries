@@ -69,6 +69,16 @@ export async function createHostedCheckout({
       },
       references: { merchantReference: orderNumber },
     },
+    // Without this, CAWL only authorizes the card (reserves the funds) and
+    // waits for a separate manual capture step — which never happens here,
+    // so `payment.captured` never fires and the order sits "non payée"
+    // forever even though the customer's card was successfully charged-
+    // authorized. SALE = authorize + capture immediately, the right mode
+    // for a normal "pay now for goods" checkout (as opposed to a hotel-style
+    // hold-then-charge-later flow).
+    cardPaymentMethodSpecificInput: {
+      authorizationMode: 'SALE',
+    },
     hostedCheckoutSpecificInput: {
       locale: 'fr-FR',
       returnUrl,
