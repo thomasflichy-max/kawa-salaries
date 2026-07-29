@@ -3,7 +3,7 @@ import JSZip from 'jszip'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
-import { DEMO_ORDERS } from '@/app/admin/demo-data'
+import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { resolveDateRange, toInputDate } from '@/app/admin/date-range'
 import { RefundCertificateDocument } from '@/app/admin/commandes/pdf/refund-certificate-document'
 
@@ -25,11 +25,12 @@ export async function GET(request: Request) {
     to: searchParams.get('to') ?? undefined,
   })
 
+  const allOrders = await getAllAdminOrders()
   const zip = new JSZip()
   // Filtered by when the refund itself happened, not when the order was
   // placed — a refund on an old order still belongs to the period it was
   // actually issued in.
-  for (const order of DEMO_ORDERS) {
+  for (const order of allOrders) {
     for (const refund of order.refunds) {
       const refundedAt = new Date(refund.at)
       if (refundedAt < range.from || refundedAt > range.to) continue

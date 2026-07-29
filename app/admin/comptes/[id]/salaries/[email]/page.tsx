@@ -2,12 +2,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
-  DEMO_ORDERS,
   DEMO_ORDER_STATUS_LABELS,
   DEMO_ORDER_STATUS_STYLES,
   DEMO_NOTICE,
   getDeliveryLabel,
 } from '@/app/admin/demo-data'
+import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { DemoBadge } from '@/app/admin/demo-badge'
 import { DocumentDownloadLinks } from '@/app/admin/commandes/document-download-links'
 import { ResendConfirmationButton } from './resend-confirmation-button'
@@ -38,16 +38,13 @@ export default async function AdminEmployeeDetailPage({
     notFound()
   }
 
-  // Orders aren't wired to real profiles yet (no checkout pipeline) — matched
-  // here by email, same as everywhere else demo orders are looked up. A real
-  // employee's email won't match any of the fictional demo order emails, so
-  // this legitimately shows "no orders" until a real orders table exists.
   // Keyed by email (not a profile id) so this page also works for a
   // "Salarié ayant commandé" that only exists in the demo order data, with
   // no matching profiles row.
-  const orders = DEMO_ORDERS.filter((order) => order.employeeEmail === email).sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
+  const allOrders = await getAllAdminOrders()
+  const orders = allOrders
+    .filter((order) => order.employeeEmail === email)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   if (!employee && orders.length === 0) {
     notFound()

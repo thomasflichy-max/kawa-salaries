@@ -5,6 +5,7 @@ import {
   DEMO_ORDER_STATUS_STYLES,
   getDeliveryLabel,
 } from '@/app/admin/demo-data'
+import { getManualOrders, getRealOrders } from '@/app/admin/commandes/manual-orders'
 import { OrderContactButton } from './order-contact-button'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -13,9 +14,15 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' })
 export default async function CommandesPage() {
   const { user } = await getEmployee()
 
-  const orders = DEMO_ORDERS.filter((order) => order.employeeEmail === user.email).sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
+  // getManualOrders/getRealOrders run under the employee's own session — RLS
+  // ("employees can read own manual orders"/"own orders") already scopes
+  // the result to just their rows, same as this page's DEMO_ORDERS filter.
+  const [manualOrders, realOrders] = await Promise.all([getManualOrders(), getRealOrders()])
+  const orders = [
+    ...DEMO_ORDERS.filter((order) => order.employeeEmail === user.email),
+    ...manualOrders,
+    ...realOrders,
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   return (
     <div className="flex flex-col gap-8">

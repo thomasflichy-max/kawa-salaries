@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { DEMO_ORDERS, DEMO_NOTICE } from '@/app/admin/demo-data'
+import { DEMO_NOTICE } from '@/app/admin/demo-data'
+import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { DemoBadge } from '@/app/admin/demo-badge'
 import { resolveDateRange, toInputDate } from '@/app/admin/date-range'
 import { DateRangePicker } from '@/app/admin/date-range-picker'
@@ -63,12 +64,16 @@ export default async function AdminAccountDetailPage({
     (discounts ?? []).map((rule) => [rule.subcategory, rule.discount_amount])
   )
 
-  // Orders aren't wired to real organizations yet (no checkout pipeline) —
-  // matched here by name purely for the demo view.
-  const ordersForOrg = DEMO_ORDERS.filter((o) => o.organizationName === org.name)
+  // Demo orders aren't wired to real organizations — matched here by name,
+  // same fragile-by-name convention used elsewhere (dashboard map, order
+  // detail page); manual/real orders carry a real organization_id but
+  // AdminOrder only surfaces the resolved name, so the filter stays uniform
+  // across all three sources.
+  const allOrders = await getAllAdminOrders()
+  const ordersForOrg = allOrders.filter((o) => o.organizationName === org.name)
   const ordersInRange = ordersForOrg.filter((o) => {
     const createdAt = new Date(o.createdAt)
-    return createdAt >= range.from && createdAt <= range.to
+    return createdAt >= range.from && createdAt <= range.to && o.paid
   })
 
   const employeeStats = new Map<string, { name: string; total: number; count: number }>()

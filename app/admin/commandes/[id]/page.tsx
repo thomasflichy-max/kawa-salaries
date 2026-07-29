@@ -146,7 +146,7 @@ export default async function AdminOrderDetailPage({
               {order.deliveryMode === 'pickup' ? 'Retrait KAWA Nantes' : 'Livraison chez le client'}
             </dd>
           </div>
-          {order.source === 'demo' && (
+          {(order.source === 'demo' || order.source === 'real') && (
             <div>
               <dt className="text-kawa-500 mb-1">Statut actuel</dt>
               <dd className="mt-0.5">
@@ -181,7 +181,7 @@ export default async function AdminOrderDetailPage({
             </dd>
           </div>
         </dl>
-        {order.source === 'demo' && (
+        {(order.source === 'demo' || order.source === 'real') && (
           <div className="px-5 pb-5 flex flex-col gap-4">
             <div>
               <p className="text-sm font-medium text-kawa-700 mb-2">Changer le statut</p>
@@ -218,7 +218,7 @@ export default async function AdminOrderDetailPage({
             <EditableAddressField
               label="Facturation"
               value={order.billingAddress}
-              editable={order.source === 'demo'}
+              editable={order.source === 'demo' || order.source === 'real'}
               onSave={async (value) => {
                 'use server'
                 await updateOrderBillingAddressAction(order.id, value)
@@ -229,7 +229,10 @@ export default async function AdminOrderDetailPage({
             <EditableAddressField
               label="Livraison"
               value={shippingValue}
-              editable={order.source === 'demo' && order.deliveryMode === 'delivery'}
+              editable={
+                (order.source === 'demo' || order.source === 'real') &&
+                order.deliveryMode === 'delivery'
+              }
               onSave={async (value) => {
                 'use server'
                 await updateOrderShippingAddressAction(order.id, value)
@@ -244,7 +247,7 @@ export default async function AdminOrderDetailPage({
         items={order.items}
         amount={order.amount}
         products={catalogProducts}
-        readOnly={order.source === 'manual'}
+        readOnly={order.source === 'manual' || order.source === 'real'}
       />
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">

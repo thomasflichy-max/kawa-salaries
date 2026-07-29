@@ -3,7 +3,7 @@ import JSZip from 'jszip'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
-import { DEMO_ORDERS } from '@/app/admin/demo-data'
+import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { resolveDateRange, toInputDate } from '@/app/admin/date-range'
 import { InvoiceDocument } from '@/app/admin/commandes/pdf/invoice-document'
 
@@ -25,9 +25,15 @@ export async function GET(request: Request) {
     to: searchParams.get('to') ?? undefined,
   })
 
-  const orders = DEMO_ORDERS.filter((order) => {
+  const allOrders = await getAllAdminOrders()
+  const orders = allOrders.filter((order) => {
     const createdAt = new Date(order.createdAt)
-    return createdAt >= range.from && createdAt <= range.to && order.status !== 'annulee'
+    // Only paid orders get an invoice — a pending real-checkout order (not
+    // yet confirmed by the CAWL webhook) or an unconfirmed virement/lien_cb
+    // manual order must not be invoiced yet.
+    return (
+      createdAt >= range.from && createdAt <= range.to && order.status !== 'annulee' && order.paid
+    )
   })
 
   const zip = new JSZip()

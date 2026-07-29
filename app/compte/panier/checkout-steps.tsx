@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { updateDefaultAddress } from '@/app/actions/auth'
+import { placeOrderAction } from '@/app/actions/checkout'
 
 type Address = { id: string; label: string; address: string }
 type Step = 1 | 2 | 3
@@ -61,6 +62,7 @@ export function CheckoutSteps({
   const [selectedAddress, setSelectedAddress] = useState(defaultAddressId ?? '')
   const [confirmedAddress, setConfirmedAddress] = useState<string | null>(null)
   const [state, action, pending] = useActionState(updateDefaultAddress, undefined)
+  const [payState, payAction, payPending] = useActionState(placeOrderAction, undefined)
 
   // State adjustment driven by the action's result — done during render
   // (React's documented pattern for this), not in a useEffect.
@@ -155,17 +157,24 @@ export function CheckoutSteps({
       <div className="p-5 flex flex-col gap-3">
         <StepHeader number={3} title="Passage au paiement" status={step === 3 ? 'active' : 'locked'} />
         {step === 3 && (
-          <div className="pl-10">
+          <form action={payAction} className="pl-10 flex flex-col gap-3">
             <button
-              disabled
-              className="w-full sm:w-auto bg-kawa-200 text-kawa-500 px-6 py-3 rounded-lg font-medium cursor-not-allowed"
+              type="submit"
+              disabled={payPending}
+              className="w-full sm:w-auto bg-sky-500 text-kawa-950 px-6 py-3 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
             >
-              Passer au paiement — bientôt disponible
+              {payPending ? 'Redirection…' : `Payer ${currency.format(total)}`}
             </button>
-            <p className="text-xs text-kawa-400 mt-2">
-              Le module de paiement n&apos;est pas encore en ligne — ta commande ({selectedSite ? selectedSite.label : 'Retrait KAWA Nantes'}) est prête à être validée dès qu&apos;il le sera.
+            {payState?.error && (
+              <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 max-w-sm">
+                {payState.error}
+              </p>
+            )}
+            <p className="text-xs text-kawa-400">
+              Vous allez être redirigé·e vers la page de paiement sécurisée CAWL (Crédit
+              Agricole) — livraison : {selectedSite ? selectedSite.label : 'Retrait KAWA Nantes'}.
             </p>
-          </div>
+          </form>
         )}
       </div>
     </div>

@@ -10,7 +10,7 @@ export function PaymentStatusToggle({
   paid,
 }: {
   orderId: string
-  source: 'demo' | 'manual'
+  source: 'demo' | 'manual' | 'real'
   paid: boolean
 }) {
   const [isPending, startTransition] = useTransition()
@@ -20,6 +20,8 @@ export function PaymentStatusToggle({
       if (source === 'manual') {
         await setManualOrderPaidAction(orderId, !paid)
       } else {
+        // 'real' orders are normally flipped by the CAWL webhook — this is
+        // a manual override for edge cases (missed webhook, cash workaround).
         await setOrderPaidAction(orderId, !paid)
       }
     })

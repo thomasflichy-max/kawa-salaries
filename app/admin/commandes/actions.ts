@@ -14,10 +14,15 @@ import {
   updateDemoOrderItemQuantity,
   removeDemoOrderItem,
   getDemoOrderById,
+  getNextOrderStatus,
+  getOrderRefundTotal,
+  getOrderRefundStatus,
+  DEMO_ORDER_STATUS_LABELS,
   type DemoOrder,
   type DemoOrderStatus,
   type DemoOrderItem,
 } from '@/app/admin/demo-data'
+import { getAdminOrderById } from './manual-orders'
 import { sendOrderReadyForPickupEmail } from '@/lib/emails/order-ready-for-pickup'
 import { sendOrderRefundedEmail } from '@/lib/emails/order-refunded'
 
@@ -40,6 +45,32 @@ function revalidateOrderPaths(orderId: string) {
   revalidatePath('/admin')
 }
 
+// Sets a real order's status directly to any value and records the change
+// in order_status_history — the Supabase-backed equivalent of
+// setDemoOrderStatus (app/admin/demo-data.ts), used once an orderId isn't
+// found among DEMO_ORDERS (i.e. it's a checkout-created order in `orders`).
+async function updateRealOrderStatus(orderId: string, status: DemoOrderStatus, actor: string) {
+  const supabase = await createClient()
+  const { data: current } = await supabase
+    .from('orders')
+    .select('status')
+    .eq('id', orderId)
+    .maybeSingle()
+  if (!current || current.status === status) return null
+
+  const { error } = await supabase.from('orders').update({ status }).eq('id', orderId)
+  if (error) {
+    console.error('[commandes] real order status update failed:', error)
+    return null
+  }
+  await supabase.from('order_status_history').insert({
+    order_id: orderId,
+    actor,
+    action: `Statut changé : ${DEMO_ORDER_STATUS_LABELS[current.status as DemoOrderStatus]} → ${DEMO_ORDER_STATUS_LABELS[status]}`,
+  })
+  return getAdminOrderById(orderId)
+}
+
 // Fires only the moment an order actually transitions into "prêt à l'envoi"
 // (not on every no-op re-save of the same status) and only for pickup
 // orders — delivery orders have nothing for the client to come collect.
@@ -55,8 +86,28 @@ async function notifyIfJustReadyForPickup(order: DemoOrder | null, wasReady: boo
 
 export async function advanceOrderStatusAction(orderId: string) {
   const actor = await requireKawaStaffActor()
-  const wasReady = getDemoOrderById(orderId)?.status === 'pret'
-  const order = advanceDemoOrderStatus(orderId, actor)
+  const demoOrder = getDemoOrderById(orderId)
+  if (demoOrder) {
+    const wasReady = demoOrder.status === 'pret'
+    const order = advanceDemoOrderStatus(orderId, actor)
+    await notifyIfJustReadyForPickup(order, wasReady)
+    revalidateOrderPaths(orderId)
+    return
+  }
+
+  const supabase = await createClient()
+  const { data: current } = await supabase
+    .from('orders')
+    .select('status')
+    .eq('id', orderId)
+    .maybeSingle()
+  if (!current) {
+    revalidateOrderPaths(orderId)
+    return
+  }
+  const wasReady = current.status === 'pret'
+  const next = getNextOrderStatus(current.status as DemoOrderStatus)
+  const order = next ? await updateRealOrderStatus(orderId, next, actor) : null
   await notifyIfJustReadyForPickup(order, wasReady)
   revalidateOrderPaths(orderId)
 }
@@ -66,27 +117,89 @@ export async function advanceOrderStatusAction(orderId: string) {
 // refund via refundOrderAction below.
 export async function updateOrderStatusAction(orderId: string, status: DemoOrderStatus) {
   const actor = await requireKawaStaffActor()
-  const wasReady = getDemoOrderById(orderId)?.status === 'pret'
-  const order = setDemoOrderStatus(orderId, status, actor)
-  await notifyIfJustReadyForPickup(order, wasReady)
+  const demoOrder = getDemoOrderById(orderId)
+  if (demoOrder) {
+    const wasReady = demoOrder.status === 'pret'
+    const order = setDemoOrderStatus(orderId, status, actor)
+    await notifyIfJustReadyForPickup(order, wasReady)
+    revalidateOrderPaths(orderId)
+    return
+  }
+
+  const supabase = await createClient()
+  const { data: current } = await supabase
+    .from('orders')
+    .select('status')
+    .eq('id', orderId)
+    .maybeSingle()
+  const wasReady = current?.status === 'pret'
+  const order = await updateRealOrderStatus(orderId, status, actor)
+  await notifyIfJustReadyForPickup(order, wasReady ?? false)
   revalidateOrderPaths(orderId)
 }
 
 export async function setOrderPaidAction(orderId: string, paid: boolean) {
   const actor = await requireKawaStaffActor()
-  setDemoOrderPaid(orderId, paid, actor)
+  const demoOrder = getDemoOrderById(orderId)
+  if (demoOrder) {
+    setDemoOrderPaid(orderId, paid, actor)
+    revalidateOrderPaths(orderId)
+    return
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('orders')
+    .update({ paid, payment_status: paid ? 'paye' : 'en_attente' })
+    .eq('id', orderId)
+  if (error) {
+    console.error('[commandes] real order paid update failed:', error)
+    revalidateOrderPaths(orderId)
+    return
+  }
+  await supabase.from('order_status_history').insert({
+    order_id: orderId,
+    actor,
+    action: paid ? 'Marquée payée manuellement' : 'Marquée en attente de paiement',
+  })
   revalidateOrderPaths(orderId)
 }
 
 export async function updateOrderBillingAddressAction(orderId: string, value: string) {
   const actor = await requireKawaStaffActor()
-  updateDemoOrderBillingAddress(orderId, value, actor)
+  const demoOrder = getDemoOrderById(orderId)
+  if (demoOrder) {
+    updateDemoOrderBillingAddress(orderId, value, actor)
+    revalidateOrderPaths(orderId)
+    return
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.from('orders').update({ billing_address: value }).eq('id', orderId)
+  if (!error) {
+    await supabase
+      .from('order_status_history')
+      .insert({ order_id: orderId, actor, action: 'Adresse de facturation modifiée' })
+  }
   revalidateOrderPaths(orderId)
 }
 
 export async function updateOrderShippingAddressAction(orderId: string, value: string) {
   const actor = await requireKawaStaffActor()
-  updateDemoOrderShippingAddress(orderId, value, actor)
+  const demoOrder = getDemoOrderById(orderId)
+  if (demoOrder) {
+    updateDemoOrderShippingAddress(orderId, value, actor)
+    revalidateOrderPaths(orderId)
+    return
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.from('orders').update({ address: value }).eq('id', orderId)
+  if (!error) {
+    await supabase
+      .from('order_status_history')
+      .insert({ order_id: orderId, actor, action: 'Adresse de livraison modifiée' })
+  }
   revalidateOrderPaths(orderId)
 }
 
@@ -96,13 +209,53 @@ export async function refundOrderAction(orderId: string, amount: number, reason:
   if (!(amount > 0) || !trimmedReason) {
     throw new Error('Montant et motif requis.')
   }
-  const order = addDemoOrderRefund(orderId, amount, trimmedReason, actor)
+
+  const demoOrder = getDemoOrderById(orderId)
+  if (demoOrder) {
+    const order = addDemoOrderRefund(orderId, amount, trimmedReason, actor)
+    if (!order) {
+      throw new Error('Montant invalide (dépasse le solde restant à rembourser).')
+    }
+    const refund = order.refunds[order.refunds.length - 1]
+    try {
+      await sendOrderRefundedEmail(order, refund)
+    } catch (error) {
+      console.error('[commandes] refund confirmation email failed:', error)
+    }
+    revalidateOrderPaths(orderId)
+    return
+  }
+
+  const order = await getAdminOrderById(orderId)
   if (!order) {
+    throw new Error('Commande introuvable.')
+  }
+  const remaining = order.amount - getOrderRefundTotal(order)
+  if (amount > remaining + 0.005) {
     throw new Error('Montant invalide (dépasse le solde restant à rembourser).')
   }
-  const refund = order.refunds[order.refunds.length - 1]
+
+  const supabase = await createClient()
+  const { data: refundRow, error } = await supabase
+    .from('order_refunds')
+    .insert({ order_id: orderId, amount, reason: trimmedReason, actor })
+    .select('id, amount, reason, actor, at')
+    .single()
+  if (error || !refundRow) {
+    console.error('[commandes] refund insert failed:', error)
+    throw new Error('Une erreur est survenue, merci de réessayer.')
+  }
+
+  const isFull = getOrderRefundStatus({ ...order, refunds: [...order.refunds, refundRow] }) === 'full'
+  const amountLabel = amount.toFixed(2).replace('.', ',')
+  await supabase.from('order_status_history').insert({
+    order_id: orderId,
+    actor,
+    action: `Remboursement ${isFull ? 'total' : 'partiel'} de ${amountLabel} € — ${trimmedReason}`,
+  })
+
   try {
-    await sendOrderRefundedEmail(order, refund)
+    await sendOrderRefundedEmail(order, refundRow)
   } catch (error) {
     console.error('[commandes] refund confirmation email failed:', error)
   }

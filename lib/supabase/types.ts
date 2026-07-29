@@ -180,7 +180,7 @@ export type Database = {
           }
         ]
       }
-      orders: {
+      orders_legacy_unused: {
         Row: {
           id: string
           user_id: string | null
@@ -481,6 +481,186 @@ export type Database = {
             columns: ['manual_order_id']
             isOneToOne: false
             referencedRelation: 'manual_orders'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      orders: {
+        Row: {
+          id: string
+          order_number: string
+          profile_id: string
+          organization_id: string
+          employee_name: string
+          employee_email: string
+          billing_address: string
+          delivery_mode: string
+          address: string
+          amount: number
+          status: string
+          payment_status: string
+          paid: boolean
+          cawl_hosted_checkout_id: string | null
+          cawl_payment_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          order_number: string
+          profile_id: string
+          organization_id: string
+          employee_name: string
+          employee_email: string
+          billing_address: string
+          delivery_mode: string
+          address: string
+          amount: number
+          status?: string
+          payment_status?: string
+          paid?: boolean
+          cawl_hosted_checkout_id?: string | null
+          cawl_payment_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          order_number?: string
+          profile_id?: string
+          organization_id?: string
+          employee_name?: string
+          employee_email?: string
+          billing_address?: string
+          delivery_mode?: string
+          address?: string
+          amount?: number
+          status?: string
+          payment_status?: string
+          paid?: boolean
+          cawl_hosted_checkout_id?: string | null
+          cawl_payment_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'orders_profile_id_fkey'
+            columns: ['profile_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'orders_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      order_items: {
+        Row: {
+          id: string
+          order_id: string
+          product_name: string
+          quantity: number
+          image_url: string
+          unit: string
+          unit_price_ttc: number
+          vat_rate: number
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          product_name: string
+          quantity: number
+          image_url: string
+          unit: string
+          unit_price_ttc: number
+          vat_rate: number
+        }
+        Update: {
+          id?: string
+          order_id?: string
+          product_name?: string
+          quantity?: number
+          image_url?: string
+          unit?: string
+          unit_price_ttc?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'order_items_order_id_fkey'
+            columns: ['order_id']
+            isOneToOne: false
+            referencedRelation: 'orders'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      order_status_history: {
+        Row: {
+          id: string
+          order_id: string
+          actor: string
+          action: string
+          at: string
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          actor: string
+          action: string
+          at?: string
+        }
+        Update: {
+          id?: string
+          order_id?: string
+          actor?: string
+          action?: string
+          at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'order_status_history_order_id_fkey'
+            columns: ['order_id']
+            isOneToOne: false
+            referencedRelation: 'orders'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      order_refunds: {
+        Row: {
+          id: string
+          order_id: string
+          amount: number
+          reason: string
+          actor: string
+          at: string
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          amount: number
+          reason: string
+          actor: string
+          at?: string
+        }
+        Update: {
+          id?: string
+          order_id?: string
+          amount?: number
+          reason?: string
+          actor?: string
+          at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'order_refunds_order_id_fkey'
+            columns: ['order_id']
+            isOneToOne: false
+            referencedRelation: 'orders'
             referencedColumns: ['id']
           }
         ]

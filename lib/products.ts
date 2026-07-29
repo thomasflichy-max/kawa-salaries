@@ -22,6 +22,17 @@ export function resolveProductPricing(
   }
 }
 
+// Coffee (category "cafe") is taxed as a food product at 5.5%, everything
+// else (machines, entretien) at the standard 20% rate — same split used
+// everywhere an order line item is built, from admin manual orders to real
+// checkout, to the invoice PDF.
+export function vatRateFor(category: string) {
+  return category === 'cafe' ? 0.055 : 0.2
+}
+export function unitFor(category: string) {
+  return category === 'cafe' ? ('Kg' as const) : ('unité' as const)
+}
+
 const PRODUCT_FIELDS =
   'id, category, subcategory, tag, name, description, price, image_url, hover_image_url, purchasable, net_weight_grams'
 

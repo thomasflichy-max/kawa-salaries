@@ -2,15 +2,14 @@ import { createClient } from '@/lib/supabase/server'
 import { resolveDateRange, toInputDate } from './date-range'
 import { DateRangePicker } from './date-range-picker'
 import {
-  DEMO_ORDERS,
   ACTIVE_ORDER_STATUSES,
   computeOrderTotals,
   getClientMapPins,
   DEMO_NOTICE,
   type DemoClientPin,
-  type DemoOrder,
   type DemoOrderRefund,
 } from './demo-data'
+import { getAllAdminOrders, type AdminOrder } from './commandes/manual-orders'
 import { DemoBadge } from './demo-badge'
 import { ClientsMap } from './clients-map'
 
@@ -72,9 +71,13 @@ export default async function AdminDashboardPage({
     return [{ organizationName, address: site.address, lat: site.lat, lng: site.lng }]
   })
 
-  const ordersInRange = DEMO_ORDERS.filter((order) => {
+  const allOrders = await getAllAdminOrders()
+
+  const ordersInRange = allOrders.filter((order) => {
     const createdAt = new Date(order.createdAt)
-    return createdAt >= range.from && createdAt <= range.to && order.status !== 'annulee'
+    return (
+      createdAt >= range.from && createdAt <= range.to && order.status !== 'annulee' && order.paid
+    )
   })
 
   const revenueTTC = ordersInRange.reduce((sum, o) => sum + o.amount, 0)
@@ -82,8 +85,8 @@ export default async function AdminDashboardPage({
     (sum, o) => sum + computeOrderTotals(o.items).totalHT,
     0
   )
-  const pendingDeliveries = DEMO_ORDERS.filter((o) =>
-    ACTIVE_ORDER_STATUSES.includes(o.status)
+  const pendingDeliveries = allOrders.filter(
+    (o) => o.paid && ACTIVE_ORDER_STATUSES.includes(o.status)
   ).length
 
   const quantityByProduct = new Map<string, number>()
@@ -103,7 +106,7 @@ export default async function AdminDashboardPage({
   // Keyed by when the refund itself happened, not when the order was placed
   // — a refund on an older order still belongs to the period it was issued
   // in, same filtering the export/remboursements zip uses.
-  const refundsInRange: { order: DemoOrder; refund: DemoOrderRefund }[] = DEMO_ORDERS.flatMap(
+  const refundsInRange: { order: AdminOrder; refund: DemoOrderRefund }[] = allOrders.flatMap(
     (order) =>
       order.refunds
         .filter((refund) => {

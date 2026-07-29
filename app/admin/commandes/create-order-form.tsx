@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from 'react'
 import { createManualOrderAction } from './manual-order-actions'
-import { vatRateFor, unitFor, type CatalogProduct } from './order-items-editor'
+import { vatRateFor, unitFor } from '@/lib/products'
+import type { CatalogProduct } from './order-items-editor'
 import { KAWA_OFFICE } from '@/app/admin/demo-data'
 import type { ManualOrderPaymentMethod } from './manual-orders'
 

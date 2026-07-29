@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import Image from 'next/image'
 import type { DemoOrderItem } from '@/app/admin/demo-data'
+import { vatRateFor, unitFor } from '@/lib/products'
 import { addOrderItemAction, removeOrderItemAction, updateOrderItemQuantityAction } from './actions'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -35,16 +36,6 @@ export type CatalogProduct = {
   // product with an organization discount applied) — lets the "create order"
   // picker show the remise instead of just the already-discounted number.
   basePrice?: number | null
-}
-
-// Coffee (category "cafe") is taxed as a food product at 5.5%, everything
-// else (machines, entretien) at the standard 20% rate — same split used
-// everywhere else in the app, from the cart to the invoice PDF.
-export function vatRateFor(category: string) {
-  return category === 'cafe' ? 0.055 : 0.2
-}
-export function unitFor(category: string) {
-  return category === 'cafe' ? ('Kg' as const) : ('unité' as const)
 }
 
 function ItemRow({ orderId, item, locked }: { orderId: string; item: DemoOrderItem; locked: boolean }) {
