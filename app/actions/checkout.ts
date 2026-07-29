@@ -144,18 +144,21 @@ export async function placeOrderAction(
       .eq('id', order.id)
   } catch (error) {
     console.error('[placeOrderAction] CAWL checkout creation failed:', error)
+    // Don't leave a ghost order behind if we can't even get a payment link
+    // for it — same reasoning as the webhook deleting rejected/cancelled
+    // orders (see app/api/webhooks/cawl/route.ts): an order that was never
+    // paid for shouldn't linger in Liste Commande or block the cart.
+    await supabase.from('orders').delete().eq('id', order.id)
     return {
       error:
         "Le paiement n'a pas pu être initialisé, merci de réessayer ou de contacter KAWA.",
     }
   }
 
-  // The order is created and the checkout session exists — clear the cart
-  // now rather than waiting on the payment webhook, same convention as a
-  // standard e-commerce "order placed" moment. If payment fails, the order
-  // stays in payment_status='echoue' and staff can follow up manually
-  // (same as any other unpaid order today).
-  await supabase.from('cart_items').delete().eq('user_id', user.id)
-
+  // The cart is deliberately NOT cleared here — the order exists but isn't
+  // paid yet. It's cleared by the webhook once payment.captured actually
+  // confirms the purchase (app/api/webhooks/cawl/route.ts); if the customer
+  // cancels or their card is declined, the webhook deletes this order
+  // instead, and their cart is exactly as they left it — nothing to redo.
   redirect(redirectUrl)
 }

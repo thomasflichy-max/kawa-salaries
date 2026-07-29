@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
     const { data: order, error: findError } = await supabase
       .from('orders')
-      .select('id, payment_status')
+      .select('id, profile_id, payment_status')
       .eq('order_number', merchantReference)
       .maybeSingle()
 
@@ -70,6 +70,19 @@ export async function POST(request: Request) {
     // Idempotency: CAWL retries on non-2xx and can resend the same event —
     // don't re-send the confirmation email or duplicate the history entry.
     if (order.payment_status === paymentStatus) continue
+
+    // A rejected/cancelled payment means nothing was actually purchased —
+    // delete the order (cascades to order_items/history/refunds) rather
+    // than leaving a "Non payée" ghost order in Liste Commande forever. The
+    // employee's cart was never touched (see app/actions/checkout.ts), so
+    // this is a clean no-op from their point of view: nothing to redo.
+    if (paymentStatus === 'echoue') {
+      const { error: deleteError } = await supabase.from('orders').delete().eq('id', order.id)
+      if (deleteError) {
+        console.error('[cawl webhook] failed to delete rejected/cancelled order', order.id, deleteError)
+      }
+      continue
+    }
 
     const { error: updateError } = await supabase
       .from('orders')
@@ -92,6 +105,11 @@ export async function POST(request: Request) {
     })
 
     if (paymentStatus === 'paye') {
+      // Only now, once payment is actually confirmed, is it safe to clear
+      // the cart — the employee could have kept adding/removing items while
+      // this payment was pending.
+      await supabase.from('cart_items').delete().eq('user_id', order.profile_id)
+
       const { data: fullOrderData, error: fullOrderError } = await supabase
         .from('orders')
         .select(REAL_ORDER_SELECT)
