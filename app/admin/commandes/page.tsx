@@ -115,10 +115,10 @@ export default async function AdminOrdersPage({
                     <td className="px-5 py-3">
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                          order.paid ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                          order.paid ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
                         }`}
                       >
-                        {order.paid ? 'Payée' : 'En attente'}
+                        {order.paid ? 'Payée' : 'Non payée'}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-kawa-800 text-right whitespace-nowrap">

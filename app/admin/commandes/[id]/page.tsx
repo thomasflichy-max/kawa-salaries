@@ -193,7 +193,7 @@ export default async function AdminOrderDetailPage({
             </div>
             <div>
               <p className="text-sm font-medium text-kawa-700 mb-2">Remboursement</p>
-              <RefundForm orderId={order.id} amount={order.amount} items={order.items} refunds={order.refunds} />
+              <RefundForm orderId={order.id} amount={order.amount} refunds={order.refunds} />
             </div>
           </div>
         )}

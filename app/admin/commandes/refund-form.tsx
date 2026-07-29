@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import type { DemoOrderItem, DemoOrderRefund } from '@/app/admin/demo-data'
+import type { DemoOrderRefund } from '@/app/admin/demo-data'
 import { refundOrderAction } from './actions'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -10,18 +10,17 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeSty
 export function RefundForm({
   orderId,
   amount,
-  items,
   refunds,
 }: {
   orderId: string
   amount: number
-  items: DemoOrderItem[]
   refunds: DemoOrderRefund[]
 }) {
   const alreadyRefunded = refunds.reduce((sum, r) => sum + r.amount, 0)
   const remaining = Math.max(0, amount - alreadyRefunded)
   const [amountInput, setAmountInput] = useState(remaining ? remaining.toFixed(2) : '')
   const [reason, setReason] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const parsedAmount = Number(amountInput.replace(',', '.'))
@@ -36,10 +35,15 @@ export function RefundForm({
     ) {
       return
     }
+    setError(null)
     startTransition(async () => {
-      await refundOrderAction(orderId, parsedAmount, reason.trim())
-      setReason('')
-      setAmountInput('')
+      try {
+        await refundOrderAction(orderId, parsedAmount, reason.trim())
+        setReason('')
+        setAmountInput('')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Une erreur est survenue, merci de réessayer.')
+      }
     })
   }
 
@@ -71,28 +75,6 @@ export function RefundForm({
         </p>
       ) : (
         <div className="flex flex-col gap-3">
-          {items.length > 1 && (
-            <div className="flex flex-wrap gap-2">
-              {items.map((item) => {
-                const lineTotal = item.unitPriceTTC * item.quantity
-                if (lineTotal > remaining + 0.005) return null
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      setAmountInput(lineTotal.toFixed(2))
-                      setReason(`Article manquant/erroné : ${item.productName}`)
-                    }}
-                    className="text-xs bg-white border border-kawa-200 text-kawa-600 rounded-full px-3 py-1 hover:border-sky-400 hover:text-sky-700 transition"
-                  >
-                    Rembourser « {item.productName} » ({currency.format(lineTotal)})
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
           <div className="flex flex-wrap items-end gap-2">
             <div>
               <label className="block text-xs text-kawa-500 mb-1">Montant à rembourser</label>
@@ -125,10 +107,13 @@ export function RefundForm({
             </button>
           </div>
           <p className="text-xs text-kawa-400">
-            Solde restant remboursable : {currency.format(remaining)}. Ne déclenche aucun virement —
-            il n&apos;y a pas encore de module de paiement. Ça garde juste une trace de qui a
+            Solde restant remboursable : {currency.format(remaining)}. N&apos;appelle pas encore
+            CAWL pour déclencher un vrai remboursement bancaire — ça garde juste une trace de qui a
             remboursé, quand, combien et pourquoi.
           </p>
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+          )}
         </div>
       )}
     </div>
