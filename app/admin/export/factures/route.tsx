@@ -6,6 +6,7 @@ import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { resolveDateRange, toInputDate } from '@/app/admin/date-range'
 import { InvoiceDocument } from '@/app/admin/commandes/pdf/invoice-document'
+import { resolveOrderImages } from '@/app/admin/commandes/pdf/pdf-image'
 import { downloadDocumentPdf } from '@/lib/document-storage'
 
 export const runtime = 'nodejs'
@@ -43,7 +44,11 @@ export async function GET(request: Request) {
       order.source === 'real' && order.invoicePdfPath
         ? await downloadDocumentPdf(supabase, order.invoicePdfPath)
         : null
-    const buffer = archived ?? (await renderToBuffer(<InvoiceDocument order={order} />))
+    const buffer =
+      archived ??
+      (await renderToBuffer(
+        <InvoiceDocument order={order} imageSrcByUrl={await resolveOrderImages(order.items)} />
+      ))
     zip.file(`facture-${order.invoiceNumber ?? order.orderNumber}.pdf`, buffer)
   }
 

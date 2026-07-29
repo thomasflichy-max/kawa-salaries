@@ -4,18 +4,21 @@ import { getDeliveryLabel } from '@/app/admin/demo-data'
 import { pdfStyles, KAWA_SKY } from './styles'
 import { PdfHeader, PdfLegalFooter } from './pdf-header'
 import { KAWA_LEGAL } from './kawa-legal'
-import { resolveProductImageSrc } from './pdf-image'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short' })
 
 // deliveryNoteNumber: dedicated, gapless BL-{year}-{seq} reference (see
 // migration 0032) — falls back to order.orderNumber for demo/manual orders.
+// imageSrcByUrl: pre-resolved via resolveOrderImages() (pdf-image.tsx)
+// before rendering — see the same note on InvoiceDocument.
 export function DeliveryNoteDocument({
   order,
   deliveryNoteNumber,
+  imageSrcByUrl = {},
 }: {
   order: DemoOrder
   deliveryNoteNumber?: string
+  imageSrcByUrl?: Record<string, string | null>
 }) {
   const displayNumber = deliveryNoteNumber ?? order.orderNumber
 
@@ -65,7 +68,7 @@ export function DeliveryNoteDocument({
             </Text>
           </View>
           {order.items.map((item) => {
-            const imageDataUri = resolveProductImageSrc(item.imageUrl)
+            const imageDataUri = imageSrcByUrl[item.imageUrl] ?? null
             return (
               <View key={item.id} style={pdfStyles.tableRow}>
                 <View style={[pdfStyles.colProduct, pdfStyles.productCell]}>

@@ -2,6 +2,7 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import type { DemoOrder } from '@/app/admin/demo-data'
 import { computeOrderTotals, getDeliveryLabel } from '@/app/admin/demo-data'
 import { InvoiceDocument } from '@/app/admin/commandes/pdf/invoice-document'
+import { resolveOrderImages } from '@/app/admin/commandes/pdf/pdf-image'
 import {
   SITE_URL,
   KAWA_SKY,
@@ -119,7 +120,10 @@ export async function sendOrderConfirmationEmail(
   // different invoiceNumber than what's on file. Only demo/manual orders
   // (no dedicated invoice series) fall back to rendering on the spot.
   const invoiceBuffer =
-    overrides?.invoiceBuffer ?? (await renderToBuffer(<InvoiceDocument order={order} />))
+    overrides?.invoiceBuffer ??
+    (await renderToBuffer(
+      <InvoiceDocument order={order} imageSrcByUrl={await resolveOrderImages(order.items)} />
+    ))
   await sendOrderEmail({
     to: overrides?.to ?? order.employeeEmail,
     subject: overrides?.subjectPrefix ? `${overrides.subjectPrefix}${subject}` : subject,

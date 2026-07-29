@@ -9,6 +9,7 @@ import {
 } from '@/app/admin/commandes/manual-orders'
 import { InvoiceDocument } from '@/app/admin/commandes/pdf/invoice-document'
 import { DeliveryNoteDocument } from '@/app/admin/commandes/pdf/delivery-note-document'
+import { resolveOrderImages } from '@/app/admin/commandes/pdf/pdf-image'
 import { mintDocumentNumber, uploadDocumentPdf } from '@/lib/document-storage'
 import { sendOrderConfirmationEmail } from '@/lib/emails/order-confirmation'
 import type { AdminOrder } from '@/app/admin/commandes/manual-orders'
@@ -24,12 +25,26 @@ const REFUNDED_TYPES = new Set(['payment.refunded'])
 // try block — @react-pdf/renderer's renderToBuffer still rejects on error
 // exactly the same way, this is purely to keep the linter happy about
 // error-boundary semantics that don't actually apply to PDF rendering.
-function renderInvoiceBuffer(order: AdminOrder, invoiceNumber: string) {
-  return renderToBuffer(<InvoiceDocument order={order} invoiceNumber={invoiceNumber} />)
-}
-function renderDeliveryNoteBuffer(order: AdminOrder, deliveryNoteNumber: string) {
+function renderInvoiceBuffer(
+  order: AdminOrder,
+  invoiceNumber: string,
+  imageSrcByUrl: Record<string, string | null>
+) {
   return renderToBuffer(
-    <DeliveryNoteDocument order={order} deliveryNoteNumber={deliveryNoteNumber} />
+    <InvoiceDocument order={order} invoiceNumber={invoiceNumber} imageSrcByUrl={imageSrcByUrl} />
+  )
+}
+function renderDeliveryNoteBuffer(
+  order: AdminOrder,
+  deliveryNoteNumber: string,
+  imageSrcByUrl: Record<string, string | null>
+) {
+  return renderToBuffer(
+    <DeliveryNoteDocument
+      order={order}
+      deliveryNoteNumber={deliveryNoteNumber}
+      imageSrcByUrl={imageSrcByUrl}
+    />
   )
 }
 
@@ -151,9 +166,14 @@ export async function POST(request: Request) {
       try {
         const invoiceNumber = await mintDocumentNumber(supabase, 'facture', year)
         const deliveryNoteNumber = await mintDocumentNumber(supabase, 'bon_livraison', year)
+        const imageSrcByUrl = await resolveOrderImages(fullOrder.items)
 
-        invoiceBuffer = await renderInvoiceBuffer(fullOrder, invoiceNumber)
-        const deliveryNoteBuffer = await renderDeliveryNoteBuffer(fullOrder, deliveryNoteNumber)
+        invoiceBuffer = await renderInvoiceBuffer(fullOrder, invoiceNumber, imageSrcByUrl)
+        const deliveryNoteBuffer = await renderDeliveryNoteBuffer(
+          fullOrder,
+          deliveryNoteNumber,
+          imageSrcByUrl
+        )
 
         const invoicePdfPath = `invoices/${order.id}.pdf`
         const deliveryNotePdfPath = `delivery-notes/${order.id}.pdf`

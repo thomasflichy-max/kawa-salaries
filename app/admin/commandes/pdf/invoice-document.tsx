@@ -4,7 +4,6 @@ import { computeOrderTotals, getDeliveryLabel } from '@/app/admin/demo-data'
 import { pdfStyles, KAWA_SKY } from './styles'
 import { PdfHeader, PdfLegalFooter } from './pdf-header'
 import { KAWA_LEGAL } from './kawa-legal'
-import { resolveProductImageSrc } from './pdf-image'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short' })
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -18,12 +17,18 @@ const percent = (rate: number) => `${(rate * 100).toFixed(2).replace('.', ',')} 
 // back to order.orderNumber when absent (demo/manual orders, which don't
 // have a dedicated invoice series). Never regenerate a real order's PDF
 // after the fact with a different invoiceNumber than what was archived.
+// imageSrcByUrl: pre-resolved via resolveOrderImages() (pdf-image.tsx)
+// before rendering — item images can require an async fetch/conversion
+// (remote Storage URLs, non-PNG/JPEG formats), which can't happen inline
+// during this synchronous render.
 export function InvoiceDocument({
   order,
   invoiceNumber,
+  imageSrcByUrl = {},
 }: {
   order: DemoOrder
   invoiceNumber?: string
+  imageSrcByUrl?: Record<string, string | null>
 }) {
   const totals = computeOrderTotals(order.items)
   // Paid by card at the moment the order is placed, so the due date is the
@@ -85,7 +90,7 @@ export function InvoiceDocument({
             </Text>
           </View>
           {order.items.map((item) => {
-            const imageDataUri = resolveProductImageSrc(item.imageUrl)
+            const imageDataUri = imageSrcByUrl[item.imageUrl] ?? null
             return (
               <View key={item.id} style={pdfStyles.tableRow}>
                 <View style={[pdfStyles.colProduct, pdfStyles.productCell]}>

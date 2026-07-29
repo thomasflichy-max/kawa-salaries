@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { getAdminOrderById } from '@/app/admin/commandes/manual-orders'
 import { DeliveryNoteDocument } from '@/app/admin/commandes/pdf/delivery-note-document'
+import { resolveOrderImages } from '@/app/admin/commandes/pdf/pdf-image'
 import { downloadDocumentPdf } from '@/lib/document-storage'
 
 export const runtime = 'nodejs'
@@ -33,7 +34,11 @@ export async function GET(
       ? await downloadDocumentPdf(supabase, order.deliveryNotePdfPath)
       : null
 
-  const buffer = archived ?? (await renderToBuffer(<DeliveryNoteDocument order={order} />))
+  const buffer =
+    archived ??
+    (await renderToBuffer(
+      <DeliveryNoteDocument order={order} imageSrcByUrl={await resolveOrderImages(order.items)} />
+    ))
 
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
