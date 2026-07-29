@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import Image from 'next/image'
 import type { DemoOrderItem } from '@/app/admin/demo-data'
-import { vatRateFor, unitFor } from '@/lib/products'
+import { vatRateFor, unitFor } from '@/lib/order-item-vat'
 import { addOrderItemAction, removeOrderItemAction, updateOrderItemQuantityAction } from './actions'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
