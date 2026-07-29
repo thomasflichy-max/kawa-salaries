@@ -33,6 +33,16 @@ export default function MentionsLegalesPage() {
         </section>
 
         <section>
+          <h2 className="font-semibold text-kawa-800 mb-1">Paiement en ligne</h2>
+          <p className="text-sm text-kawa-600 leading-relaxed">
+            Les paiements par carte bancaire sont traités par CAWL, solution de
+            paiement du Crédit Agricole. KAWA n&apos;a à aucun moment accès aux
+            données bancaires des salariés, qui sont saisies directement sur la page
+            de paiement sécurisée de CAWL.
+          </p>
+        </section>
+
+        <section>
           <h2 className="font-semibold text-kawa-800 mb-1">Propriété intellectuelle</h2>
           <p className="text-sm text-kawa-600 leading-relaxed">
             L&apos;ensemble des contenus présents sur ce site (textes, images, logos)

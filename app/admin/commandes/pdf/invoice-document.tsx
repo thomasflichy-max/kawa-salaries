@@ -4,7 +4,7 @@ import { computeOrderTotals, getDeliveryLabel } from '@/app/admin/demo-data'
 import { pdfStyles, KAWA_SKY } from './styles'
 import { PdfHeader, PdfLegalFooter } from './pdf-header'
 import { KAWA_LEGAL } from './kawa-legal'
-import { readPublicImageAsDataUri } from './pdf-image'
+import { resolveProductImageSrc } from './pdf-image'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short' })
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -85,7 +85,7 @@ export function InvoiceDocument({
             </Text>
           </View>
           {order.items.map((item) => {
-            const imageDataUri = readPublicImageAsDataUri(item.imageUrl)
+            const imageDataUri = resolveProductImageSrc(item.imageUrl)
             return (
               <View key={item.id} style={pdfStyles.tableRow}>
                 <View style={[pdfStyles.colProduct, pdfStyles.productCell]}>

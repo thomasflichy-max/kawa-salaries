@@ -42,9 +42,9 @@ export default function CGVPage() {
           <h2 className="font-semibold text-kawa-800 mb-1">3. Commande</h2>
           <p className="text-sm text-kawa-600 leading-relaxed">
             La commande est passée depuis l&apos;espace personnel du salarié après
-            connexion. Elle n&apos;est définitive qu&apos;après confirmation par KAWA
-            et, le cas échéant, réception du paiement selon les modalités indiquées
-            lors du passage de commande.
+            connexion. Elle n&apos;est définitive qu&apos;une fois le paiement en ligne
+            confirmé (voir article 5) : tant que le paiement n&apos;est pas validé, la
+            commande n&apos;est pas enregistrée.
           </p>
         </section>
 
@@ -61,10 +61,11 @@ export default function CGVPage() {
         <section>
           <h2 className="font-semibold text-kawa-800 mb-1">5. Paiement</h2>
           <p className="text-sm text-kawa-600 leading-relaxed">
-            Les modalités de paiement seront précisées au moment du passage de
-            commande. À défaut de paiement en ligne disponible, KAWA se réserve le
-            droit de facturer directement l&apos;entreprise cliente ou le salarié
-            selon l&apos;accord en vigueur.
+            Le paiement s&apos;effectue en ligne par carte bancaire au moment de la
+            commande, via CAWL, la solution de paiement du Crédit Agricole. Le
+            salarié est redirigé vers une page de paiement sécurisée hébergée par
+            CAWL : les données bancaires ne transitent à aucun moment par les
+            serveurs de KAWA, qui n&apos;y a pas accès et ne les conserve pas.
           </p>
         </section>
 

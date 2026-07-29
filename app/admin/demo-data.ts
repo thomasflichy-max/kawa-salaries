@@ -400,21 +400,38 @@ export type ClientMapPin = {
 // Not yet delivered/picked up and not cancelled.
 export const ACTIVE_ORDER_STATUSES: DemoOrderStatus[] = ['en_cours', 'en_preparation', 'pret']
 
+// Just the fields getClientMapPins actually needs, structurally compatible
+// with AdminOrder (app/admin/commandes/manual-orders.ts) — kept as a local
+// Pick-style type here rather than importing AdminOrder, which would create
+// a circular import (manual-orders.ts already imports from this file).
+type OrderForMapPin = {
+  organizationName: string
+  deliveryMode: DemoDeliveryMode
+  status: DemoOrderStatus
+  paid: boolean
+}
+
 // Two independent signals plotted as two different pins, so a company
 // with one employee picking up and another getting delivered never has to
 // pick a single color for both: the company pin only tracks deliveries to
 // its address, the KAWA office pin only tracks pending pickups.
 //
 // `companyPins` are the real geocoded client sites (organization_addresses,
-// see app/admin/page.tsx) — orders are still demo data (no checkout
-// pipeline yet), so pending-delivery status is matched by organization name
-// only, same fragile-by-name link used elsewhere in this file.
-export function getClientMapPins(companyPins: DemoClientPin[] = DEMO_CLIENT_PINS): ClientMapPin[] {
+// see app/admin/page.tsx). `orders` should be every source (demo/manual/real,
+// via getAllAdminOrders()) — pending-delivery status is matched by
+// organization name only, same fragile-by-name link used elsewhere in this
+// file. Only paid orders count as "pending" — an unpaid real order hasn't
+// actually been placed yet from a fulfillment point of view.
+export function getClientMapPins(
+  companyPins: DemoClientPin[] = DEMO_CLIENT_PINS,
+  orders: OrderForMapPin[] = DEMO_ORDERS
+): ClientMapPin[] {
   const mappedCompanyPins: ClientMapPin[] = companyPins.map((pin) => {
-    const hasPendingDelivery = DEMO_ORDERS.some(
+    const hasPendingDelivery = orders.some(
       (order) =>
         order.organizationName === pin.organizationName &&
         order.deliveryMode === 'delivery' &&
+        order.paid &&
         ACTIVE_ORDER_STATUSES.includes(order.status)
     )
     return {
@@ -428,8 +445,8 @@ export function getClientMapPins(companyPins: DemoClientPin[] = DEMO_CLIENT_PINS
     }
   })
 
-  const hasPendingPickup = DEMO_ORDERS.some(
-    (order) => order.deliveryMode === 'pickup' && ACTIVE_ORDER_STATUSES.includes(order.status)
+  const hasPendingPickup = orders.some(
+    (order) => order.deliveryMode === 'pickup' && order.paid && ACTIVE_ORDER_STATUSES.includes(order.status)
   )
 
   const officePin: ClientMapPin = {

@@ -51,7 +51,13 @@ export default function ConfidentialitePage() {
           <p className="text-sm text-kawa-600 leading-relaxed">
             Vos données peuvent être traitées par nos prestataires techniques
             (hébergement, base de données, envoi d&apos;email), dans le cadre
-            strictement nécessaire au fonctionnement du service.
+            strictement nécessaire au fonctionnement du service. Pour le paiement en
+            ligne, votre nom et le montant de la commande sont transmis à CAWL,
+            solution de paiement du Crédit Agricole, chargée de traiter la
+            transaction : vos données bancaires (numéro de carte, date
+            d&apos;expiration, cryptogramme) sont saisies directement sur la page
+            sécurisée de CAWL et ne transitent jamais par nos serveurs, qui n&apos;y
+            ont pas accès.
           </p>
         </section>
 

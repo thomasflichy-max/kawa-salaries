@@ -253,7 +253,7 @@ export default async function AdminDashboardPage({
             Adresses clients
           </h2>
           <div className="p-5">
-            <ClientsMap pins={getClientMapPins(clientPins)} />
+            <ClientsMap pins={getClientMapPins(clientPins, allOrders)} />
           </div>
         </section>
       </div>
