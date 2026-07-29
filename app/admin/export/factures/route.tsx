@@ -6,6 +6,7 @@ import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { resolveDateRange, toInputDate } from '@/app/admin/date-range'
 import { InvoiceDocument } from '@/app/admin/commandes/pdf/invoice-document'
+import { downloadDocumentPdf } from '@/lib/document-storage'
 
 export const runtime = 'nodejs'
 
@@ -38,8 +39,12 @@ export async function GET(request: Request) {
 
   const zip = new JSZip()
   for (const order of orders) {
-    const buffer = await renderToBuffer(<InvoiceDocument order={order} />)
-    zip.file(`facture-${order.orderNumber}.pdf`, buffer)
+    const archived =
+      order.source === 'real' && order.invoicePdfPath
+        ? await downloadDocumentPdf(supabase, order.invoicePdfPath)
+        : null
+    const buffer = archived ?? (await renderToBuffer(<InvoiceDocument order={order} />))
+    zip.file(`facture-${order.invoiceNumber ?? order.orderNumber}.pdf`, buffer)
   }
 
   const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' })

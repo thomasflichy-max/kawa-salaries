@@ -6,6 +6,7 @@ import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { resolveDateRange, toInputDate } from '@/app/admin/date-range'
 import { RefundCertificateDocument } from '@/app/admin/commandes/pdf/refund-certificate-document'
+import { downloadDocumentPdf } from '@/lib/document-storage'
 
 export const runtime = 'nodejs'
 
@@ -34,8 +35,11 @@ export async function GET(request: Request) {
     for (const refund of order.refunds) {
       const refundedAt = new Date(refund.at)
       if (refundedAt < range.from || refundedAt > range.to) continue
-      const buffer = await renderToBuffer(<RefundCertificateDocument order={order} refund={refund} />)
-      zip.file(`justificatif-remboursement-${order.orderNumber}-${refund.id.slice(0, 8)}.pdf`, buffer)
+      const archived = refund.pdfPath ? await downloadDocumentPdf(supabase, refund.pdfPath) : null
+      const buffer =
+        archived ?? (await renderToBuffer(<RefundCertificateDocument order={order} refund={refund} />))
+      const label = refund.refundNumber ?? `${order.orderNumber}-${refund.id.slice(0, 8)}`
+      zip.file(`justificatif-remboursement-${label}.pdf`, buffer)
     }
   }
 

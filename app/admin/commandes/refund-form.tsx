@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import type { DemoOrderRefund } from '@/app/admin/demo-data'
+import type { AdminOrderRefund } from '@/app/admin/commandes/manual-orders'
 import { refundOrderAction } from './actions'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -14,7 +14,7 @@ export function RefundForm({
 }: {
   orderId: string
   amount: number
-  refunds: DemoOrderRefund[]
+  refunds: AdminOrderRefund[]
 }) {
   const alreadyRefunded = refunds.reduce((sum, r) => sum + r.amount, 0)
   const remaining = Math.max(0, amount - alreadyRefunded)
@@ -58,12 +58,21 @@ export function RefundForm({
             >
               <div>
                 <p className="text-red-700 font-medium">
+                  {refund.refundNumber && `${refund.refundNumber} — `}
                   {currency.format(refund.amount)} — {refund.reason}
                 </p>
                 <p className="text-xs text-red-500">
                   {dateFormat.format(new Date(refund.at))} par {refund.actor}
                 </p>
               </div>
+              <a
+                href={`/admin/commandes/${orderId}/remboursement/${refund.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-red-700 underline shrink-0"
+              >
+                Justificatif PDF
+              </a>
             </li>
           ))}
         </ul>

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { getAdminOrderById } from '@/app/admin/commandes/manual-orders'
 import { DeliveryNoteDocument } from '@/app/admin/commandes/pdf/delivery-note-document'
+import { downloadDocumentPdf } from '@/lib/document-storage'
 
 export const runtime = 'nodejs'
 
@@ -27,7 +28,12 @@ export async function GET(
     return NextResponse.json({ error: 'Commande introuvable.' }, { status: 404 })
   }
 
-  const buffer = await renderToBuffer(<DeliveryNoteDocument order={order} />)
+  const archived =
+    order.source === 'real' && order.deliveryNotePdfPath
+      ? await downloadDocumentPdf(supabase, order.deliveryNotePdfPath)
+      : null
+
+  const buffer = archived ?? (await renderToBuffer(<DeliveryNoteDocument order={order} />))
 
   return new NextResponse(new Uint8Array(buffer), {
     headers: {

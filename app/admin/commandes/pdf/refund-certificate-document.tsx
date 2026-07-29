@@ -11,18 +11,24 @@ const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: '
 // Certifies that money actually moved (unlike the old avoir, which was a
 // credit for a future order) — a receipt, not a fiscal document, so it
 // deliberately skips a VAT breakdown.
+//
+// refundNumber: dedicated, gapless AVOIR-{year}-{seq} reference (see
+// migration 0032) — falls back to just the order number for demo/manual
+// orders, which don't have a dedicated refund series.
 export function RefundCertificateDocument({
   order,
   refund,
+  refundNumber,
 }: {
   order: DemoOrder
   refund: DemoOrderRefund
+  refundNumber?: string
 }) {
   const totalRefunded = getOrderRefundTotal(order)
   const isFull = totalRefunded >= order.amount - 0.005
 
   return (
-    <Document title={`Justificatif de remboursement ${order.orderNumber}`}>
+    <Document title={`Justificatif de remboursement ${refundNumber ?? order.orderNumber}`}>
       <Page size="A4" style={pdfStyles.page}>
         <PdfHeader />
         <View style={pdfStyles.hr} />
@@ -30,7 +36,7 @@ export function RefundCertificateDocument({
         <View style={pdfStyles.titleRow}>
           <View>
             <Text style={[pdfStyles.title, { color: KAWA_SKY }]}>
-              JUSTIFICATIF DE REMBOURSEMENT
+              JUSTIFICATIF DE REMBOURSEMENT{refundNumber ? ` - ${refundNumber}` : ''}
             </Text>
             <Text style={pdfStyles.subtitle}>Commande {order.orderNumber}</Text>
           </View>

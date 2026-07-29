@@ -502,6 +502,10 @@ export type Database = {
           paid: boolean
           cawl_hosted_checkout_id: string | null
           cawl_payment_id: string | null
+          invoice_number: string | null
+          invoice_pdf_path: string | null
+          delivery_note_number: string | null
+          delivery_note_pdf_path: string | null
           created_at: string
         }
         Insert: {
@@ -520,6 +524,10 @@ export type Database = {
           paid?: boolean
           cawl_hosted_checkout_id?: string | null
           cawl_payment_id?: string | null
+          invoice_number?: string | null
+          invoice_pdf_path?: string | null
+          delivery_note_number?: string | null
+          delivery_note_pdf_path?: string | null
           created_at?: string
         }
         Update: {
@@ -538,6 +546,10 @@ export type Database = {
           paid?: boolean
           cawl_hosted_checkout_id?: string | null
           cawl_payment_id?: string | null
+          invoice_number?: string | null
+          invoice_pdf_path?: string | null
+          delivery_note_number?: string | null
+          delivery_note_pdf_path?: string | null
           created_at?: string
         }
         Relationships: [
@@ -637,6 +649,8 @@ export type Database = {
           amount: number
           reason: string
           actor: string
+          refund_number: string | null
+          pdf_path: string | null
           at: string
         }
         Insert: {
@@ -645,6 +659,8 @@ export type Database = {
           amount: number
           reason: string
           actor: string
+          refund_number?: string | null
+          pdf_path?: string | null
           at?: string
         }
         Update: {
@@ -653,6 +669,8 @@ export type Database = {
           amount?: number
           reason?: string
           actor?: string
+          refund_number?: string | null
+          pdf_path?: string | null
           at?: string
         }
         Relationships: [
@@ -664,6 +682,24 @@ export type Database = {
             referencedColumns: ['id']
           }
         ]
+      }
+      document_sequences: {
+        Row: {
+          series: string
+          year: number
+          last_number: number
+        }
+        Insert: {
+          series: string
+          year: number
+          last_number?: number
+        }
+        Update: {
+          series?: string
+          year?: number
+          last_number?: number
+        }
+        Relationships: []
       }
       cart_items: {
         Row: {
@@ -768,6 +804,10 @@ export type Database = {
       find_organization_by_domain: {
         Args: { input_domain: string }
         Returns: { id: string; name: string }[]
+      }
+      next_document_number: {
+        Args: { p_series: string; p_year: number }
+        Returns: number
       }
     }
     Enums: Record<string, never>

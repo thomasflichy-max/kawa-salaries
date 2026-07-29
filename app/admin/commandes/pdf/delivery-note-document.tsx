@@ -8,9 +8,19 @@ import { readPublicImageAsDataUri } from './pdf-image'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short' })
 
-export function DeliveryNoteDocument({ order }: { order: DemoOrder }) {
+// deliveryNoteNumber: dedicated, gapless BL-{year}-{seq} reference (see
+// migration 0032) — falls back to order.orderNumber for demo/manual orders.
+export function DeliveryNoteDocument({
+  order,
+  deliveryNoteNumber,
+}: {
+  order: DemoOrder
+  deliveryNoteNumber?: string
+}) {
+  const displayNumber = deliveryNoteNumber ?? order.orderNumber
+
   return (
-    <Document title={`Bon de livraison ${order.orderNumber}`}>
+    <Document title={`Bon de livraison ${displayNumber}`}>
       <Page size="A4" style={pdfStyles.page}>
         <PdfHeader />
         <View style={pdfStyles.hr} />
@@ -18,8 +28,11 @@ export function DeliveryNoteDocument({ order }: { order: DemoOrder }) {
         <View style={pdfStyles.titleRow}>
           <View>
             <Text style={[pdfStyles.title, { color: KAWA_SKY }]}>
-              BON DE LIVRAISON - {order.orderNumber}
+              BON DE LIVRAISON - {displayNumber}
             </Text>
+            {deliveryNoteNumber && (
+              <Text style={pdfStyles.subtitle}>Commande {order.orderNumber}</Text>
+            )}
           </View>
           <Text style={pdfStyles.metaLabel}>
             Date : {dateFormat.format(new Date(order.createdAt))}

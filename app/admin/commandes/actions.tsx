@@ -22,7 +22,10 @@ import {
   type DemoOrderStatus,
   type DemoOrderItem,
 } from '@/app/admin/demo-data'
+import { renderToBuffer } from '@react-pdf/renderer'
 import { getAdminOrderById } from './manual-orders'
+import { RefundCertificateDocument } from './pdf/refund-certificate-document'
+import { mintDocumentNumber, uploadDocumentPdf } from '@/lib/document-storage'
 import { sendOrderReadyForPickupEmail } from '@/lib/emails/order-ready-for-pickup'
 import { sendOrderRefundedEmail } from '@/lib/emails/order-refunded'
 
@@ -246,13 +249,37 @@ export async function refundOrderAction(orderId: string, amount: number, reason:
     throw new Error('Une erreur est survenue, merci de réessayer.')
   }
 
-  const isFull = getOrderRefundStatus({ ...order, refunds: [...order.refunds, refundRow] }) === 'full'
+  const orderWithNewRefund = { ...order, refunds: [...order.refunds, refundRow] }
+  const isFull = getOrderRefundStatus(orderWithNewRefund) === 'full'
   const amountLabel = amount.toFixed(2).replace('.', ',')
   await supabase.from('order_status_history').insert({
     order_id: orderId,
     actor,
     action: `Remboursement ${isFull ? 'total' : 'partiel'} de ${amountLabel} € — ${trimmedReason}`,
   })
+
+  // Dedicated, gapless AVOIR-{year}-{seq} reference + immutable archived
+  // PDF (migration 0032) — same reasoning as the facture/BL in the CAWL
+  // webhook: never let a later edit change what was actually issued.
+  try {
+    const year = new Date().getFullYear()
+    const refundNumber = await mintDocumentNumber(supabase, 'avoir', year)
+    const buffer = await renderToBuffer(
+      <RefundCertificateDocument
+        order={orderWithNewRefund}
+        refund={refundRow}
+        refundNumber={refundNumber}
+      />
+    )
+    const pdfPath = `refund-certificates/${refundRow.id}.pdf`
+    await uploadDocumentPdf(supabase, pdfPath, buffer)
+    await supabase
+      .from('order_refunds')
+      .update({ refund_number: refundNumber, pdf_path: pdfPath })
+      .eq('id', refundRow.id)
+  } catch (archiveError) {
+    console.error('[commandes] refund certificate numbering/archiving failed:', archiveError)
+  }
 
   try {
     await sendOrderRefundedEmail(order, refundRow)

@@ -12,23 +12,37 @@ const percent = (rate: number) => `${(rate * 100).toFixed(2).replace('.', ',')} 
 
 // Billed to the employee as an individual (B2C) — the employer company only
 // grants the discount, it isn't the contracting party on this invoice.
-export function InvoiceDocument({ order }: { order: DemoOrder }) {
+//
+// invoiceNumber: the dedicated, gapless FACT-{year}-{seq} reference (see
+// migration 0032, minted once in app/api/webhooks/cawl/route.ts) — falls
+// back to order.orderNumber when absent (demo/manual orders, which don't
+// have a dedicated invoice series). Never regenerate a real order's PDF
+// after the fact with a different invoiceNumber than what was archived.
+export function InvoiceDocument({
+  order,
+  invoiceNumber,
+}: {
+  order: DemoOrder
+  invoiceNumber?: string
+}) {
   const totals = computeOrderTotals(order.items)
   // Paid by card at the moment the order is placed, so the due date is the
   // order date itself — there are no net payment terms.
   const invoiceDate = new Date(order.createdAt)
+  const displayNumber = invoiceNumber ?? order.orderNumber
 
   return (
-    <Document title={`Facture ${order.orderNumber}`}>
+    <Document title={`Facture ${displayNumber}`}>
       <Page size="A4" style={pdfStyles.page}>
         <PdfHeader />
         <View style={pdfStyles.hr} />
 
         <View style={pdfStyles.titleRow}>
           <View>
-            <Text style={[pdfStyles.title, { color: KAWA_SKY }]}>
-              FACTURE - {order.orderNumber}
-            </Text>
+            <Text style={[pdfStyles.title, { color: KAWA_SKY }]}>FACTURE - {displayNumber}</Text>
+            {invoiceNumber && (
+              <Text style={pdfStyles.subtitle}>Commande {order.orderNumber}</Text>
+            )}
           </View>
           <View>
             <Text style={pdfStyles.metaLabel}>

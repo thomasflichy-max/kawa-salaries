@@ -107,14 +107,19 @@ export function renderOrderConfirmationEmail(order: DemoOrder) {
 // previewed or redirected to a test address without duplicating the template.
 export async function sendOrderConfirmationEmail(
   order: DemoOrder,
-  overrides?: { to?: string; subjectPrefix?: string }
+  overrides?: { to?: string; subjectPrefix?: string; invoiceBuffer?: Buffer }
 ) {
   if (!process.env.RESEND_API_KEY) {
     console.warn('[order-confirmation] RESEND_API_KEY not set, skipping email send')
     return
   }
   const { subject, html, text } = renderOrderConfirmationEmail(order)
-  const invoiceBuffer = await renderToBuffer(<InvoiceDocument order={order} />)
+  // Real orders pass the exact buffer already archived (migration 0032) —
+  // rendering a second time here risked emailing an invoice with a
+  // different invoiceNumber than what's on file. Only demo/manual orders
+  // (no dedicated invoice series) fall back to rendering on the spot.
+  const invoiceBuffer =
+    overrides?.invoiceBuffer ?? (await renderToBuffer(<InvoiceDocument order={order} />))
   await sendOrderEmail({
     to: overrides?.to ?? order.employeeEmail,
     subject: overrides?.subjectPrefix ? `${overrides.subjectPrefix}${subject}` : subject,

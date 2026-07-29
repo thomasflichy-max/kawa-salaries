@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { DEMO_ORDERS, getDemoOrderById, type DemoOrder } from '@/app/admin/demo-data'
+import { DEMO_ORDERS, getDemoOrderById, type DemoOrder, type DemoOrderRefund } from '@/app/admin/demo-data'
 
 // Unifies DEMO_ORDERS (in-memory, resets on redeploy) with real,
 // Supabase-persisted `manual_orders` (created by staff from
@@ -13,15 +13,43 @@ import { DEMO_ORDERS, getDemoOrderById, type DemoOrder } from '@/app/admin/demo-
 // for source === 'manual'.
 export type ManualOrderPaymentMethod = 'virement' | 'lien_cb' | 'boutique'
 
-export type AdminOrder = DemoOrder & {
+// refundNumber/pdfPath: dedicated AVOIR-{year}-{seq} reference + archived
+// PDF path (migration 0032), only ever set for source === 'real' refunds —
+// null for demo/manual, which don't have a dedicated refund document series.
+export type AdminOrderRefund = DemoOrderRefund & {
+  refundNumber: string | null
+  pdfPath: string | null
+}
+
+export type AdminOrder = Omit<DemoOrder, 'refunds'> & {
   source: 'demo' | 'manual' | 'real'
   paymentLink: string | null
   comment: string | null
   paymentMethod: ManualOrderPaymentMethod | null
+  refunds: AdminOrderRefund[]
+  // Dedicated, gapless FACT-/BL-{year}-{seq} references + archived PDF
+  // paths (migration 0032) — only ever set for source === 'real'. null for
+  // demo/manual orders, which fall back to order_number as their reference
+  // and are re-rendered on demand (see the PDF components/routes).
+  invoiceNumber: string | null
+  invoicePdfPath: string | null
+  deliveryNoteNumber: string | null
+  deliveryNotePdfPath: string | null
 }
 
 export function toAdminOrder(order: DemoOrder): AdminOrder {
-  return { ...order, source: 'demo', paymentLink: null, comment: null, paymentMethod: null }
+  return {
+    ...order,
+    refunds: order.refunds.map((r) => ({ ...r, refundNumber: null, pdfPath: null })),
+    source: 'demo',
+    paymentLink: null,
+    comment: null,
+    paymentMethod: null,
+    invoiceNumber: null,
+    invoicePdfPath: null,
+    deliveryNoteNumber: null,
+    deliveryNotePdfPath: null,
+  }
 }
 
 const MANUAL_ORDER_SELECT =
@@ -94,6 +122,10 @@ function mapManualOrderRow(row: ManualOrderRow): AdminOrder {
     paymentLink: row.payment_link,
     comment: row.comment,
     paymentMethod: row.payment_method as ManualOrderPaymentMethod,
+    invoiceNumber: null,
+    invoicePdfPath: null,
+    deliveryNoteNumber: null,
+    deliveryNotePdfPath: null,
   }
 }
 
@@ -120,11 +152,19 @@ export async function getManualOrders(): Promise<AdminOrder[]> {
 // and reuse mapRealOrderRow to build the object sendOrderConfirmationEmail
 // expects, without duplicating this select string.
 export const REAL_ORDER_SELECT =
-  'id, order_number, employee_name, employee_email, organization_id, organizations(name), delivery_mode, address, billing_address, amount, status, payment_status, paid, cawl_hosted_checkout_id, cawl_payment_id, created_at, order_items(id, product_name, quantity, image_url, unit, unit_price_ttc, vat_rate), order_status_history(actor, action, at), order_refunds(id, amount, reason, actor, at)'
+  'id, order_number, employee_name, employee_email, organization_id, organizations(name), delivery_mode, address, billing_address, amount, status, payment_status, paid, cawl_hosted_checkout_id, cawl_payment_id, invoice_number, invoice_pdf_path, delivery_note_number, delivery_note_pdf_path, created_at, order_items(id, product_name, quantity, image_url, unit, unit_price_ttc, vat_rate), order_status_history(actor, action, at), order_refunds(id, amount, reason, actor, refund_number, pdf_path, at)'
 
 type RealOrderItemRow = ManualOrderItemRow
 type RealOrderHistoryRow = { actor: string; action: string; at: string }
-type RealOrderRefundRow = { id: string; amount: number; reason: string; actor: string; at: string }
+type RealOrderRefundRow = {
+  id: string
+  amount: number
+  reason: string
+  actor: string
+  refund_number: string | null
+  pdf_path: string | null
+  at: string
+}
 
 export type RealOrderRow = {
   id: string
@@ -142,6 +182,10 @@ export type RealOrderRow = {
   paid: boolean
   cawl_hosted_checkout_id: string | null
   cawl_payment_id: string | null
+  invoice_number: string | null
+  invoice_pdf_path: string | null
+  delivery_note_number: string | null
+  delivery_note_pdf_path: string | null
   created_at: string
   order_items: RealOrderItemRow[]
   order_status_history: RealOrderHistoryRow[]
@@ -180,12 +224,18 @@ export function mapRealOrderRow(row: RealOrderRow): AdminOrder {
       reason: r.reason,
       actor: r.actor,
       at: r.at,
+      refundNumber: r.refund_number,
+      pdfPath: r.pdf_path,
     })),
     paid: row.paid,
     source: 'real',
     paymentLink: null,
     comment: null,
     paymentMethod: null,
+    invoiceNumber: row.invoice_number,
+    invoicePdfPath: row.invoice_pdf_path,
+    deliveryNoteNumber: row.delivery_note_number,
+    deliveryNotePdfPath: row.delivery_note_pdf_path,
   }
 }
 
