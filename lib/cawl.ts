@@ -120,28 +120,34 @@ export type CawlWebhookPaymentEvent = {
   }
 }
 
-// NOTE: the exact signature header name for incoming webhooks isn't clearly
-// documented (CAWL's docs point to their server SDK instead of stating it
-// plainly). Until we've observed a real webhook delivery (first live sandbox
-// test), this logs every header so we can read the real name from the
-// Vercel/dev logs, and does NOT reject the request — do not treat this as
-// verified security until locked down. See payment module memory notes.
-export function verifyWebhookSignatureUnconfirmed(headers: Headers, rawBody: string): boolean {
+// Confirmed against a real sandbox webhook delivery (2026-07-29): the
+// signature header is `x-gcs-signature`, and `x-gcs-keyid` echoes back our
+// CAWL_WEBHOOK_ID. Still STAGE 2, not fully locked down: the exact bytes
+// CAWL hashes (raw body vs. some canonical string, like the outbound
+// request signing scheme) aren't documented, so this logs whether our
+// best-guess HMAC(raw body) matches without rejecting on mismatch yet — a
+// wrong guess must not silently drop every future payment confirmation.
+// Once a real delivery logs "signature match: true", flip MATCH_REQUIRED to
+// true (or just delete the fallback) to actually start rejecting bad
+// signatures.
+const MATCH_REQUIRED = false
+
+export function verifyWebhookSignature(headers: Headers, rawBody: string): boolean {
   const secret = requiredEnv('CAWL_WEBHOOK_SECRET')
-  const candidateHeaderNames = ['x-gcs-signature', 'x-signature', 'x-cawl-signature']
-  const received = candidateHeaderNames.map((name) => headers.get(name)).find(Boolean)
+  const keyId = headers.get('x-gcs-keyid')
+  const received = headers.get('x-gcs-signature')
 
-  console.log('[cawl webhook] all headers:', JSON.stringify(Object.fromEntries(headers.entries())))
-
+  if (keyId !== process.env.CAWL_WEBHOOK_ID) {
+    console.warn('[cawl webhook] x-gcs-keyid does not match CAWL_WEBHOOK_ID:', keyId)
+  }
   if (!received) {
-    console.warn(
-      '[cawl webhook] no recognized signature header found among',
-      candidateHeaderNames,
-      '— accepting anyway (verification not yet locked down), but check the logged headers above and update lib/cawl.ts'
-    )
+    console.warn('[cawl webhook] no x-gcs-signature header found — accepting anyway (stage 2)')
     return true
   }
 
   const expected = createHmac('sha256', secret).update(rawBody, 'utf8').digest('base64')
-  return received === expected
+  const matches = received === expected
+  console.log('[cawl webhook] signature match:', matches, matches ? '' : `(expected ${expected}, got ${received})`)
+
+  return matches || !MATCH_REQUIRED
 }

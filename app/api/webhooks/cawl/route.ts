@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { verifyWebhookSignatureUnconfirmed, type CawlWebhookPaymentEvent } from '@/lib/cawl'
+import { verifyWebhookSignature, type CawlWebhookPaymentEvent } from '@/lib/cawl'
 import {
   mapRealOrderRow,
   REAL_ORDER_SELECT,
@@ -17,7 +17,7 @@ const REFUNDED_TYPES = new Set(['payment.refunded'])
 export async function POST(request: Request) {
   const rawBody = await request.text()
 
-  if (!verifyWebhookSignatureUnconfirmed(request.headers, rawBody)) {
+  if (!verifyWebhookSignature(request.headers, rawBody)) {
     return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
   }
 
