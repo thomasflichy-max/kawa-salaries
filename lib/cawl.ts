@@ -82,6 +82,12 @@ export async function createHostedCheckout({
     hostedCheckoutSpecificInput: {
       locale: 'fr-FR',
       returnUrl,
+      // "Nom de la variante" from the CAWL portal's branding page — applies
+      // the configured logo/brand color instead of the generic default
+      // template. Optional: falls back to the default look if unset.
+      ...(process.env.CAWL_CHECKOUT_VARIANT
+        ? { variant: process.env.CAWL_CHECKOUT_VARIANT }
+        : {}),
     },
   })
 
