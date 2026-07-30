@@ -8,6 +8,7 @@ import {
   getDeliveryLabel,
 } from '@/app/admin/demo-data'
 import { getAdminOrderById } from '@/app/admin/commandes/manual-orders'
+import { InvoiceIcon } from '@/app/admin/commandes/document-icons'
 import { OrderContactButton } from '../order-contact-button'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -45,11 +46,24 @@ export default async function CommandeDetailPage({
               {dateFormat.format(new Date(order.createdAt))}
             </p>
           </div>
-          <span
-            className={`inline-block px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
-          >
-            {DEMO_ORDER_STATUS_LABELS[order.status]}
-          </span>
+          <div className="flex items-center gap-3">
+            <span
+              className={`inline-block px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
+            >
+              {DEMO_ORDER_STATUS_LABELS[order.status]}
+            </span>
+            {order.paid && (
+              <a
+                href={`/compte/commandes/${order.id}/facture`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-kawa-800 text-white px-4 py-2 text-sm font-medium hover:bg-kawa-900 transition"
+              >
+                <InvoiceIcon />
+                Facture PDF
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
