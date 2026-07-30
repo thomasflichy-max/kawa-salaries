@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
 import {
   DEMO_ORDERS,
@@ -44,7 +45,10 @@ export default async function CommandesPage() {
               key={order.id}
               className="bg-white rounded-2xl border border-kawa-200 p-6 flex flex-col gap-3"
             >
-              <div className="flex items-start justify-between gap-4 flex-wrap">
+              <Link
+                href={`/compte/commandes/${order.id}`}
+                className="flex items-start justify-between gap-4 flex-wrap hover:opacity-80 transition"
+              >
                 <div>
                   <p className="font-semibold text-kawa-800">{order.orderNumber}</p>
                   <p className="text-sm text-kawa-500 mt-0.5">
@@ -59,7 +63,7 @@ export default async function CommandesPage() {
                   </span>
                   <span className="font-semibold text-kawa-800">{currency.format(order.amount)}</span>
                 </div>
-              </div>
+              </Link>
               <OrderContactButton orderNumber={order.orderNumber} />
             </li>
           ))}
