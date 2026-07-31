@@ -108,7 +108,18 @@ export default async function AdminOrderDetailPage({
         <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-4 p-5 text-sm">
           <div>
             <dt className="text-kawa-500">Salarié</dt>
-            <dd className="text-kawa-800 mt-0.5">{order.employeeName}</dd>
+            <dd className="text-kawa-800 mt-0.5">
+              {organization ? (
+                <Link
+                  href={`/admin/comptes/${organization.id}/salaries/${encodeURIComponent(order.employeeEmail)}`}
+                  className="text-sky-700 hover:underline"
+                >
+                  {order.employeeName}
+                </Link>
+              ) : (
+                order.employeeName
+              )}
+            </dd>
           </div>
           <div>
             <dt className="text-kawa-500">Entreprise</dt>
