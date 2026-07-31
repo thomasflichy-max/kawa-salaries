@@ -28,9 +28,10 @@ export default async function MfaChallengePage({
   }
 
   const { data: factorsData } = await supabase.auth.mfa.listFactors()
-  const factor = factorsData?.totp?.find((f) => f.status === 'verified')
+  const totpFactor = factorsData?.totp?.find((f) => f.status === 'verified')
+  const webauthnFactor = factorsData?.webauthn?.find((f) => f.status === 'verified')
 
-  if (!factor) {
+  if (!totpFactor && !webauthnFactor) {
     // Shouldn't happen (nextLevel is only 'aal2' once a verified factor
     // exists), but don't strand the user on a dead-end form if it does.
     redirect('/connexion')
@@ -42,11 +43,17 @@ export default async function MfaChallengePage({
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-kawa-800">Vérification en deux étapes</h1>
           <p className="text-kawa-500 mt-2">
-            Saisissez le code généré par votre application d&apos;authentification.
+            {webauthnFactor
+              ? 'Utilisez votre empreinte digitale, Face ID ou Windows Hello.'
+              : "Saisissez le code généré par votre application d'authentification."}
           </p>
         </div>
 
-        <MfaChallengeForm factorId={factor.id} next={next ?? '/admin'} />
+        <MfaChallengeForm
+          totpFactorId={totpFactor?.id ?? null}
+          webauthnFactorId={webauthnFactor?.id ?? null}
+          next={next ?? '/admin'}
+        />
 
         <form action={logout} className="mt-6 text-center">
           <button className="text-sm text-sky-700 underline">
