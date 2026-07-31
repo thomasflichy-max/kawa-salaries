@@ -542,7 +542,9 @@ export type SuspendEmployeeState =
 // toggle is enforced.
 export async function suspendEmployee(
   profileId: string,
-  suspended: boolean
+  suspended: boolean,
+  organizationId: string,
+  email: string
 ): Promise<SuspendEmployeeState> {
   const supabase = await createClient()
   const {
@@ -563,6 +565,7 @@ export async function suspendEmployee(
     return { error: 'Mise à jour impossible.' }
   }
 
-  revalidatePath('/admin/comptes')
+  revalidatePath(`/admin/comptes/${organizationId}`)
+  revalidatePath(`/admin/comptes/${organizationId}/salaries/${encodeURIComponent(email)}`)
   return { success: true }
 }

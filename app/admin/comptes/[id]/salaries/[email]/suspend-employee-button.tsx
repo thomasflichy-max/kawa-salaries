@@ -6,9 +6,13 @@ import { suspendEmployee } from '@/app/admin/actions'
 export function SuspendEmployeeButton({
   profileId,
   isSuspended,
+  organizationId,
+  email,
 }: {
   profileId: string
   isSuspended: boolean
+  organizationId: string
+  email: string
 }) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -24,7 +28,7 @@ export function SuspendEmployeeButton({
     }
     setError(null)
     startTransition(async () => {
-      const state = await suspendEmployee(profileId, !isSuspended)
+      const state = await suspendEmployee(profileId, !isSuspended, organizationId, email)
       if (state?.error) {
         setError(state.error)
       }

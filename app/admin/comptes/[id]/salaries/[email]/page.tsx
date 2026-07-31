@@ -91,7 +91,12 @@ export default async function AdminEmployeeDetailPage({
         {employee && (
           <div className="px-5 pb-5 flex items-center gap-4 flex-wrap">
             <ResendConfirmationButton email={email} />
-            <SuspendEmployeeButton profileId={employee.id} isSuspended={employee.is_suspended} />
+            <SuspendEmployeeButton
+              profileId={employee.id}
+              isSuspended={employee.is_suspended}
+              organizationId={org.id}
+              email={email}
+            />
           </div>
         )}
       </section>
