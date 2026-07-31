@@ -151,6 +151,7 @@ export type Database = {
           default_address_id: string | null
           email: string | null
           created_at: string | null
+          is_suspended: boolean
         }
         Insert: {
           id: string
@@ -160,6 +161,7 @@ export type Database = {
           default_address_id?: string | null
           email?: string | null
           created_at?: string | null
+          is_suspended?: boolean
         }
         Update: {
           id?: string
@@ -169,6 +171,7 @@ export type Database = {
           default_address_id?: string | null
           email?: string | null
           created_at?: string | null
+          is_suspended?: boolean
         }
         Relationships: [
           {

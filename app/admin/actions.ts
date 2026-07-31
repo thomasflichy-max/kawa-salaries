@@ -529,3 +529,40 @@ export async function resendSignupConfirmation(
 
   return { success: true }
 }
+
+export type SuspendEmployeeState =
+  | { error: string; success?: false }
+  | { success: true; error?: undefined }
+  | undefined
+
+// Blocks a single employee from ordering/logging in (e.g. they've left the
+// company) without deleting their profile or order history. The actual
+// enforcement — signing them out and refusing /compte access — happens in
+// getEmployee() (lib/get-employee.ts), the same place the org-level "active"
+// toggle is enforced.
+export async function suspendEmployee(
+  profileId: string,
+  suspended: boolean
+): Promise<SuspendEmployeeState> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!isKawaStaffEmail(user?.email)) {
+    return { error: 'Non autorisé.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_suspended: suspended })
+    .eq('id', profileId)
+
+  if (error) {
+    console.error('[suspendEmployee] update failed:', error)
+    return { error: 'Mise à jour impossible.' }
+  }
+
+  revalidatePath('/admin/comptes')
+  return { success: true }
+}

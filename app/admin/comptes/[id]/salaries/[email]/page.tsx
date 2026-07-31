@@ -9,6 +9,7 @@ import {
 import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { DocumentDownloadLinks } from '@/app/admin/commandes/document-download-links'
 import { ResendConfirmationButton } from './resend-confirmation-button'
+import { SuspendEmployeeButton } from './suspend-employee-button'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' })
@@ -26,7 +27,7 @@ export default async function AdminEmployeeDetailPage({
     supabase.from('organizations').select('id, name').eq('id', id).maybeSingle(),
     supabase
       .from('profiles')
-      .select('id, full_name, email, organization_id, created_at')
+      .select('id, full_name, email, organization_id, created_at, is_suspended')
       .eq('organization_id', id)
       .eq('email', email)
       .maybeSingle(),
@@ -57,7 +58,14 @@ export default async function AdminEmployeeDetailPage({
         <Link href={`/admin/comptes/${org.id}`} className="text-sky-700 hover:underline text-sm">
           ← Retour à {org.name}
         </Link>
-        <h1 className="text-xl font-bold text-kawa-800 mt-2">{displayName}</h1>
+        <h1 className="text-xl font-bold text-kawa-800 mt-2 flex items-center gap-2">
+          {displayName}
+          {employee?.is_suspended && (
+            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+              Suspendu
+            </span>
+          )}
+        </h1>
         <p className="text-kawa-500 text-sm mt-1">{email}</p>
       </div>
 
@@ -81,8 +89,9 @@ export default async function AdminEmployeeDetailPage({
           </div>
         </dl>
         {employee && (
-          <div className="px-5 pb-5">
+          <div className="px-5 pb-5 flex items-center gap-4 flex-wrap">
             <ResendConfirmationButton email={email} />
+            <SuspendEmployeeButton profileId={employee.id} isSuspended={employee.is_suspended} />
           </div>
         )}
       </section>

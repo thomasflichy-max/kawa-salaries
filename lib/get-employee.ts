@@ -13,9 +13,16 @@ export async function getEmployee() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, organization_id, billing_address, default_address_id')
+    .select('full_name, organization_id, billing_address, default_address_id, is_suspended')
     .eq('id', user.id)
     .single()
+
+  // A staff member can suspend a single employee (app/admin/comptes) — e.g.
+  // they've left the company — without deactivating the whole organization.
+  if (profile?.is_suspended) {
+    await supabase.auth.signOut()
+    redirect('/connexion?erreur=compte_suspendu')
+  }
 
   const [
     { data: organization, error: organizationError },

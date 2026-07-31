@@ -45,6 +45,12 @@ export default async function ConnexionPage({
             erreur.
           </p>
         )}
+        {erreur === 'compte_suspendu' && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
+            Votre compte KAWA a été suspendu. Contactez votre RH ou écrivez-nous à
+            nantes@kawa.coffee si vous pensez qu&apos;il s&apos;agit d&apos;une erreur.
+          </p>
+        )}
 
         <LoginForm next={next ?? '/compte/avantage'} />
 
