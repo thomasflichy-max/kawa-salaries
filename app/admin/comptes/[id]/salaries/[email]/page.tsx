@@ -10,6 +10,7 @@ import { getAllAdminOrders } from '@/app/admin/commandes/manual-orders'
 import { DocumentDownloadLinks } from '@/app/admin/commandes/document-download-links'
 import { ResendConfirmationButton } from './resend-confirmation-button'
 import { SuspendEmployeeButton } from './suspend-employee-button'
+import { SendPasswordResetButton } from './send-password-reset-button'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' })
@@ -91,6 +92,7 @@ export default async function AdminEmployeeDetailPage({
         {employee && (
           <div className="px-5 pb-5 flex items-center gap-4 flex-wrap">
             <ResendConfirmationButton email={email} />
+            <SendPasswordResetButton email={email} />
             <SuspendEmployeeButton
               profileId={employee.id}
               isSuspended={employee.is_suspended}

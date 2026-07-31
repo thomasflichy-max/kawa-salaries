@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { MfaSettings } from './mfa-settings'
+import { ChangePasswordForm } from '@/app/compte/change-password-form'
 
 export default async function AdminSecuritePage() {
   const supabase = await createClient()
@@ -16,6 +17,15 @@ export default async function AdminSecuritePage() {
         </h2>
         <div className="p-5">
           <MfaSettings hasVerifiedFactor={!!verifiedFactor} factorId={verifiedFactor?.id ?? null} />
+        </div>
+      </section>
+
+      <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
+        <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
+          Mot de passe
+        </h2>
+        <div className="p-5">
+          <ChangePasswordForm />
         </div>
       </section>
     </div>

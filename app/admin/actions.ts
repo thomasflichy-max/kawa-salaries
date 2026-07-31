@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { geocodeAddress } from '@/lib/geocode'
@@ -577,5 +578,40 @@ export async function suspendEmployee(
 
   revalidatePath(`/admin/comptes/${organizationId}`)
   revalidatePath(`/admin/comptes/${organizationId}/salaries/${encodeURIComponent(email)}`)
+  return { success: true }
+}
+
+export type SendPasswordResetState =
+  | { error: string; success?: false }
+  | { success: true; error?: undefined }
+  | undefined
+
+// Lets staff help a locked-out employee without needing them to find
+// "mot de passe oublié" themselves — sends the same reset email as the
+// self-service flow (requestPasswordReset in app/actions/auth.ts).
+export async function sendPasswordResetForEmployee(
+  email: string
+): Promise<SendPasswordResetState> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!isKawaStaffEmail(user?.email)) {
+    return { error: 'Non autorisé.' }
+  }
+
+  const headersList = await headers()
+  const origin = headersList.get('origin') ?? `https://${headersList.get('host')}`
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/mot-de-passe-oublie/nouveau`,
+  })
+
+  if (error) {
+    console.error('[sendPasswordResetForEmployee] resetPasswordForEmail failed:', error)
+    return { error: "L'envoi a échoué, merci de réessayer." }
+  }
+
   return { success: true }
 }
