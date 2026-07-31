@@ -152,6 +152,7 @@ export type Database = {
           email: string | null
           created_at: string | null
           is_suspended: boolean
+          mfa_recovery_bypass_until: string | null
         }
         Insert: {
           id: string
@@ -162,6 +163,7 @@ export type Database = {
           email?: string | null
           created_at?: string | null
           is_suspended?: boolean
+          mfa_recovery_bypass_until?: string | null
         }
         Update: {
           id?: string
@@ -172,6 +174,7 @@ export type Database = {
           email?: string | null
           created_at?: string | null
           is_suspended?: boolean
+          mfa_recovery_bypass_until?: string | null
         }
         Relationships: [
           {
@@ -801,6 +804,27 @@ export type Database = {
         }
         Relationships: []
       }
+      password_history: {
+        Row: {
+          id: string
+          user_id: string
+          password_hash: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          password_hash: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          password_hash?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -811,6 +835,14 @@ export type Database = {
       next_document_number: {
         Args: { p_series: string; p_year: number }
         Returns: number
+      }
+      generate_mfa_recovery_codes: {
+        Args: { p_code_hashes: string[] }
+        Returns: undefined
+      }
+      consume_mfa_recovery_code: {
+        Args: { p_code_hash: string }
+        Returns: boolean
       }
     }
     Enums: Record<string, never>

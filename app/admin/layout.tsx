@@ -35,7 +35,21 @@ export default async function AdminLayout({
   // one exists, so this doesn't affect accounts that haven't enrolled yet.
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
   if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
-    redirect('/connexion/mfa?next=/admin')
+    // A verified recovery code (lost authenticator device) grants a 12h
+    // window instead of real aal2 — see supabase/migrations/0036_mfa_recovery.sql
+    // for why this can only ever be set by consume_mfa_recovery_code().
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('mfa_recovery_bypass_until')
+      .eq('id', user.id)
+      .maybeSingle()
+    const bypassActive =
+      !!profile?.mfa_recovery_bypass_until &&
+      new Date(profile.mfa_recovery_bypass_until).getTime() > Date.now()
+
+    if (!bypassActive) {
+      redirect('/connexion/mfa?next=/admin')
+    }
   }
 
   // Unread badge for "Canal d'inscriptions" — count of signup_attempts

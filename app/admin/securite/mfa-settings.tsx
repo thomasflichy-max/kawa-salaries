@@ -16,6 +16,7 @@ export function MfaSettings({
   const [enrollment, setEnrollment] = useState<EnrollState>(null)
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null)
 
   function handleStartEnroll() {
     setError(null)
@@ -40,6 +41,9 @@ export function MfaSettings({
       }
       setEnrollment(null)
       setCode('')
+      if (result.recoveryCodes.length > 0) {
+        setRecoveryCodes(result.recoveryCodes)
+      }
     })
   }
 
@@ -53,6 +57,33 @@ export function MfaSettings({
         setError(result.error)
       }
     })
+  }
+
+  if (recoveryCodes) {
+    return (
+      <div className="flex flex-col gap-4 max-w-sm">
+        <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+          Vérification en deux étapes activée.
+        </p>
+        <p className="text-sm text-kawa-700 font-medium">
+          Notez ces codes de récupération dans un endroit sûr — chacun ne fonctionne qu&apos;une
+          fois, et ils ne seront plus jamais affichés. Ils vous permettent d&apos;accéder à
+          l&apos;admin si vous perdez votre application d&apos;authentification.
+        </p>
+        <ul className="grid grid-cols-2 gap-2 font-mono text-sm bg-kawa-50 rounded-lg p-4">
+          {recoveryCodes.map((c) => (
+            <li key={c}>{c}</li>
+          ))}
+        </ul>
+        <button
+          type="button"
+          onClick={() => setRecoveryCodes(null)}
+          className="bg-sky-500 text-kawa-950 px-4 py-2 rounded-lg font-medium hover:bg-sky-600 transition w-fit"
+        >
+          J&apos;ai noté ces codes
+        </button>
+      </div>
+    )
   }
 
   if (hasVerifiedFactor) {

@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { validatePassword } from '@/lib/password-policy'
+import { isPasswordReused, recordPasswordHistory } from '@/lib/password-history'
 
 export type AuthFormState = { error: string } | undefined
 
@@ -103,6 +104,10 @@ export async function signup(
     console.error('[signup] failed to log signup attempt:', logError)
   }
 
+  if (signUpData.user) {
+    await recordPasswordHistory(supabase, signUpData.user.id, password)
+  }
+
   // If email confirmation is disabled on the project, signUp already returns
   // an active session; otherwise the user must confirm by email first.
   redirect(signUpData.session ? '/compte/avantage' : '/inscription/confirmation')
@@ -151,6 +156,10 @@ export async function adminSignup(
           ? 'Un compte existe déjà avec cet email — utilisez "Mot de passe oublié" sur la page de connexion.'
           : 'Une erreur est survenue, merci de réessayer.',
     }
+  }
+
+  if (signUpData.user) {
+    await recordPasswordHistory(supabase, signUpData.user.id, password)
   }
 
   // If email confirmation is disabled on the project, signUp already returns
@@ -354,6 +363,10 @@ export async function updatePassword(
     return { error: 'Mot de passe actuel incorrect.' }
   }
 
+  if (await isPasswordReused(supabase, user.id, newPassword)) {
+    return { error: 'Ce mot de passe a déjà été utilisé récemment, choisissez-en un autre.' }
+  }
+
   const { error: updateError } = await supabase.auth.updateUser({
     password: newPassword,
   })
@@ -362,5 +375,56 @@ export async function updatePassword(
     return { error: 'Une erreur est survenue, merci de réessayer.' }
   }
 
+  await recordPasswordHistory(supabase, user.id, newPassword)
+
   return { success: true }
+}
+
+export type SetNewPasswordState = { error: string } | undefined
+
+// Used by the "mot de passe oublié" reset link flow (new-password-form.tsx)
+// instead of calling supabase.auth.updateUser directly from the client, so
+// the reuse check and history recording (server-side, needs bcrypt against
+// stored hashes) can happen the same way as updatePassword above.
+export async function setNewPasswordAfterReset(
+  _prevState: SetNewPasswordState,
+  formData: FormData
+): Promise<SetNewPasswordState> {
+  const password = String(formData.get('password') ?? '')
+  const confirmPassword = String(formData.get('confirmPassword') ?? '')
+
+  const passwordError = validatePassword(password)
+  if (passwordError) {
+    return { error: passwordError }
+  }
+  if (password !== confirmPassword) {
+    return { error: 'Les deux mots de passe ne correspondent pas.' }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return {
+      error: "Le lien a peut-être expiré. Retournez sur la page précédente et recommencez.",
+    }
+  }
+
+  if (await isPasswordReused(supabase, user.id, password)) {
+    return { error: 'Ce mot de passe a déjà été utilisé récemment, choisissez-en un autre.' }
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({ password })
+  if (updateError) {
+    console.error('[setNewPasswordAfterReset] auth.updateUser failed:', updateError)
+    return {
+      error: "Le lien a peut-être expiré. Retournez sur la page précédente et recommencez.",
+    }
+  }
+
+  await recordPasswordHistory(supabase, user.id, password)
+
+  redirect('/compte')
 }
