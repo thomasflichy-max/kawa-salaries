@@ -555,13 +555,23 @@ export async function suspendEmployee(
     return { error: 'Non autorisé.' }
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .update({ is_suspended: suspended })
     .eq('id', profileId)
+    .select('id')
+    .maybeSingle()
 
   if (error) {
     console.error('[suspendEmployee] update failed:', error)
+    return { error: 'Mise à jour impossible.' }
+  }
+
+  // RLS can silently match 0 rows (no error) instead of rejecting the
+  // update outright — treat that the same as a failure rather than report
+  // success with nothing actually changed.
+  if (!data) {
+    console.error('[suspendEmployee] update matched no row (RLS?) for profile', profileId)
     return { error: 'Mise à jour impossible.' }
   }
 
