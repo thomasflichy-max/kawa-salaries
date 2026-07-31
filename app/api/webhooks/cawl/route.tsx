@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyWebhookSignature, type CawlWebhookPaymentEvent } from '@/lib/cawl'
+import { logSecurityEvent } from '@/lib/log-security-event'
 import {
   mapRealOrderRow,
   REAL_ORDER_SELECT,
@@ -52,6 +53,10 @@ export async function POST(request: Request) {
   const rawBody = await request.text()
 
   if (!verifyWebhookSignature(request.headers, rawBody)) {
+    logSecurityEvent(createAdminClient(), {
+      eventType: 'cawl_webhook_signature_invalid',
+      detail: `keyId=${request.headers.get('x-gcs-keyid') ?? 'none'}`,
+    })
     return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
   }
 

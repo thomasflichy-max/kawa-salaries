@@ -21,10 +21,12 @@ export function AdminMobileNav({
   userEmail,
   logoutAction,
   inscriptionsUnreadCount = 0,
+  securityEventsUnreadCount = 0,
 }: {
   userEmail: string
   logoutAction: () => void
   inscriptionsUnreadCount?: number
+  securityEventsUnreadCount?: number
 }) {
   const [open, setOpen] = useState(false)
 
@@ -41,7 +43,7 @@ export function AdminMobileNav({
           className="relative text-kawa-700 p-1"
         >
           <MenuIcon />
-          {inscriptionsUnreadCount > 0 && (
+          {(inscriptionsUnreadCount > 0 || securityEventsUnreadCount > 0) && (
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500" />
           )}
         </button>
@@ -70,7 +72,10 @@ export function AdminMobileNav({
               </button>
             </div>
             <div className="flex-1 px-3 py-4" onClick={() => setOpen(false)}>
-              <AdminNav inscriptionsUnreadCount={inscriptionsUnreadCount} />
+              <AdminNav
+                inscriptionsUnreadCount={inscriptionsUnreadCount}
+                securityEventsUnreadCount={securityEventsUnreadCount}
+              />
             </div>
             <div className="px-5 py-4 border-t border-kawa-200 text-sm">
               <p className="text-kawa-500 truncate">{userEmail}</p>

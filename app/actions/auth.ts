@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { validatePassword } from '@/lib/password-policy'
 import { isPasswordReused, recordPasswordHistory } from '@/lib/password-history'
+import { logSecurityEvent } from '@/lib/log-security-event'
 
 export type AuthFormState = { error: string } | undefined
 
@@ -135,14 +136,16 @@ export async function adminSignup(
   if (passwordError) {
     return { error: passwordError }
   }
+  const supabase = await createClient()
+
   if (!isKawaStaffEmail(email)) {
+    logSecurityEvent(supabase, { eventType: 'admin_signup_rejected', email })
     return {
       error:
         "Cette adresse n'est pas autorisée pour l'accès admin. Contactez un administrateur si vous pensez qu'il s'agit d'une erreur.",
     }
   }
 
-  const supabase = await createClient()
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
@@ -186,6 +189,7 @@ export async function login(
 
   if (error) {
     console.error('[login] signInWithPassword failed:', error)
+    logSecurityEvent(supabase, { eventType: 'login_failed', email, detail: error.message })
     return { error: 'Email ou mot de passe incorrect.' }
   }
 

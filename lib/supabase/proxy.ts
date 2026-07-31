@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
+import { logSecurityEvent } from '@/lib/log-security-event'
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request })
@@ -37,6 +38,11 @@ export async function updateSession(request: NextRequest) {
   const isKawaStaff = isKawaStaffEmail(user?.email)
 
   if (isAdminRoute && !isKawaStaff) {
+    logSecurityEvent(supabase, {
+      eventType: 'unauthorized_admin_access',
+      email: user?.email ?? null,
+      detail: request.nextUrl.pathname,
+    })
     const url = request.nextUrl.clone()
     url.pathname = '/connexion'
     url.searchParams.set('next', request.nextUrl.pathname)

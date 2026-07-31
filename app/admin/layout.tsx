@@ -63,12 +63,20 @@ export default async function AdminLayout({
     .select('id', { count: 'exact', head: true })
     .gt('created_at', lastSeen ?? '1970-01-01')
 
+  // Same pattern for "Canal de sécurité" (app/admin/securite/evenements).
+  const securityEventsLastSeen = cookieStore.get('securite_evenements_last_seen')?.value
+  const { count: securityEventsUnreadCount } = await supabase
+    .from('security_events')
+    .select('id', { count: 'exact', head: true })
+    .gt('created_at', securityEventsLastSeen ?? '1970-01-01')
+
   return (
     <div className="min-h-screen bg-kawa-50 flex flex-col md:flex-row">
       <AdminMobileNav
         userEmail={user.email ?? ''}
         logoutAction={logout}
         inscriptionsUnreadCount={inscriptionsUnreadCount ?? 0}
+        securityEventsUnreadCount={securityEventsUnreadCount ?? 0}
       />
       <aside className="hidden md:flex w-64 shrink-0 border-r border-kawa-200 bg-white flex-col">
         <div className="px-5 py-5 border-b border-kawa-200">
@@ -77,7 +85,10 @@ export default async function AdminLayout({
           </Link>
         </div>
         <div className="flex-1 px-3 py-4">
-          <AdminNav inscriptionsUnreadCount={inscriptionsUnreadCount ?? 0} />
+          <AdminNav
+            inscriptionsUnreadCount={inscriptionsUnreadCount ?? 0}
+            securityEventsUnreadCount={securityEventsUnreadCount ?? 0}
+          />
         </div>
         <div className="px-5 py-4 border-t border-kawa-200 text-sm">
           <p className="text-kawa-500 truncate">{user.email}</p>

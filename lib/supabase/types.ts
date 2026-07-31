@@ -825,6 +825,30 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          id: string
+          event_type: string
+          email: string | null
+          detail: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_type: string
+          email?: string | null
+          detail?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_type?: string
+          email?: string | null
+          detail?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
