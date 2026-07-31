@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
+import { validatePassword } from '@/lib/password-policy'
 
 export type AuthFormState = { error: string } | undefined
 
@@ -29,8 +30,9 @@ export async function signup(
   if (!isValidEmail(email)) {
     return { error: 'Adresse email invalide.' }
   }
-  if (password.length < 8) {
-    return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
+  const passwordError = validatePassword(password)
+  if (passwordError) {
+    return { error: passwordError }
   }
   if (!billingAddress) {
     return { error: 'Merci de renseigner votre adresse de facturation.' }
@@ -124,8 +126,9 @@ export async function adminSignup(
   if (!isValidEmail(email)) {
     return { error: 'Adresse email invalide.' }
   }
-  if (password.length < 8) {
-    return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
+  const passwordError = validatePassword(password)
+  if (passwordError) {
+    return { error: passwordError }
   }
   if (!isKawaStaffEmail(email)) {
     return {
@@ -324,8 +327,9 @@ export async function updatePassword(
   const newPassword = String(formData.get('newPassword') ?? '')
   const confirmPassword = String(formData.get('confirmPassword') ?? '')
 
-  if (newPassword.length < 8) {
-    return { error: 'Le nouveau mot de passe doit contenir au moins 8 caractères.' }
+  const passwordError = validatePassword(newPassword)
+  if (passwordError) {
+    return { error: passwordError }
   }
   if (newPassword !== confirmPassword) {
     return { error: 'Les deux mots de passe ne correspondent pas.' }

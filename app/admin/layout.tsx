@@ -30,6 +30,14 @@ export default async function AdminLayout({
     redirect('/connexion?next=/admin')
   }
 
+  // MFA is opt-in (app/admin/securite) but enforced from the moment a staff
+  // member has a verified TOTP factor: nextLevel only becomes 'aal2' once
+  // one exists, so this doesn't affect accounts that haven't enrolled yet.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+    redirect('/connexion/mfa?next=/admin')
+  }
+
   // Unread badge for "Canal d'inscriptions" — count of signup_attempts
   // since this browser's last visit (see app/admin/inscriptions/actions.ts,
   // MarkSeen). No cookie yet (first time in the channel) counts everything,

@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/admin/clients', label: 'Ajout Client' },
   { href: '/admin/comptes', label: 'Comptes' },
   { href: '/admin/inscriptions', label: "Canal d'inscriptions" },
+  { href: '/admin/securite', label: 'Sécurité' },
 ]
 
 export function AdminNav({ inscriptionsUnreadCount = 0 }: { inscriptionsUnreadCount?: number }) {

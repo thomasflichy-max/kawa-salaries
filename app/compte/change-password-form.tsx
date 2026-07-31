@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { updatePassword } from '@/app/actions/auth'
 import { PasswordInput } from '@/app/password-input'
+import { PASSWORD_MIN_LENGTH } from '@/lib/password-policy'
 
 export function ChangePasswordForm() {
   const formRef = useRef<HTMLFormElement>(null)
@@ -29,12 +30,15 @@ export function ChangePasswordForm() {
 
       <div>
         <label className="text-sm font-medium text-kawa-700">Nouveau mot de passe</label>
-        <PasswordInput name="newPassword" required minLength={8} />
+        <PasswordInput name="newPassword" required minLength={PASSWORD_MIN_LENGTH} />
+        <p className="text-xs text-kawa-400 mt-1">
+          Au moins {PASSWORD_MIN_LENGTH} caractères, avec des lettres et des chiffres.
+        </p>
       </div>
 
       <div>
         <label className="text-sm font-medium text-kawa-700">Confirmer le nouveau mot de passe</label>
-        <PasswordInput name="confirmPassword" required minLength={8} />
+        <PasswordInput name="confirmPassword" required minLength={PASSWORD_MIN_LENGTH} />
       </div>
 
       {state?.error && (

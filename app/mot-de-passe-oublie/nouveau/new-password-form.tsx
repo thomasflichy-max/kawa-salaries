@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PasswordInput } from '@/app/password-input'
+import { validatePassword, PASSWORD_MIN_LENGTH } from '@/lib/password-policy'
 
 export function NewPasswordForm() {
   const router = useRouter()
@@ -16,8 +17,9 @@ export function NewPasswordForm() {
     e.preventDefault()
     setError(null)
 
-    if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.')
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      setError(passwordError)
       return
     }
     if (password !== confirm) {
@@ -48,7 +50,7 @@ export function NewPasswordForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          minLength={8}
+          minLength={PASSWORD_MIN_LENGTH}
         />
       </div>
 
@@ -58,7 +60,7 @@ export function NewPasswordForm() {
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           required
-          minLength={8}
+          minLength={PASSWORD_MIN_LENGTH}
         />
       </div>
 

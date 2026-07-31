@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import { adminSignup } from '@/app/actions/auth'
 import { PasswordInput } from '@/app/password-input'
+import { PASSWORD_MIN_LENGTH } from '@/lib/password-policy'
 
 export function AdminSignupForm() {
   const [state, action, pending] = useActionState(adminSignup, undefined)
@@ -22,7 +23,15 @@ export function AdminSignupForm() {
 
       <div>
         <label className="text-sm font-medium text-kawa-700">Mot de passe</label>
-        <PasswordInput name="password" placeholder="••••••••" required minLength={8} />
+        <PasswordInput
+          name="password"
+          placeholder="••••••••"
+          required
+          minLength={PASSWORD_MIN_LENGTH}
+        />
+        <p className="text-xs text-kawa-400 mt-1">
+          Au moins {PASSWORD_MIN_LENGTH} caractères, avec des lettres et des chiffres.
+        </p>
       </div>
 
       {state?.error && (
