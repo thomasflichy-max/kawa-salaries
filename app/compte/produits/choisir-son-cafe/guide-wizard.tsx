@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { FiltreIcon, GrainsIcon, MokaIcon } from './machine-icons'
 
 type Coffee = { id: string; name: string; description: string | null }
 type GrindValue = 'grain' | 'filtre' | 'espresso'
@@ -11,21 +12,21 @@ const MACHINES = [
   {
     key: 'filtre',
     label: 'Cafetière filtre',
-    emoji: '☕',
+    Icon: FiltreIcon,
     grind: 'filtre' as GrindValue,
     grindLabel: 'Moulu filtre',
   },
   {
     key: 'grains',
     label: 'Machine à grains',
-    emoji: '🫘',
+    Icon: GrainsIcon,
     grind: 'grain' as GrindValue,
     grindLabel: 'En grains',
   },
   {
     key: 'moka',
     label: 'Cafetière moka',
-    emoji: '♨️',
+    Icon: MokaIcon,
     grind: 'espresso' as GrindValue,
     grindLabel: 'Moulu espresso',
   },
@@ -130,8 +131,8 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
                 onClick={() => handlePickMachine(m)}
                 className="flex flex-col items-center gap-3 rounded-xl border border-kawa-200 hover:border-sky-400 hover:bg-sky-50 transition p-5"
               >
-                <span className="w-14 h-14 rounded-full bg-sky-100 flex items-center justify-center text-3xl">
-                  {m.emoji}
+                <span className="w-14 h-14 rounded-full bg-sky-100 flex items-center justify-center text-sky-600">
+                  <m.Icon className="w-8 h-8" />
                 </span>
                 <span className="font-medium text-kawa-800 text-sm">{m.label}</span>
               </button>
@@ -147,8 +148,8 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
             Pour une {machine.label.toLowerCase()}, il vous faut du café :
           </p>
           <div className="flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 mb-5 w-fit">
-            <span className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-xl">
-              {machine.emoji}
+            <span className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-600">
+              <machine.Icon className="w-6 h-6" />
             </span>
             <span className="font-semibold text-sky-700">{machine.grindLabel}</span>
           </div>
