@@ -6,12 +6,6 @@ export default async function ChoisirSonCafePage() {
   const { coffeeDiscounts } = await getEmployee()
   const coffees = await getActiveProducts('cafe', coffeeDiscounts)
 
-  const simplifiedCoffees = coffees.map((c) => ({
-    id: c.id,
-    name: c.name,
-    description: c.description,
-  }))
-
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -21,7 +15,7 @@ export default async function ChoisirSonCafePage() {
         </p>
       </div>
 
-      <GuideWizard coffees={simplifiedCoffees} />
+      <GuideWizard coffees={coffees} />
     </div>
   )
 }

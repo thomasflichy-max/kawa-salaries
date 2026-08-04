@@ -2,9 +2,21 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { ProductGrid } from '../product-grid'
 
-type Coffee = { id: string; name: string; description: string | null }
+type Coffee = {
+  id: string
+  category: string
+  name: string
+  description: string | null
+  short_description: string | null
+  price: number | null
+  basePrice: number | null
+  image_url: string | null
+  hover_image_url: string | null
+  tag: string | null
+  purchasable: boolean
+}
 type GrindValue = 'grain' | 'filtre' | 'espresso'
 
 const MACHINES = [
@@ -86,7 +98,6 @@ function StepDot({ n, step }: { n: number; step: number }) {
 }
 
 export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
-  const router = useRouter()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [machine, setMachine] = useState<Machine | null>(null)
   const [selectedFlavor, setSelectedFlavor] = useState<string | null>(null)
@@ -106,13 +117,8 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
   }
 
   function handlePickFlavor(keyword: string) {
-    if (!machine) return
     setSelectedFlavor(keyword)
     const found = coffees.filter((c) => c.description?.toLowerCase().includes(keyword))
-    if (found.length === 1) {
-      router.push(`/compte/produits/produit/${found[0].id}?mouture=${machine.grind}`)
-      return
-    }
     setMatches(found)
   }
 
@@ -225,24 +231,14 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
           )}
 
           {matches && (
-            <div className="flex flex-col gap-2 mb-5">
-              {matches.length === 0 && (
+            <div className="mb-5">
+              {matches.length === 0 ? (
                 <p className="text-sm text-kawa-400">
                   Aucun café ne correspond, essayez une autre saveur.
                 </p>
+              ) : (
+                <ProductGrid products={matches} />
               )}
-              {matches.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/compte/produits/produit/${c.id}?mouture=${machine.grind}`}
-                  className="flex flex-col rounded-lg border border-kawa-200 hover:border-sky-400 hover:bg-sky-50 transition p-3"
-                >
-                  <span className="font-medium text-kawa-800 text-sm">{c.name}</span>
-                  {c.description && (
-                    <span className="text-xs text-kawa-500 line-clamp-1">{c.description}</span>
-                  )}
-                </Link>
-              ))}
             </div>
           )}
 
