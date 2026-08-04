@@ -65,13 +65,6 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
                   }`}
                 >
                   <Link
-                    href="/compte/produits"
-                    onClick={() => setProduitsOpen(false)}
-                    className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
-                  >
-                    Produits
-                  </Link>
-                  <Link
                     href="/compte/produits/choisir-son-cafe"
                     onClick={() => setProduitsOpen(false)}
                     className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
