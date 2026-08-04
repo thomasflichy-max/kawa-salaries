@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -143,7 +142,10 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
                 className="flex flex-col items-center gap-3 rounded-xl border border-kawa-200 hover:border-sky-400 hover:bg-sky-50 transition p-5"
               >
                 <span className="w-14 h-14 rounded-full bg-sky-100 flex items-center justify-center overflow-hidden">
-                  <Image src={m.iconSrc} alt="" width={40} height={40} className="object-contain" />
+                  {/* eslint-disable-next-line @next/next/no-img-element -- intrinsic
+                      sizes vary a lot between these icons; max-w/max-h % guarantees
+                      the whole machine stays visible regardless of aspect ratio */}
+                  <img src={m.iconSrc} alt="" className="max-w-[72%] max-h-[72%] object-contain" />
                 </span>
                 <span className="font-medium text-kawa-800 text-sm">{m.label}</span>
               </button>
@@ -160,7 +162,8 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
           </p>
           <div className="flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 mb-5 w-fit">
             <span className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center overflow-hidden">
-              <Image src={machine.iconSrc} alt="" width={28} height={28} className="object-contain" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={machine.iconSrc} alt="" className="max-w-[72%] max-h-[72%] object-contain" />
             </span>
             <span className="font-semibold text-sky-700">{machine.grindLabel}</span>
           </div>
