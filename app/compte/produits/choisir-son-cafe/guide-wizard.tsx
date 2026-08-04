@@ -40,10 +40,12 @@ type Machine = (typeof MACHINES)[number]
 const FLAVOR_KEYWORDS = [
   'fruité',
   'floral',
-  'chocolaté',
+  'chocolat',
   'corsé',
   'doux',
+  'sucré',
   'épicé',
+  'citron',
   'acidulé',
   'rond',
   'intense',
