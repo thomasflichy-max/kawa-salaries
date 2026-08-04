@@ -145,7 +145,11 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
                   {/* eslint-disable-next-line @next/next/no-img-element -- intrinsic
                       sizes vary a lot between these icons; max-w/max-h % guarantees
                       the whole machine stays visible regardless of aspect ratio */}
-                  <img src={m.iconSrc} alt="" className="max-w-[72%] max-h-[72%] object-contain" />
+                  <img
+                    src={m.iconSrc}
+                    alt=""
+                    className={`object-contain ${m.key === 'grains' ? 'max-w-[84%] max-h-[84%]' : 'max-w-[72%] max-h-[72%]'}`}
+                  />
                 </span>
                 <span className="font-medium text-kawa-800 text-sm">{m.label}</span>
               </button>
@@ -163,7 +167,11 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
           <div className="flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 mb-5 w-fit">
             <span className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={machine.iconSrc} alt="" className="max-w-[72%] max-h-[72%] object-contain" />
+              <img
+                src={machine.iconSrc}
+                alt=""
+                className={`object-contain ${machine.key === 'grains' ? 'max-w-[84%] max-h-[84%]' : 'max-w-[72%] max-h-[72%]'}`}
+              />
             </span>
             <span className="font-semibold text-sky-700">{machine.grindLabel}</span>
           </div>
