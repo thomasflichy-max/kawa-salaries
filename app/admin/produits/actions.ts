@@ -24,6 +24,7 @@ type ParsedProductForm =
         name: string
         description: string | null
         short_description: string | null
+        flavor_tags: string[]
         price: number | null
         image_url: string | null
         hover_image_url: string | null
@@ -41,6 +42,13 @@ function parseProductForm(formData: FormData): ParsedProductForm {
   const name = String(formData.get('name') ?? '').trim()
   const description = String(formData.get('description') ?? '').trim()
   const shortDescription = String(formData.get('short_description') ?? '').trim()
+  const flavorTagsRaw = String(formData.get('flavor_tags') ?? '').trim()
+  const flavorTags = flavorTagsRaw
+    ? flavorTagsRaw
+        .split(',')
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean)
+    : []
   const priceRaw = String(formData.get('price') ?? '').trim()
   const imageUrl = String(formData.get('image_url') ?? '').trim()
   const hoverImageUrl = String(formData.get('hover_image_url') ?? '').trim()
@@ -78,6 +86,7 @@ function parseProductForm(formData: FormData): ParsedProductForm {
       name,
       description: description || null,
       short_description: shortDescription || null,
+      flavor_tags: flavorTags,
       price,
       image_url: imageUrl || null,
       hover_image_url: hoverImageUrl || null,

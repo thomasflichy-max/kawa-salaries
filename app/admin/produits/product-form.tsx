@@ -19,6 +19,7 @@ type ProductDefaults = {
   name: string
   description: string | null
   short_description: string | null
+  flavor_tags: string[]
   price: number | null
   image_url: string | null
   hover_image_url: string | null
@@ -120,6 +121,25 @@ export function ProductForm({
           className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
       </div>
+
+      {isCoffee && (
+        <div>
+          <label className="text-sm font-medium text-kawa-700">
+            Tags de goût (guide &quot;Choisir son café&quot;)
+          </label>
+          <input
+            type="text"
+            name="flavor_tags"
+            defaultValue={defaults?.flavor_tags?.join(', ') ?? ''}
+            placeholder="chocolat, noisette"
+            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+          />
+          <p className="text-xs text-kawa-400 mt-1">
+            Séparés par des virgules. Choix possibles : chocolat, corsé, doux, épicé, intense,
+            noisette, caramel.
+          </p>
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-2 gap-4">
         {hasFixedPrice && (

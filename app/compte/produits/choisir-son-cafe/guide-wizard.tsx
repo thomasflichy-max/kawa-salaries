@@ -10,6 +10,7 @@ type Coffee = {
   name: string
   description: string | null
   short_description: string | null
+  flavor_tags: string[]
   price: number | null
   basePrice: number | null
   image_url: string | null
@@ -66,16 +67,16 @@ const MACHINES = [
 
 type Machine = (typeof MACHINES)[number]
 
-// Propositions come straight from what's actually written in the active
-// cafés' descriptions — a keyword only shows up as a button if at least one
-// café currently mentions it, so this stays accurate as the catalog changes
-// without needing a dedicated "flavor" field on products.
+// A flavor only shows up as a button if at least one café is explicitly
+// tagged with it (products.flavor_tags, set from /admin/produits) — this
+// used to scan free-text descriptions for these words instead, but that
+// couldn't express "this café belongs under both Corsé and Intense" without
+// also fighting the human-facing description's wording.
 const FLAVOR_KEYWORDS = [
   'chocolat',
   'corsé',
   'doux',
   'épicé',
-  'citron',
   'intense',
   'noisette',
   'caramel',
@@ -104,10 +105,7 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
   const [matches, setMatches] = useState<Coffee[] | null>(null)
 
   const availableFlavors = useMemo(
-    () =>
-      FLAVOR_KEYWORDS.filter((keyword) =>
-        coffees.some((c) => c.description?.toLowerCase().includes(keyword))
-      ),
+    () => FLAVOR_KEYWORDS.filter((keyword) => coffees.some((c) => c.flavor_tags?.includes(keyword))),
     [coffees]
   )
 
@@ -118,7 +116,7 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
 
   function handlePickFlavor(keyword: string) {
     setSelectedFlavor(keyword)
-    const found = coffees.filter((c) => c.description?.toLowerCase().includes(keyword))
+    const found = coffees.filter((c) => c.flavor_tags?.includes(keyword))
     setMatches(found)
   }
 
