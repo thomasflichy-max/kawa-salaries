@@ -10,6 +10,13 @@ type GrindValue = 'grain' | 'filtre' | 'espresso'
 
 const MACHINES = [
   {
+    key: 'grains',
+    label: 'Machine à grains',
+    iconSrc: '/machine-icons/grains.png',
+    grind: 'grain' as GrindValue,
+    grindLabel: 'En grains',
+  },
+  {
     key: 'piston',
     label: 'Cafetière à piston',
     iconSrc: '/machine-icons/piston.png',
@@ -18,7 +25,7 @@ const MACHINES = [
   },
   {
     key: 'filtre',
-    label: 'Cafetière filtre électrique',
+    label: 'Cafetière filtre',
     iconSrc: '/machine-icons/filtre.png',
     grind: 'filtre' as GrindValue,
     grindLabel: 'Moulu filtre',
@@ -32,17 +39,10 @@ const MACHINES = [
   },
   {
     key: 'espresso',
-    label: 'Machine expresso',
+    label: 'Machine espresso',
     iconSrc: '/machine-icons/espresso.png',
     grind: 'espresso' as GrindValue,
     grindLabel: 'Moulu espresso',
-  },
-  {
-    key: 'grains',
-    label: 'Machine à grains automatique',
-    iconSrc: '/machine-icons/grains.png',
-    grind: 'grain' as GrindValue,
-    grindLabel: 'En grains',
   },
 ] as const
 
