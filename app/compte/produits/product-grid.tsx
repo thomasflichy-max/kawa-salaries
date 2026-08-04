@@ -38,6 +38,11 @@ export function ProductGrid({ products }: { products: Product[] }) {
           className="group flex flex-col overflow-hidden rounded-2xl border border-kawa-200 bg-kawa-50"
         >
           <Link href={`/compte/produits/produit/${product.id}`}>
+            {product.tag && (
+              <p className="px-5 pt-4 text-[10px] uppercase tracking-wide text-sky-700 font-medium">
+                {product.tag}
+              </p>
+            )}
             <div className="relative aspect-[4/3] bg-white">
               {product.image_url && (
                 <Image
@@ -58,11 +63,6 @@ export function ProductGrid({ products }: { products: Product[] }) {
                   sizes="(min-width:1024px) 22vw, 50vw"
                   className="object-contain opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 />
-              )}
-              {product.tag && (
-                <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] uppercase tracking-wide text-sky-700 font-medium">
-                  {product.tag}
-                </span>
               )}
             </div>
             <div className="flex flex-col gap-2 p-5 pb-0">
