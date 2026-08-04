@@ -12,12 +12,14 @@ const GRINDS = [
 export function QuantityAddForm({
   productId,
   showGrind = false,
+  initialGrind,
 }: {
   productId: string
   showGrind?: boolean
+  initialGrind?: (typeof GRINDS)[number]['value']
 }) {
   const [quantity, setQuantity] = useState(1)
-  const [grind, setGrind] = useState<(typeof GRINDS)[number]['value']>('grain')
+  const [grind, setGrind] = useState<(typeof GRINDS)[number]['value']>(initialGrind ?? 'grain')
 
   return (
     <div className="flex flex-col gap-4">

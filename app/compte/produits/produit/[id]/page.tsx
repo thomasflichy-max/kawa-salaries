@@ -12,18 +12,29 @@ const currency = new Intl.NumberFormat('fr-FR', {
   currency: 'EUR',
 })
 
+const VALID_GRINDS = ['grain', 'filtre', 'espresso'] as const
+
 export default async function ProductDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ mouture?: string }>
 }) {
   const { id } = await params
+  const { mouture } = await searchParams
   const { coffeeDiscounts } = await getEmployee()
   const product = await getProductById(id, coffeeDiscounts)
 
   if (!product) {
     notFound()
   }
+
+  // Comes from the "Choisir son café" guide, which already worked out the
+  // right mouture from the employee's machine type — pre-select it rather
+  // than making them pick it again. Ignore anything that isn't one of the
+  // 3 real values (untrusted query param).
+  const initialGrind = VALID_GRINDS.find((g) => g === mouture)
 
   const category = PRODUCT_CATEGORIES.find((c) => c.key === product.category)
   const isCoffee = product.category === 'cafe'
@@ -115,7 +126,11 @@ export default async function ProductDetailPage({
 
           {product.purchasable ? (
             <>
-              <QuantityAddForm productId={product.id} showGrind={isCoffee} />
+              <QuantityAddForm
+                productId={product.id}
+                showGrind={isCoffee}
+                initialGrind={isCoffee ? initialGrind : undefined}
+              />
               <p className="text-xs text-kawa-400">
                 Les options de livraison seront à choisir au moment du passage de commande.
               </p>
