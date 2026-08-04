@@ -18,6 +18,7 @@ type ProductDefaults = {
   tag: string | null
   name: string
   description: string | null
+  short_description: string | null
   price: number | null
   image_url: string | null
   hover_image_url: string | null
@@ -101,7 +102,17 @@ export function ProductForm({
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Description</label>
+        <label className="text-sm font-medium text-kawa-700">Description courte (grille produits)</label>
+        <textarea
+          name="short_description"
+          rows={2}
+          defaultValue={defaults?.short_description ?? ''}
+          className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-kawa-700">Description détaillée (fiche produit)</label>
         <textarea
           name="description"
           rows={3}

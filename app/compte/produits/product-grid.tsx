@@ -12,6 +12,7 @@ type Product = {
   category: string
   name: string
   description: string | null
+  short_description: string | null
   price: number | null
   basePrice: number | null
   image_url: string | null
@@ -68,8 +69,8 @@ export function ProductGrid({ products }: { products: Product[] }) {
               <p className="font-semibold text-kawa-800 hover:underline decoration-sky-500">
                 {product.name}
               </p>
-              {product.category === 'cafe' && product.description && (
-                <p className="text-sm text-kawa-500">{product.description}</p>
+              {product.category === 'cafe' && product.short_description && (
+                <p className="text-sm text-kawa-500">{product.short_description}</p>
               )}
             </div>
           </Link>

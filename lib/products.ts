@@ -23,7 +23,7 @@ export function resolveProductPricing(
 }
 
 const PRODUCT_FIELDS =
-  'id, category, subcategory, tag, name, description, price, image_url, hover_image_url, purchasable, net_weight_grams'
+  'id, category, subcategory, tag, name, description, short_description, price, image_url, hover_image_url, purchasable, net_weight_grams'
 
 export async function getActiveProducts(category?: string, coffeeDiscounts: CoffeeDiscounts = {}) {
   const supabase = await createClient()
