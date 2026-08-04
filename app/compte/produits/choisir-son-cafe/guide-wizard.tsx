@@ -60,24 +60,14 @@ type Machine = (typeof MACHINES)[number]
 // café currently mentions it, so this stays accurate as the catalog changes
 // without needing a dedicated "flavor" field on products.
 const FLAVOR_KEYWORDS = [
-  'fruité',
-  'floral',
   'chocolat',
   'corsé',
   'doux',
-  'sucré',
   'épicé',
   'citron',
-  'acidulé',
-  'rond',
   'intense',
   'noisette',
   'caramel',
-  'agrumes',
-  'boisé',
-  'torréfié',
-  'vanillé',
-  'miel',
 ]
 
 function StepDot({ n, step }: { n: number; step: number }) {
