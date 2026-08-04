@@ -24,7 +24,7 @@ const MACHINES = [
   {
     key: 'grains',
     label: 'Machine à grains',
-    iconSrc: '/machine-icons/grains-v5.png',
+    iconSrc: '/machine-icons/grains-v6.png',
     grind: 'grain' as GrindValue,
     grindLabel: 'En grains',
   },
