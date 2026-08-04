@@ -1,15 +1,9 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import {
-  FrenchPressIcon,
-  DripMachineIcon,
-  MokaIcon,
-  EspressoMachineIcon,
-  AutoMachineIcon,
-} from './machine-icons'
 
 type Coffee = { id: string; name: string; description: string | null }
 type GrindValue = 'grain' | 'filtre' | 'espresso'
@@ -18,35 +12,35 @@ const MACHINES = [
   {
     key: 'piston',
     label: 'Cafetière à piston',
-    Icon: FrenchPressIcon,
+    iconSrc: '/machine-icons/piston.png',
     grind: 'filtre' as GrindValue,
     grindLabel: 'Moulu filtre',
   },
   {
     key: 'filtre',
     label: 'Cafetière filtre électrique',
-    Icon: DripMachineIcon,
+    iconSrc: '/machine-icons/filtre.png',
     grind: 'filtre' as GrindValue,
     grindLabel: 'Moulu filtre',
   },
   {
     key: 'moka',
     label: 'Cafetière moka',
-    Icon: MokaIcon,
+    iconSrc: '/machine-icons/moka.png',
     grind: 'espresso' as GrindValue,
     grindLabel: 'Moulu espresso',
   },
   {
     key: 'espresso',
     label: 'Machine expresso',
-    Icon: EspressoMachineIcon,
+    iconSrc: '/machine-icons/espresso.png',
     grind: 'espresso' as GrindValue,
     grindLabel: 'Moulu espresso',
   },
   {
     key: 'grains',
     label: 'Machine à grains automatique',
-    Icon: AutoMachineIcon,
+    iconSrc: '/machine-icons/grains.png',
     grind: 'grain' as GrindValue,
     grindLabel: 'En grains',
   },
@@ -151,8 +145,8 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
                 onClick={() => handlePickMachine(m)}
                 className="flex flex-col items-center gap-3 rounded-xl border border-kawa-200 hover:border-sky-400 hover:bg-sky-50 transition p-5"
               >
-                <span className="w-14 h-14 rounded-full bg-sky-100 flex items-center justify-center text-sky-600">
-                  <m.Icon className="w-8 h-8" />
+                <span className="w-14 h-14 rounded-full bg-sky-100 flex items-center justify-center overflow-hidden">
+                  <Image src={m.iconSrc} alt="" width={40} height={40} className="object-contain" />
                 </span>
                 <span className="font-medium text-kawa-800 text-sm">{m.label}</span>
               </button>
@@ -168,8 +162,8 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
             Pour une {machine.label.toLowerCase()}, il vous faut du café :
           </p>
           <div className="flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 mb-5 w-fit">
-            <span className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-600">
-              <machine.Icon className="w-6 h-6" />
+            <span className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center overflow-hidden">
+              <Image src={machine.iconSrc} alt="" width={28} height={28} className="object-contain" />
             </span>
             <span className="font-semibold text-sky-700">{machine.grindLabel}</span>
           </div>
