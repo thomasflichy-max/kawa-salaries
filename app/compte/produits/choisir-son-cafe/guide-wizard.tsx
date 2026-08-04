@@ -3,25 +3,31 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { FiltreIcon, GrainsIcon, MokaIcon } from './machine-icons'
+import {
+  FrenchPressIcon,
+  DripMachineIcon,
+  MokaIcon,
+  EspressoMachineIcon,
+  AutoMachineIcon,
+} from './machine-icons'
 
 type Coffee = { id: string; name: string; description: string | null }
 type GrindValue = 'grain' | 'filtre' | 'espresso'
 
 const MACHINES = [
   {
-    key: 'filtre',
-    label: 'Cafetière filtre',
-    Icon: FiltreIcon,
+    key: 'piston',
+    label: 'Cafetière à piston',
+    Icon: FrenchPressIcon,
     grind: 'filtre' as GrindValue,
     grindLabel: 'Moulu filtre',
   },
   {
-    key: 'grains',
-    label: 'Machine à grains',
-    Icon: GrainsIcon,
-    grind: 'grain' as GrindValue,
-    grindLabel: 'En grains',
+    key: 'filtre',
+    label: 'Cafetière filtre électrique',
+    Icon: DripMachineIcon,
+    grind: 'filtre' as GrindValue,
+    grindLabel: 'Moulu filtre',
   },
   {
     key: 'moka',
@@ -29,6 +35,20 @@ const MACHINES = [
     Icon: MokaIcon,
     grind: 'espresso' as GrindValue,
     grindLabel: 'Moulu espresso',
+  },
+  {
+    key: 'espresso',
+    label: 'Machine expresso',
+    Icon: EspressoMachineIcon,
+    grind: 'espresso' as GrindValue,
+    grindLabel: 'Moulu espresso',
+  },
+  {
+    key: 'grains',
+    label: 'Machine à grains automatique',
+    Icon: AutoMachineIcon,
+    grind: 'grain' as GrindValue,
+    grindLabel: 'En grains',
   },
 ] as const
 
@@ -123,7 +143,7 @@ export function GuideWizard({ coffees }: { coffees: Coffee[] }) {
         <section className="bg-white rounded-2xl border border-kawa-200 p-6">
           <h2 className="font-semibold text-kawa-800 mb-1">Quelle est votre machine ?</h2>
           <p className="text-sm text-kawa-500 mb-5">La mouture adaptée en dépend directement.</p>
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {MACHINES.map((m) => (
               <button
                 key={m.key}
