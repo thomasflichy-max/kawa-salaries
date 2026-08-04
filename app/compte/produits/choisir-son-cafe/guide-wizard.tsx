@@ -31,6 +31,13 @@ const MACHINES = [
     grindLabel: 'Moulu filtre',
   },
   {
+    key: 'v60',
+    label: 'Cafetière V60',
+    iconSrc: '/machine-icons/v60.png',
+    grind: 'filtre' as GrindValue,
+    grindLabel: 'Moulu filtre',
+  },
+  {
     key: 'moka',
     label: 'Cafetière moka',
     iconSrc: '/machine-icons/moka.png',
