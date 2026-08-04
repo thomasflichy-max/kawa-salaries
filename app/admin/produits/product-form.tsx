@@ -12,6 +12,11 @@ const COFFEE_SUBCATEGORIES = [
   { key: 'decafeine', label: 'Décaféiné' },
 ] as const
 
+// Kept in sync with app/compte/produits/choisir-son-cafe/guide-wizard.tsx's
+// FLAVOR_KEYWORDS — these are the only tags the guide knows how to show as
+// a button.
+const FLAVOR_OPTIONS = ['chocolat', 'corsé', 'doux', 'épicé', 'intense', 'noisette', 'caramel']
+
 type ProductDefaults = {
   category: string
   subcategory: string | null
@@ -46,7 +51,14 @@ export function ProductForm({
   // genuinely null" — collapsing both to 'classique' is exactly what silently
   // reassigned Déca KAWA back onto the shared per-kg pricing on its first re-save.
   const [subcategory, setSubcategory] = useState(defaults ? defaults.subcategory ?? '' : 'classique')
+  const [flavorTags, setFlavorTags] = useState<string[]>(defaults?.flavor_tags ?? [])
   const isCoffee = category === 'cafe'
+
+  function toggleFlavor(flavor: string) {
+    setFlavorTags((prev) =>
+      prev.includes(flavor) ? prev.filter((f) => f !== flavor) : [...prev, flavor]
+    )
+  }
   // Coffee normally follows the shared per-kg pricing (Products → Tarification
   // des cafés), but a coffee with no subcategory — like the 200g Déca KAWA —
   // is priced directly, same as a non-coffee product.
@@ -124,20 +136,37 @@ export function ProductForm({
 
       {isCoffee && (
         <div>
-          <label className="text-sm font-medium text-kawa-700">
+          <label className="text-sm font-medium text-kawa-700 block mb-1">
             Tags de goût (guide &quot;Choisir son café&quot;)
           </label>
-          <input
-            type="text"
-            name="flavor_tags"
-            defaultValue={defaults?.flavor_tags?.join(', ') ?? ''}
-            placeholder="chocolat, noisette"
-            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-          />
-          <p className="text-xs text-kawa-400 mt-1">
-            Séparés par des virgules. Choix possibles : chocolat, corsé, doux, épicé, intense,
-            noisette, caramel.
-          </p>
+          <details className="relative">
+            <summary className="cursor-pointer list-none w-full border border-kawa-200 rounded-lg px-3 py-2 flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-sky-400">
+              <span className={flavorTags.length > 0 ? 'text-kawa-800 capitalize' : 'text-kawa-400'}>
+                {flavorTags.length > 0 ? flavorTags.join(', ') : 'Choisir un ou plusieurs goûts'}
+              </span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="text-kawa-400 shrink-0">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </summary>
+            <div className="absolute z-10 mt-1 w-full bg-white border border-kawa-200 rounded-lg shadow-lg p-2 flex flex-col gap-0.5">
+              {FLAVOR_OPTIONS.map((flavor) => (
+                <label
+                  key={flavor}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-kawa-50 cursor-pointer text-sm text-kawa-700 capitalize"
+                >
+                  <input
+                    type="checkbox"
+                    name="flavor_tags"
+                    value={flavor}
+                    checked={flavorTags.includes(flavor)}
+                    onChange={() => toggleFlavor(flavor)}
+                    className="rounded border-kawa-300 text-sky-500 focus:ring-sky-400"
+                  />
+                  {flavor}
+                </label>
+              ))}
+            </div>
+          </details>
         </div>
       )}
 
