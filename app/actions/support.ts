@@ -35,9 +35,13 @@ export async function submitSupportMessage(
     .eq('id', user.id)
     .maybeSingle()
 
-  const { error } = await supabase.from('support_messages').insert({
-    user_id: user.id,
-    message,
+  // Lands in the same "Sécurité & support" admin channel as security
+  // alerts (see app/admin/securite/evenements) rather than the old
+  // support_messages table, which no admin page ever actually read.
+  const { error } = await supabase.from('security_events').insert({
+    event_type: 'support_message',
+    email: user.email,
+    detail: message,
   })
 
   if (error) {
@@ -60,7 +64,7 @@ export async function submitSupportMessage(
         ].join('\n'),
       })
     } catch (emailError) {
-      // The message is already saved in support_messages, so a failed
+      // The message is already saved in security_events, so a failed
       // notification email must not fail the whole submission.
       console.error('[submitSupportMessage] email send failed:', emailError)
     }

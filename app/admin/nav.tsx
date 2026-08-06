@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { href: '/admin/comptes', label: 'Comptes' },
   { href: '/admin/inscriptions', label: "Canal d'inscriptions" },
   { href: '/admin/securite', label: 'Sécurité' },
-  { href: '/admin/securite/evenements', label: 'Canal de sécurité' },
+  { href: '/admin/securite/evenements', label: 'Sécurité & support' },
 ]
 
 // '/admin' and '/admin/securite' both now have a child route with its own

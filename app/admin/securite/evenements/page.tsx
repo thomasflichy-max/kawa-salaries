@@ -17,7 +17,12 @@ const EVENT_LABELS: Record<string, { title: string; icon: string }> = {
     title: 'Modification de profil non autorisée bloquée',
     icon: '🧨',
   },
+  support_message: { title: "Question d'un salarié", icon: '💬' },
 }
+
+// Support messages aren't a threat — a separate, calmer color keeps them
+// visually distinct from actual security alerts in the same feed.
+const SUPPORT_EVENT_TYPES = new Set(['support_message'])
 
 function dayKey(date: Date) {
   return date.toISOString().slice(0, 10)
@@ -46,10 +51,15 @@ type SecurityEvent = {
 function EventMessage({ event }: { event: SecurityEvent }) {
   const date = new Date(event.created_at)
   const meta = EVENT_LABELS[event.event_type] ?? { title: event.event_type, icon: '❔' }
+  const isSupport = SUPPORT_EVENT_TYPES.has(event.event_type)
 
   return (
     <div className="flex gap-3 py-3">
-      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-lg bg-red-50">
+      <div
+        className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-lg ${
+          isSupport ? 'bg-sky-50' : 'bg-red-50'
+        }`}
+      >
         {meta.icon}
       </div>
       <div className="flex-1 min-w-0">
@@ -64,10 +74,21 @@ function EventMessage({ event }: { event: SecurityEvent }) {
             <p className="text-sky-700 mt-0.5">{event.email ?? '—'}</p>
           </div>
           <div>
-            <p className="text-kawa-500 text-xs uppercase tracking-wide">Détail</p>
+            <p className="text-kawa-500 text-xs uppercase tracking-wide">
+              {isSupport ? 'Message' : 'Détail'}
+            </p>
             <p className="text-kawa-800 mt-0.5 break-all">{event.detail ?? '—'}</p>
           </div>
         </div>
+
+        {isSupport && event.email && (
+          <a
+            href={`mailto:${event.email}?subject=${encodeURIComponent('Re: votre question KAWA')}`}
+            className="inline-block mt-2 text-xs text-sky-700 hover:underline"
+          >
+            Répondre par email
+          </a>
+        )}
       </div>
     </div>
   )
@@ -107,17 +128,17 @@ export default async function AdminSecurityEventsPage() {
     <div className="flex flex-col gap-6">
       <MarkSeen />
       <div>
-        <h1 className="text-xl font-bold text-kawa-800">Canal de sécurité</h1>
+        <h1 className="text-xl font-bold text-kawa-800">Sécurité &amp; support</h1>
         <p className="text-kawa-500 text-sm mt-1">
-          Connexions échouées, tentatives d&apos;accès admin non autorisées, tentatives de
-          création de compte admin refusées, et signatures de webhook CAWL invalides — les 500
-          derniers événements.
+          Questions envoyées par les salariés, connexions échouées, tentatives d&apos;accès admin
+          non autorisées, tentatives de création de compte admin refusées, et signatures de
+          webhook CAWL invalides — les 500 derniers événements.
         </p>
       </div>
 
       <section className="bg-white rounded-2xl border border-kawa-200 p-5">
         {groups.length === 0 && (
-          <p className="text-kawa-400 text-center py-10">Aucun événement de sécurité pour le moment.</p>
+          <p className="text-kawa-400 text-center py-10">Aucun message ni événement pour le moment.</p>
         )}
         {groups.map((group) => (
           <div key={group.key}>
