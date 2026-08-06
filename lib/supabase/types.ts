@@ -898,6 +898,14 @@ export type Database = {
         Args: { p_code_hash: string }
         Returns: boolean
       }
+      get_push_subscriptions_for_notify: {
+        Args: Record<PropertyKey, never>
+        Returns: { id: string; subscription: Record<string, unknown> }[]
+      }
+      prune_push_subscription: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

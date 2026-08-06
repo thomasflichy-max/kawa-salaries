@@ -25,9 +25,12 @@ export async function notifyStaffDevices(payload: { title: string; body: string;
   ensureConfigured()
 
   const supabase = await createClient()
-  const { data: subscriptions, error } = await supabase
-    .from('push_subscriptions')
-    .select('id, subscription')
+  // push_subscriptions' RLS only allows a staff member to see their OWN row —
+  // this runs under the caller's session (often an employee submitting a
+  // support message, not a staff member), so reading every subscription
+  // needs the SECURITY DEFINER RPC rather than a direct table select, which
+  // would otherwise just silently return 0 rows. See migration 0044.
+  const { data: subscriptions, error } = await supabase.rpc('get_push_subscriptions_for_notify')
 
   if (error) {
     console.error('[notifyStaffDevices] failed to load subscriptions:', error)
@@ -48,7 +51,7 @@ export async function notifyStaffDevices(payload: { title: string; body: string;
         if (statusCode === 404 || statusCode === 410) {
           // Subscription expired or the browser/device unsubscribed —
           // prune it so future sends don't keep failing on it.
-          await supabase.from('push_subscriptions').delete().eq('id', row.id)
+          await supabase.rpc('prune_push_subscription', { p_id: row.id })
         } else {
           console.error('[notifyStaffDevices] send failed:', sendError)
         }
