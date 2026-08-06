@@ -63,7 +63,7 @@ export default async function AdminLayout({
     .select('id', { count: 'exact', head: true })
     .gt('created_at', lastSeen ?? '1970-01-01')
 
-  // Same pattern for "Sécurité & support" (app/admin/securite/evenements).
+  // Same pattern for "Account Management" (app/admin/securite/evenements).
   const securityEventsLastSeen = cookieStore.get('securite_evenements_last_seen')?.value
   const { count: securityEventsUnreadCount } = await supabase
     .from('security_events')

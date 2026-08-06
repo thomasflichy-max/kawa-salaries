@@ -1,14 +1,12 @@
 'use server'
 
-import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
+import { notifyStaffDevices } from '@/lib/push-notifications'
 
 export type SupportMessageState =
   | { error: string; success?: false }
   | { success: true; error?: undefined }
   | undefined
-
-const NOTIFY_EMAIL = 'thomas.flichy@kawa.coffee'
 
 export async function submitSupportMessage(
   _prevState: SupportMessageState,
@@ -35,7 +33,7 @@ export async function submitSupportMessage(
     .eq('id', user.id)
     .maybeSingle()
 
-  // Lands in the same "Sécurité & support" admin channel as security
+  // Lands in the "Account Management" admin channel alongside security
   // alerts (see app/admin/securite/evenements) rather than the old
   // support_messages table, which no admin page ever actually read.
   const { error } = await supabase.from('security_events').insert({
@@ -49,27 +47,18 @@ export async function submitSupportMessage(
     return { error: 'Une erreur est survenue, merci de réessayer.' }
   }
 
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const resend = new Resend(process.env.RESEND_API_KEY)
-      await resend.emails.send({
-        from: 'kawa-salaries <onboarding@resend.dev>',
-        to: NOTIFY_EMAIL,
-        replyTo: user.email,
-        subject: `Question d'un salarié — ${profile?.full_name ?? user.email}`,
-        text: [
-          `De : ${profile?.full_name ?? 'Salarié'} (${user.email})`,
-          '',
-          message,
-        ].join('\n'),
-      })
-    } catch (emailError) {
-      // The message is already saved in security_events, so a failed
-      // notification email must not fail the whole submission.
-      console.error('[submitSupportMessage] email send failed:', emailError)
-    }
-  } else {
-    console.warn('[submitSupportMessage] RESEND_API_KEY not set, skipping email notification')
+  // OS-level notification on any staff device that opted in (Account
+  // Management page) — replaces the email that used to fire here.
+  try {
+    await notifyStaffDevices({
+      title: `Question d'un salarié — ${profile?.full_name ?? user.email}`,
+      body: message,
+      url: '/admin/securite/evenements',
+    })
+  } catch (pushError) {
+    // The message is already saved in security_events, so a failed push
+    // must not fail the whole submission.
+    console.error('[submitSupportMessage] push notification failed:', pushError)
   }
 
   return { success: true }

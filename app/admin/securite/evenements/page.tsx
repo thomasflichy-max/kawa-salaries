@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { MarkSeen } from './mark-seen'
+import { PushNotificationButton } from './push-notification-button'
 
 const timeFormat = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short' })
 const dayLabelFormat = new Intl.DateTimeFormat('fr-FR', {
@@ -127,13 +128,16 @@ export default async function AdminSecurityEventsPage() {
   return (
     <div className="flex flex-col gap-6">
       <MarkSeen />
-      <div>
-        <h1 className="text-xl font-bold text-kawa-800">Sécurité &amp; support</h1>
-        <p className="text-kawa-500 text-sm mt-1">
-          Questions envoyées par les salariés, connexions échouées, tentatives d&apos;accès admin
-          non autorisées, tentatives de création de compte admin refusées, et signatures de
-          webhook CAWL invalides — les 500 derniers événements.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-bold text-kawa-800">Account Management</h1>
+          <p className="text-kawa-500 text-sm mt-1">
+            Questions envoyées par les salariés, connexions échouées, tentatives d&apos;accès admin
+            non autorisées, tentatives de création de compte admin refusées, et signatures de
+            webhook CAWL invalides — les 500 derniers événements.
+          </p>
+        </div>
+        <PushNotificationButton />
       </div>
 
       <section className="bg-white rounded-2xl border border-kawa-200 p-5">
