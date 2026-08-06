@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { MarkSeen } from './mark-seen'
 import { PushNotificationButton } from './push-notification-button'
+import { ReplyBox } from './reply-box'
 
 const timeFormat = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short' })
 const dayLabelFormat = new Intl.DateTimeFormat('fr-FR', {
@@ -19,11 +20,17 @@ const EVENT_LABELS: Record<string, { title: string; icon: string }> = {
     icon: '🧨',
   },
   support_message: { title: "Question d'un salarié", icon: '💬' },
+  support_reply: { title: 'Réponse envoyée', icon: '↩️' },
 }
 
-// Support messages aren't a threat — a separate, calmer color keeps them
-// visually distinct from actual security alerts in the same feed.
-const SUPPORT_EVENT_TYPES = new Set(['support_message'])
+// Support messages and replies aren't a threat — calmer colors keep them
+// visually distinct from actual security alerts in the same feed, and from
+// each other (incoming question vs. outgoing reply).
+const SUPPORT_EVENT_TYPES = new Set(['support_message', 'support_reply'])
+const EVENT_ICON_BG: Record<string, string> = {
+  support_message: 'bg-sky-50',
+  support_reply: 'bg-emerald-50',
+}
 
 function dayKey(date: Date) {
   return date.toISOString().slice(0, 10)
@@ -53,12 +60,14 @@ function EventMessage({ event }: { event: SecurityEvent }) {
   const date = new Date(event.created_at)
   const meta = EVENT_LABELS[event.event_type] ?? { title: event.event_type, icon: '❔' }
   const isSupport = SUPPORT_EVENT_TYPES.has(event.event_type)
+  const isQuestion = event.event_type === 'support_message'
+  const isReply = event.event_type === 'support_reply'
 
   return (
     <div className="flex gap-3 py-3">
       <div
         className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-lg ${
-          isSupport ? 'bg-sky-50' : 'bg-red-50'
+          EVENT_ICON_BG[event.event_type] ?? (isSupport ? 'bg-sky-50' : 'bg-red-50')
         }`}
       >
         {meta.icon}
@@ -71,31 +80,20 @@ function EventMessage({ event }: { event: SecurityEvent }) {
 
         <div className="mt-2 rounded-xl border bg-kawa-50 border-kawa-200 p-4 grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
           <div>
-            <p className="text-kawa-500 text-xs uppercase tracking-wide">Email</p>
+            <p className="text-kawa-500 text-xs uppercase tracking-wide">
+              {isReply ? 'Destinataire' : 'Email'}
+            </p>
             <p className="text-sky-700 mt-0.5">{event.email ?? '—'}</p>
           </div>
           <div>
             <p className="text-kawa-500 text-xs uppercase tracking-wide">
-              {isSupport ? 'Message' : 'Détail'}
+              {isQuestion ? 'Message' : isReply ? 'Réponse' : 'Détail'}
             </p>
             <p className="text-kawa-800 mt-0.5 break-all">{event.detail ?? '—'}</p>
           </div>
         </div>
 
-        {isSupport && event.email && (
-          <a
-            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
-              event.email
-            )}&su=${encodeURIComponent('Re: votre question KAWA')}&body=${encodeURIComponent(
-              `Bonjour,\n\n\n\n---\nVotre message :\n${event.detail ?? ''}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mt-2 text-xs text-sky-700 hover:underline"
-          >
-            Répondre par email
-          </a>
-        )}
+        {isQuestion && event.email && <ReplyBox email={event.email} />}
       </div>
     </div>
   )
