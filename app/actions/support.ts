@@ -50,7 +50,7 @@ export async function submitSupportMessage(
   // OS-level notification on any staff device that opted in (Account
   // Management page) — replaces the email that used to fire here.
   try {
-    await notifyStaffDevices({
+    await notifyStaffDevices(supabase, {
       title: `Question d'un salarié — ${profile?.full_name ?? user.email}`,
       body: message,
       url: '/admin/securite/evenements',

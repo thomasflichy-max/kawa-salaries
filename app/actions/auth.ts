@@ -7,6 +7,7 @@ import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { validatePassword } from '@/lib/password-policy'
 import { isPasswordReused, recordPasswordHistory } from '@/lib/password-history'
 import { logSecurityEvent } from '@/lib/log-security-event'
+import { notifyStaffDevices } from '@/lib/push-notifications'
 
 export type AuthFormState = { error: string } | undefined
 
@@ -64,7 +65,15 @@ export async function signup(
         reason: 'domain_not_recognized',
       })
       .then(({ error }) => {
-        if (error) console.error('[signup] failed to log signup attempt:', error)
+        if (error) {
+          console.error('[signup] failed to log signup attempt:', error)
+          return
+        }
+        notifyStaffDevices(supabase, {
+          title: 'Inscription refusée — domaine non reconnu',
+          body: `${firstName} ${lastName} (${email})`,
+          url: '/admin/inscriptions',
+        }).catch((pushError) => console.error('[signup] push notification failed:', pushError))
       })
 
     return {
@@ -103,6 +112,12 @@ export async function signup(
   })
   if (logError) {
     console.error('[signup] failed to log signup attempt:', logError)
+  } else {
+    notifyStaffDevices(supabase, {
+      title: 'Nouvelle inscription',
+      body: `${firstName} ${lastName} (${email}) — ${org.name}`,
+      url: '/admin/inscriptions',
+    }).catch((pushError) => console.error('[signup] push notification failed:', pushError))
   }
 
   if (signUpData.user) {
