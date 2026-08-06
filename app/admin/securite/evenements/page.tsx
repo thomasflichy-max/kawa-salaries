@@ -84,7 +84,11 @@ function EventMessage({ event }: { event: SecurityEvent }) {
 
         {isSupport && event.email && (
           <a
-            href={`mailto:${event.email}?subject=${encodeURIComponent('Re: votre question KAWA')}`}
+            href={`mailto:${event.email}?subject=${encodeURIComponent(
+              'Re: votre question KAWA'
+            )}&body=${encodeURIComponent(
+              `Bonjour,\n\n\n\n---\nVotre message :\n${event.detail ?? ''}`
+            )}`}
             className="inline-block mt-2 text-xs text-sky-700 hover:underline"
           >
             Répondre par email
