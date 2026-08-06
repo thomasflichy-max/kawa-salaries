@@ -84,11 +84,13 @@ function EventMessage({ event }: { event: SecurityEvent }) {
 
         {isSupport && event.email && (
           <a
-            href={`mailto:${event.email}?subject=${encodeURIComponent(
-              'Re: votre question KAWA'
-            )}&body=${encodeURIComponent(
+            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+              event.email
+            )}&su=${encodeURIComponent('Re: votre question KAWA')}&body=${encodeURIComponent(
               `Bonjour,\n\n\n\n---\nVotre message :\n${event.detail ?? ''}`
             )}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block mt-2 text-xs text-sky-700 hover:underline"
           >
             Répondre par email
