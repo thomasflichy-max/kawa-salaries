@@ -35,12 +35,12 @@ export function PdfLegalFooter() {
   return (
     <Text style={pdfStyles.footer}>
       <Text style={pdfStyles.footerName}>
-        {KAWA_LEGAL.name} - {KAWA_LEGAL.legalForm}
+        {KAWA_LEGAL.name} - {KAWA_LEGAL.legalForm} au capital de {KAWA_LEGAL.capitalSocial}
       </Text>
       {'\n'}
       {KAWA_FULL_ADDRESS}
       {'\n'}
-      Numéro de SIRET: {KAWA_LEGAL.siret} - Numéro de TVA: {KAWA_LEGAL.vatNumber} -{' '}
+      Numéro de SIRET: {KAWA_LEGAL.siret} - Numéro de TVA: {KAWA_LEGAL.vatNumber} - RCS{' '}
       {KAWA_LEGAL.rcsCity}
     </Text>
   )

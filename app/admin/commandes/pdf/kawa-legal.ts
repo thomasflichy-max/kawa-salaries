@@ -15,6 +15,7 @@ export const KAWA_LEGAL = {
   siret: '889 062 600 00016',
   vatNumber: 'FR55 889062600',
   rcsCity: 'Nantes',
+  capitalSocial: '1 000 €',
   // Salariés pay by card at the moment they place the order — no net terms,
   // no bank transfer/IBAN, no late-payment clause (there's nothing to be
   // late on).
