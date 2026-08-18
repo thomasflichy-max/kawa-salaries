@@ -3,7 +3,6 @@ import type { DemoOrder, DemoOrderRefund } from '@/app/admin/demo-data'
 import { getOrderRefundTotal } from '@/app/admin/demo-data'
 import { pdfStyles, KAWA_SKY } from './styles'
 import { PdfHeader, PdfLegalFooter } from './pdf-header'
-import { KAWA_LEGAL } from './kawa-legal'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short' })
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
@@ -78,8 +77,6 @@ export function RefundCertificateDocument({
             Remboursement crédité sur le moyen de paiement utilisé lors de la commande.
           </Text>
         </View>
-
-        <Text style={pdfStyles.csrNoteBottom}>{KAWA_LEGAL.csrNote}</Text>
 
         <PdfLegalFooter />
       </Page>

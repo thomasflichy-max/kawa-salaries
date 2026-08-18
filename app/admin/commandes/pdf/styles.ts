@@ -143,20 +143,6 @@ export const pdfStyles = StyleSheet.create({
     fontSize: 9,
     lineHeight: 1.5,
   },
-  // Pinned just above the legal footer, regardless of how short the item
-  // table is — matches the real BL sample, where this note sits at the
-  // bottom of the page rather than right under the table.
-  csrNoteBottom: {
-    position: 'absolute',
-    bottom: 75,
-    left: 40,
-    right: 40,
-    fontSize: 8,
-    fontStyle: 'italic',
-    color: KAWA_MUTED,
-    textAlign: 'center',
-    lineHeight: 1.5,
-  },
   footer: {
     position: 'absolute',
     bottom: 30,

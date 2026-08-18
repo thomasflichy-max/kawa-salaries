@@ -144,8 +144,6 @@ export function InvoiceDocument({
           <Text style={pdfStyles.paymentValue}>{KAWA_LEGAL.paymentTerms}</Text>
         </View>
 
-        <Text style={pdfStyles.csrNoteBottom}>{KAWA_LEGAL.csrNote}</Text>
-
         <PdfLegalFooter />
       </Page>
     </Document>

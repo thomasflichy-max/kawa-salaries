@@ -34,14 +34,20 @@ export function PdfHeader() {
 export function PdfLegalFooter() {
   return (
     <Text style={pdfStyles.footer}>
+      {KAWA_LEGAL.bioNote}
+      {'\n\n'}
+      TVA: {KAWA_LEGAL.vatNumber} – SIREN : {KAWA_LEGAL.siren} – RCS {KAWA_LEGAL.rcsCity}
+      {'\n'}
+      IBAN: {KAWA_LEGAL.iban} – SWIFT: {KAWA_LEGAL.swift}
+      {'\n\n'}
       <Text style={pdfStyles.footerName}>
-        {KAWA_LEGAL.name} - {KAWA_LEGAL.legalForm} au capital de {KAWA_LEGAL.capitalSocial}
+        {KAWA_LEGAL.name}, {KAWA_LEGAL.legalForm} au capital de {KAWA_LEGAL.capitalSocial} –{' '}
+        {KAWA_FULL_ADDRESS}
       </Text>
       {'\n'}
-      {KAWA_FULL_ADDRESS}
-      {'\n'}
-      Numéro de SIRET: {KAWA_LEGAL.siret} - Numéro de TVA: {KAWA_LEGAL.vatNumber} - RCS{' '}
-      {KAWA_LEGAL.rcsCity}
+      {KAWA_LEGAL.paymentClause}
+      {'\n\n'}
+      {KAWA_LEGAL.csrNote}
     </Text>
   )
 }

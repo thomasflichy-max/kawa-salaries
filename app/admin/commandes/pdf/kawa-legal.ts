@@ -1,28 +1,33 @@
-// Real KAWA Coffee Nantes legal/invoicing identity, taken directly from
-// actual invoice/delivery-note samples provided by the client (2026-07).
-// This address (3 B rue Germain Boffrand) is the siège social / billing
-// address — intentionally distinct from KAWA_OFFICE (75 Bd Ernest Dalby),
-// which is the bureaux/pickup-and-delivery point used elsewhere on the site.
-// Confirmed with the client: both addresses are real and correct as-is.
+// Real KAWA Coffee Nantes legal/invoicing identity — the exact wording of
+// the footer block (bio/TVA/SIREN/RCS/IBAN/SWIFT/capital/late-payment/CSR)
+// was provided verbatim by the client (2026-08-18) as the text used on their
+// official commercial documents; kept as literal strings rather than
+// composed from parts so the PDF output matches it exactly.
 export const KAWA_LEGAL = {
   name: 'Kawa Coffee Nantes',
   legalForm: 'SAS',
-  address: '3 B rue Germain Boffrand',
+  address: '3 bis Rue Germain Boffrand',
   postalCode: '44000',
-  city: 'Nantes',
+  city: 'NANTES',
   email: 'nantes@kawa.coffee',
   website: 'https://kawanantespro.com/',
-  siret: '889 062 600 00016',
+  siren: '889 062 600',
   vatNumber: 'FR55 889062600',
   rcsCity: 'Nantes',
-  capitalSocial: '1 000 €',
-  // Salariés pay by card at the moment they place the order — no net terms,
-  // no bank transfer/IBAN, no late-payment clause (there's nothing to be
-  // late on).
+  capitalSocial: '1000€',
+  iban: 'FR76 1470 6000 4073 9728 2599 695',
+  swift: 'AGRIFRPP847',
+  bioNote: 'Bio : produits issus de l’agriculture biologique, certifiés par ECOCERT SAS FR-BIO-01',
+  // Salariés pay by card at the moment they place the order, so there's
+  // nothing to actually be late on — this clause is included anyway because
+  // it's the client's standard boilerplate footer, printed as-is on every
+  // commercial document regardless of payment method.
+  paymentClause:
+    'Pas d’escompte. Pénalité forfaitaire de retard de 40€. TVA acquittée d’après les débits.',
   paymentMethod: 'Carte bancaire à la commande',
   paymentTerms: 'Paiement à la commande',
   csrNote:
-    "Parce que nous souhaitons contribuer à l'avènement d'une société toujours plus solidaire et inclusive, Kawa Coffee Nantes s'engage à reverser 0,2€/kg de café vendu au fond de dotation Handicap Agir Ensemble, en soutien à l'ADAPEI de Loire-Atlantique.",
+    'Kawa Coffee Nantes s’engage à reverser 0,2€ pour chaque Kg de café vendu au fonds de dotation Handicap Agir Ensemble, en soutien à l’Adapeila de Loire-Atlantique.',
 }
 
 export const KAWA_FULL_ADDRESS = `${KAWA_LEGAL.address} ${KAWA_LEGAL.postalCode} ${KAWA_LEGAL.city}`

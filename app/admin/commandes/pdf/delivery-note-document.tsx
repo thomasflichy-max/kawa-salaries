@@ -3,7 +3,6 @@ import type { DemoOrder } from '@/app/admin/demo-data'
 import { getDeliveryLabel } from '@/app/admin/demo-data'
 import { pdfStyles, KAWA_SKY } from './styles'
 import { PdfHeader, PdfLegalFooter } from './pdf-header'
-import { KAWA_LEGAL } from './kawa-legal'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short' })
 
@@ -85,8 +84,6 @@ export function DeliveryNoteDocument({
             )
           })}
         </View>
-
-        <Text style={pdfStyles.csrNoteBottom}>{KAWA_LEGAL.csrNote}</Text>
 
         <PdfLegalFooter />
       </Page>
