@@ -110,19 +110,15 @@ export async function POST(request: Request) {
     // don't re-send the confirmation email or duplicate the history entry.
     if (order.payment_status === paymentStatus) continue
 
-    // A rejected/cancelled payment means nothing was actually purchased —
-    // delete the order (cascades to order_items/history/refunds) rather
-    // than leaving a "Non payée" ghost order in Liste Commande forever. The
-    // employee's cart was never touched (see app/actions/checkout.ts), so
-    // this is a clean no-op from their point of view: nothing to redo.
-    if (paymentStatus === 'echoue') {
-      const { error: deleteError } = await supabase.from('orders').delete().eq('id', order.id)
-      if (deleteError) {
-        console.error('[cawl webhook] failed to delete rejected/cancelled order', order.id, deleteError)
-      }
-      continue
-    }
-
+    // A rejected/cancelled payment must NOT delete the order: CAWL's hosted
+    // checkout page offers "Réessayer" on the SAME session after a decline,
+    // so a later payment.captured event can still arrive for this exact
+    // order_number. Deleting here would leave that success webhook with
+    // nothing to match against — confirmed in production 2026-08-18, a
+    // real card retry succeeded but the order had already been deleted
+    // after the first decline. Just mark it unpaid like any other status;
+    // it stays visible ("Non payée") in Liste Commande, and this same
+    // update path below flips it to "paye" if the retry succeeds.
     const { error: updateError } = await supabase
       .from('orders')
       .update({
