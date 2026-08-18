@@ -44,8 +44,6 @@ export function PdfLegalFooter() {
         {KAWA_LEGAL.name}, {KAWA_LEGAL.legalForm} au capital de {KAWA_LEGAL.capitalSocial} –{' '}
         {KAWA_FULL_ADDRESS}
       </Text>
-      {'\n'}
-      {KAWA_LEGAL.paymentClause}
       {'\n\n'}
       {KAWA_LEGAL.csrNote}
     </Text>
