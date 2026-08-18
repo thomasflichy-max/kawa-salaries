@@ -22,10 +22,8 @@ import {
   type DemoOrderStatus,
   type DemoOrderItem,
 } from '@/app/admin/demo-data'
-import { renderToBuffer } from '@react-pdf/renderer'
 import { getAdminOrderById } from './manual-orders'
-import { RefundCertificateDocument } from './pdf/refund-certificate-document'
-import { mintDocumentNumber, uploadDocumentPdf } from '@/lib/document-storage'
+import { archiveOrderInvoiceAndDeliveryNote, archiveRefundCertificate } from '@/lib/order-documents'
 import { sendOrderReadyForPickupEmail } from '@/lib/emails/order-ready-for-pickup'
 import { sendOrderRefundedEmail } from '@/lib/emails/order-refunded'
 
@@ -260,25 +258,13 @@ export async function refundOrderAction(orderId: string, amount: number, reason:
 
   // Dedicated, gapless AVOIR-{year}-{seq} reference + immutable archived
   // PDF (migration 0032) — same reasoning as the facture/BL in the CAWL
-  // webhook: never let a later edit change what was actually issued.
-  try {
-    const year = new Date().getFullYear()
-    const refundNumber = await mintDocumentNumber(supabase, 'avoir', year)
-    const buffer = await renderToBuffer(
-      <RefundCertificateDocument
-        order={orderWithNewRefund}
-        refund={refundRow}
-        refundNumber={refundNumber}
-      />
-    )
-    const pdfPath = `refund-certificates/${refundRow.id}.pdf`
-    await uploadDocumentPdf(supabase, pdfPath, buffer)
-    await supabase
-      .from('order_refunds')
-      .update({ refund_number: refundNumber, pdf_path: pdfPath })
-      .eq('id', refundRow.id)
-  } catch (archiveError) {
-    console.error('[commandes] refund certificate numbering/archiving failed:', archiveError)
+  // webhook: never let a later edit change what was actually issued. A
+  // failure here logs a security_event + push notification (see
+  // lib/order-documents.tsx) instead of silently leaving a burned sequence
+  // number — staff can retry via the "Régénérer" button on the order page.
+  const archiveResult = await archiveRefundCertificate(supabase, orderId, refundRow.id)
+  if (!archiveResult.ok) {
+    console.error('[commandes] refund certificate archiving failed:', archiveResult.error)
   }
 
   try {
@@ -309,4 +295,32 @@ export async function removeOrderItemAction(orderId: string, itemId: string) {
   const actor = await requireKawaStaffActor()
   removeDemoOrderItem(orderId, itemId, actor)
   revalidateOrderPaths(orderId)
+}
+
+export type RegenerateDocumentResult = { ok: true } | { ok: false; error: string }
+
+// Manual recovery for the (rare) case where minting a facture/BL number
+// succeeded but rendering/uploading the PDF failed right after — see
+// lib/order-documents.tsx. Safe to call repeatedly: each retry mints a
+// fresh number rather than reusing the burned one, since the sequence must
+// stay strictly increasing.
+export async function regenerateOrderDocumentsAction(
+  orderId: string
+): Promise<RegenerateDocumentResult> {
+  await requireKawaStaffActor()
+  const supabase = await createClient()
+  const result = await archiveOrderInvoiceAndDeliveryNote(supabase, orderId)
+  revalidateOrderPaths(orderId)
+  return result.ok ? { ok: true } : { ok: false, error: result.error }
+}
+
+export async function regenerateRefundCertificateAction(
+  orderId: string,
+  refundId: string
+): Promise<RegenerateDocumentResult> {
+  await requireKawaStaffActor()
+  const supabase = await createClient()
+  const result = await archiveRefundCertificate(supabase, orderId, refundId)
+  revalidateOrderPaths(orderId)
+  return result
 }

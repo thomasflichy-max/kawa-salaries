@@ -11,6 +11,7 @@ import { getAllAdminOrders } from './manual-orders'
 import { OrderRow } from './order-row'
 import { AdvanceStatusButton } from './advance-status-button'
 import { DocumentDownloadLinks } from './document-download-links'
+import { RegenerateDocumentsButton } from './regenerate-documents-button'
 import { OrderPreviewButton } from './order-preview-button'
 import { StatusFilter } from './status-filter'
 import { OrganizationFilter } from './organization-filter'
@@ -129,6 +130,9 @@ export default async function AdminOrdersPage({
                           disabled={order.source === 'manual' || !getNextOrderStatus(order.status)}
                         />
                         <DocumentDownloadLinks orderId={order.id} />
+                        {order.source === 'real' && order.paid && !order.invoiceNumber && (
+                          <RegenerateDocumentsButton orderId={order.id} />
+                        )}
                       </div>
                     </td>
                   </OrderRow>

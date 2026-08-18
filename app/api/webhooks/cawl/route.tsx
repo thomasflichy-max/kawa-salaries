@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { renderToBuffer } from '@react-pdf/renderer'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyWebhookSignature, type CawlWebhookPaymentEvent } from '@/lib/cawl'
 import { logSecurityEvent } from '@/lib/log-security-event'
@@ -8,46 +7,14 @@ import {
   REAL_ORDER_SELECT,
   type RealOrderRow,
 } from '@/app/admin/commandes/manual-orders'
-import { InvoiceDocument } from '@/app/admin/commandes/pdf/invoice-document'
-import { DeliveryNoteDocument } from '@/app/admin/commandes/pdf/delivery-note-document'
-import { resolveOrderImages } from '@/app/admin/commandes/pdf/pdf-image'
-import { mintDocumentNumber, uploadDocumentPdf } from '@/lib/document-storage'
+import { archiveOrderInvoiceAndDeliveryNote } from '@/lib/order-documents'
 import { sendOrderConfirmationEmail } from '@/lib/emails/order-confirmation'
-import type { AdminOrder } from '@/app/admin/commandes/manual-orders'
 
 export const runtime = 'nodejs'
 
 const PAID_TYPES = new Set(['payment.captured'])
 const FAILED_TYPES = new Set(['payment.rejected', 'payment.cancelled'])
 const REFUNDED_TYPES = new Set(['payment.refunded'])
-
-// Pulled out to plain function calls (not inline JSX) so the numbering +
-// archiving try/catch below doesn't construct JSX directly inside a
-// try block — @react-pdf/renderer's renderToBuffer still rejects on error
-// exactly the same way, this is purely to keep the linter happy about
-// error-boundary semantics that don't actually apply to PDF rendering.
-function renderInvoiceBuffer(
-  order: AdminOrder,
-  invoiceNumber: string,
-  imageSrcByUrl: Record<string, string | null>
-) {
-  return renderToBuffer(
-    <InvoiceDocument order={order} invoiceNumber={invoiceNumber} imageSrcByUrl={imageSrcByUrl} />
-  )
-}
-function renderDeliveryNoteBuffer(
-  order: AdminOrder,
-  deliveryNoteNumber: string,
-  imageSrcByUrl: Record<string, string | null>
-) {
-  return renderToBuffer(
-    <DeliveryNoteDocument
-      order={order}
-      deliveryNoteNumber={deliveryNoteNumber}
-      imageSrcByUrl={imageSrcByUrl}
-    />
-  )
-}
 
 export async function POST(request: Request) {
   const rawBody = await request.text()
@@ -157,49 +124,26 @@ export async function POST(request: Request) {
       }
 
       const fullOrder = mapRealOrderRow(fullOrderData as unknown as RealOrderRow)
-      const year = new Date().getFullYear()
 
-      // Mint the dedicated, gapless facture/BL numbers and archive the
+      // Mints the dedicated, gapless facture/BL numbers and archives the
       // exact PDFs issued right now — this is what makes them immutable:
       // every future download serves this same file, never a re-render
       // from (possibly since-edited) live order data. See migration 0032.
-      let invoiceBuffer: Buffer | undefined
-      try {
-        const invoiceNumber = await mintDocumentNumber(supabase, 'facture', year)
-        const deliveryNoteNumber = await mintDocumentNumber(supabase, 'bon_livraison', year)
-        const imageSrcByUrl = await resolveOrderImages(fullOrder.items)
-
-        invoiceBuffer = await renderInvoiceBuffer(fullOrder, invoiceNumber, imageSrcByUrl)
-        const deliveryNoteBuffer = await renderDeliveryNoteBuffer(
-          fullOrder,
-          deliveryNoteNumber,
-          imageSrcByUrl
-        )
-
-        const invoicePdfPath = `invoices/${order.id}.pdf`
-        const deliveryNotePdfPath = `delivery-notes/${order.id}.pdf`
-        await uploadDocumentPdf(supabase, invoicePdfPath, invoiceBuffer)
-        await uploadDocumentPdf(supabase, deliveryNotePdfPath, deliveryNoteBuffer)
-
-        await supabase
-          .from('orders')
-          .update({
-            invoice_number: invoiceNumber,
-            invoice_pdf_path: invoicePdfPath,
-            delivery_note_number: deliveryNoteNumber,
-            delivery_note_pdf_path: deliveryNotePdfPath,
-          })
-          .eq('id', order.id)
-      } catch (archiveError) {
-        // A numbering/archiving failure must not block the confirmation
-        // email — the facture/document.tsx routes fall back to on-the-fly
-        // rendering (via order_number) when invoice_number is still null,
-        // so nothing is unrecoverable; this just needs investigating.
-        console.error('[cawl webhook] invoice/BL numbering or archiving failed:', archiveError)
+      // A failure here logs a security_event + push notification (see
+      // lib/order-documents.tsx) rather than silently leaving a burned
+      // sequence number — staff can retry via the "Régénérer" button on
+      // the order detail page. Must not block the confirmation email either
+      // way; the facture/route.tsx falls back to on-the-fly rendering (via
+      // order_number) when invoice_number is still null.
+      const archiveResult = await archiveOrderInvoiceAndDeliveryNote(supabase, order.id)
+      if (!archiveResult.ok) {
+        console.error('[cawl webhook] invoice/BL archiving failed:', archiveResult.error)
       }
 
       try {
-        await sendOrderConfirmationEmail(fullOrder, { invoiceBuffer })
+        await sendOrderConfirmationEmail(fullOrder, {
+          invoiceBuffer: archiveResult.ok ? archiveResult.invoiceBuffer : undefined,
+        })
       } catch (emailError) {
         console.error('[cawl webhook] confirmation email failed:', emailError)
       }

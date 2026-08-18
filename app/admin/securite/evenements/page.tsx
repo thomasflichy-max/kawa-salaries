@@ -15,6 +15,7 @@ const EVENT_LABELS: Record<string, { title: string; icon: string }> = {
   admin_signup_rejected: { title: 'Tentative de création de compte admin refusée', icon: '🚨' },
   unauthorized_admin_access: { title: 'Accès admin non autorisé', icon: '🔒' },
   cawl_webhook_signature_invalid: { title: 'Signature de webhook CAWL invalide', icon: '🛑' },
+  document_archiving_failed: { title: 'Archivage de document échoué', icon: '🗂️' },
   unauthorized_profile_change: {
     title: 'Modification de profil non autorisée bloquée',
     icon: '🧨',

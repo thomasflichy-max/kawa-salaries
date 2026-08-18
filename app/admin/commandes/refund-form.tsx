@@ -2,10 +2,39 @@
 
 import { useState, useTransition } from 'react'
 import type { AdminOrderRefund } from '@/app/admin/commandes/manual-orders'
-import { refundOrderAction } from './actions'
+import { refundOrderAction, regenerateRefundCertificateAction } from './actions'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
+
+// Only shown when a refund's numbering/PDF archiving failed right after
+// mintDocumentNumber() ran (see lib/order-documents.tsx) — the certificate
+// is still downloadable via the on-the-fly route below either way, this
+// just fixes the missing AVOIR-{year}-{seq} archive.
+function RegenerateRefundButton({ orderId, refundId }: { orderId: string; refundId: string }) {
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  return (
+    <span className="inline-flex items-center gap-1">
+      <button
+        type="button"
+        disabled={isPending}
+        onClick={() =>
+          startTransition(async () => {
+            setError(null)
+            const result = await regenerateRefundCertificateAction(orderId, refundId)
+            if (!result.ok) setError(result.error)
+          })
+        }
+        className="text-xs text-amber-700 underline shrink-0 disabled:opacity-50"
+      >
+        {isPending ? 'Régénération…' : 'Régénérer le numéro'}
+      </button>
+      {error && <span className="text-xs text-red-600">{error}</span>}
+    </span>
+  )
+}
 
 export function RefundForm({
   orderId,
@@ -65,14 +94,19 @@ export function RefundForm({
                   {dateFormat.format(new Date(refund.at))} par {refund.actor}
                 </p>
               </div>
-              <a
-                href={`/admin/commandes/${orderId}/remboursement/${refund.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-red-700 underline shrink-0"
-              >
-                Justificatif PDF
-              </a>
+              <div className="flex items-center gap-3 shrink-0">
+                <a
+                  href={`/admin/commandes/${orderId}/remboursement/${refund.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-red-700 underline"
+                >
+                  Justificatif PDF
+                </a>
+                {!refund.refundNumber && (
+                  <RegenerateRefundButton orderId={orderId} refundId={refund.id} />
+                )}
+              </div>
             </li>
           ))}
         </ul>

@@ -7,12 +7,14 @@ export type SecurityEventType =
   | 'admin_signup_rejected'
   | 'unauthorized_admin_access'
   | 'cawl_webhook_signature_invalid'
+  | 'document_archiving_failed'
 
 const EVENT_NOTIFY_TITLES: Record<SecurityEventType, string> = {
   login_failed: 'Connexion échouée',
   admin_signup_rejected: 'Tentative de compte admin refusée',
   unauthorized_admin_access: 'Accès admin non autorisé',
   cawl_webhook_signature_invalid: 'Signature webhook CAWL invalide',
+  document_archiving_failed: 'Archivage de document échoué',
 }
 
 // Fire-and-forget by design (same reasoning as the signup_attempts logging
