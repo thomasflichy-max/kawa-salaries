@@ -111,6 +111,57 @@ export async function createHostedCheckout({
   return { redirectUrl: data.redirectUrl, hostedCheckoutId: data.hostedCheckoutId }
 }
 
+// RefundPayment — docs.ecommerce.cawl-solutions.fr/fr/integration/api-developer-guide/maintenance-operations
+// (confirmed 2026-08-20). paymentId is the CAWL payment.id captured from the
+// payment.captured webhook (orders.cawl_payment_id) — NOT our own order id
+// or order_number. Refunds can only be performed on a successfully
+// processed payment; CAWL also sends a payment.refunded webhook afterward
+// (see app/api/webhooks/cawl/route.ts REFUNDED_TYPES), which is just a
+// status confirmation, not something this call needs to wait for.
+export type RefundPaymentInput = {
+  cawlPaymentId: string
+  amount: number // TTC, euros (converted to minor units here)
+}
+
+export type RefundPaymentResult = {
+  id: string
+}
+
+export async function refundPayment({
+  cawlPaymentId,
+  amount,
+}: RefundPaymentInput): Promise<RefundPaymentResult> {
+  const merchantId = requiredEnv('CAWL_MERCHANT_ID')
+  const path = `/v2/${merchantId}/payments/${cawlPaymentId}/refund`
+  const { date, authorization } = signRequest('POST', path, 'application/json')
+
+  const body = JSON.stringify({
+    amountOfMoney: {
+      amount: Math.round(amount * 100),
+      currencyCode: 'EUR',
+    },
+  })
+
+  const res = await fetch(`https://${HOST}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Date: date,
+      'X-GCS-Date': date,
+      Authorization: authorization,
+    },
+    body,
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`[cawl] refundPayment failed: ${res.status} ${text}`)
+  }
+
+  const data = (await res.json()) as { id: string }
+  return { id: data.id }
+}
+
 // Matches an incoming webhook event to one of our orders. CAWL's docs
 // confirm this path: payment.paymentOutput.references.merchantReference —
 // which we set to our own order_number when creating the checkout, so it's

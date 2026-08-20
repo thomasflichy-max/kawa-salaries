@@ -35,6 +35,10 @@ export type AdminOrder = Omit<DemoOrder, 'refunds'> & {
   invoicePdfPath: string | null
   deliveryNoteNumber: string | null
   deliveryNotePdfPath: string | null
+  // CAWL's own payment.id (not our order id/order_number) — required to
+  // call refundPayment() (lib/cawl.ts). null for demo/manual orders, which
+  // never went through CAWL checkout.
+  cawlPaymentId: string | null
 }
 
 export function toAdminOrder(order: DemoOrder): AdminOrder {
@@ -49,6 +53,7 @@ export function toAdminOrder(order: DemoOrder): AdminOrder {
     invoicePdfPath: null,
     deliveryNoteNumber: null,
     deliveryNotePdfPath: null,
+    cawlPaymentId: null,
   }
 }
 
@@ -126,6 +131,7 @@ function mapManualOrderRow(row: ManualOrderRow): AdminOrder {
     invoicePdfPath: null,
     deliveryNoteNumber: null,
     deliveryNotePdfPath: null,
+    cawlPaymentId: null,
   }
 }
 
@@ -236,6 +242,7 @@ export function mapRealOrderRow(row: RealOrderRow): AdminOrder {
     invoicePdfPath: row.invoice_pdf_path,
     deliveryNoteNumber: row.delivery_note_number,
     deliveryNotePdfPath: row.delivery_note_pdf_path,
+    cawlPaymentId: row.cawl_payment_id,
   }
 }
 

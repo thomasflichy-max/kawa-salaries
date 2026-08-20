@@ -24,6 +24,7 @@ import {
 } from '@/app/admin/demo-data'
 import { getAdminOrderById } from './manual-orders'
 import { archiveOrderInvoiceAndDeliveryNote, archiveRefundCertificate } from '@/lib/order-documents'
+import { refundPayment } from '@/lib/cawl'
 import { sendOrderReadyForPickupEmail } from '@/lib/emails/order-ready-for-pickup'
 import { sendOrderRefundedEmail } from '@/lib/emails/order-refunded'
 
@@ -234,6 +235,25 @@ export async function refundOrderAction(orderId: string, amount: number, reason:
   const remaining = order.amount - getOrderRefundTotal(order)
   if (amount > remaining + 0.005) {
     throw new Error('Montant invalide (dépasse le solde restant à rembourser).')
+  }
+
+  // Real (CAWL) orders: actually move the money back to the card BEFORE
+  // recording anything — a manual order was never charged through CAWL
+  // (paid by virement/lien_cb/boutique instead), so there's nothing to call
+  // there. If the CAWL call fails, throw immediately and record nothing:
+  // recording a refund that never actually happened would be worse than
+  // this button silently doing nothing (previous behaviour), since staff
+  // would trust the record. See lib/cawl.ts refundPayment().
+  if (order.source === 'real') {
+    if (!order.cawlPaymentId) {
+      throw new Error('Identifiant de paiement CAWL manquant sur cette commande.')
+    }
+    try {
+      await refundPayment({ cawlPaymentId: order.cawlPaymentId, amount })
+    } catch (cawlError) {
+      console.error('[commandes] CAWL refundPayment failed:', cawlError)
+      throw new Error('Le remboursement CAWL a échoué, merci de réessayer ou de le faire manuellement sur le back-office CAWL.')
+    }
   }
 
   const supabase = await createClient()

@@ -40,10 +40,12 @@ export function RefundForm({
   orderId,
   amount,
   refunds,
+  isRealCawlOrder,
 }: {
   orderId: string
   amount: number
   refunds: AdminOrderRefund[]
+  isRealCawlOrder: boolean
 }) {
   const alreadyRefunded = refunds.reduce((sum, r) => sum + r.amount, 0)
   const remaining = Math.max(0, amount - alreadyRefunded)
@@ -57,11 +59,10 @@ export function RefundForm({
 
   function handleSubmit() {
     if (!canSubmit) return
-    if (
-      !confirm(
-        `Confirmer un remboursement de ${currency.format(parsedAmount)} (${reason.trim()}) ? Aucun virement ne sera déclenché.`
-      )
-    ) {
+    const confirmMessage = isRealCawlOrder
+      ? `Confirmer un remboursement de ${currency.format(parsedAmount)} (${reason.trim()}) ? La carte du salarié sera remboursée via CAWL.`
+      : `Confirmer un remboursement de ${currency.format(parsedAmount)} (${reason.trim()}) ? Cette commande n'est pas passée par CAWL — aucun virement ne sera déclenché, ça garde juste une trace.`
+    if (!confirm(confirmMessage)) {
       return
     }
     setError(null)
@@ -150,9 +151,10 @@ export function RefundForm({
             </button>
           </div>
           <p className="text-xs text-kawa-400">
-            Solde restant remboursable : {currency.format(remaining)}. N&apos;appelle pas encore
-            CAWL pour déclencher un vrai remboursement bancaire — ça garde juste une trace de qui a
-            remboursé, quand, combien et pourquoi.
+            Solde restant remboursable : {currency.format(remaining)}.{' '}
+            {isRealCawlOrder
+              ? 'Déclenche un vrai remboursement sur la carte du salarié via CAWL, en plus de garder une trace de qui a remboursé, quand, combien et pourquoi.'
+              : "Cette commande n'est pas passée par CAWL (paiement manuel) — ça garde juste une trace de qui a remboursé, quand, combien et pourquoi."}
           </p>
           {error && (
             <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
