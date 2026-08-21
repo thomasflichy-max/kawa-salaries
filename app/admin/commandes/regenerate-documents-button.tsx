@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { regenerateOrderDocumentsAction } from './actions'
+import { regenerateOrderDocumentsAction } from './refund-actions'
 import { Tooltip } from '@/app/admin/tooltip'
 
 // Only ever shown when a paid real order's invoiceNumber is still null —

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import type { AdminOrderRefund } from '@/app/admin/commandes/manual-orders'
-import { refundOrderAction, regenerateRefundCertificateAction } from './actions'
+import { refundOrderAction, regenerateRefundCertificateAction } from './refund-actions'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
