@@ -1,6 +1,5 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import sharp from 'sharp'
 
 const cache = new Map<string, string | null>()
 
@@ -25,11 +24,20 @@ function readPublicImageAsDataUri(publicPath: string): string | null {
 // (confirmed: a real product's image is .avif), which silently failed to
 // render on the facture/BL PDFs even after pointing <Image> straight at the
 // URL, since fetching isn't the part that was broken — decoding was.
+//
+// sharp is imported dynamically, inside the try, rather than as a static
+// top-level import: sharp's native binary has failed to load in some Vercel
+// serverless function bundles for this project (works from the CAWL webhook
+// route, not from Server Actions) — a static import throws at module-load
+// time, before this function's own try/catch ever runs, which took down the
+// entire caller (a refund, an invoice archive) instead of just this one
+// image. A dynamic import's failure is caught right here instead.
 async function fetchRemoteImageAsDataUri(url: string): Promise<string | null> {
   try {
     const res = await fetch(url)
     if (!res.ok) return null
     const buffer = Buffer.from(await res.arrayBuffer())
+    const sharp = (await import('sharp')).default
     const png = await sharp(buffer).png().toBuffer()
     return `data:image/png;base64,${png.toString('base64')}`
   } catch (error) {
