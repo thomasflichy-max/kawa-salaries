@@ -22,18 +22,28 @@ import { requireKawaStaffActor, revalidateOrderPaths } from './actions-helpers'
 // using the linux-x64 runtime") even though nothing on that page actually
 // generates a PDF. Splitting this out means sharp is only ever loaded when a
 // refund/regenerate action actually runs, not just by viewing the page.
-export async function refundOrderAction(orderId: string, amount: number, reason: string) {
+export type RefundOrderResult = { ok: true } | { ok: false; error: string }
+
+// Returns a result object instead of throwing — Next.js redacts thrown
+// Server Action errors in production ("An error occurred in the Server
+// Components render..."), which silently hid every failure message here
+// (invalid amount, CAWL API failure, etc.) behind a useless generic error.
+export async function refundOrderAction(
+  orderId: string,
+  amount: number,
+  reason: string
+): Promise<RefundOrderResult> {
   const actor = await requireKawaStaffActor()
   const trimmedReason = reason.trim()
   if (!(amount > 0) || !trimmedReason) {
-    throw new Error('Montant et motif requis.')
+    return { ok: false, error: 'Montant et motif requis.' }
   }
 
   const demoOrder = getDemoOrderById(orderId)
   if (demoOrder) {
     const order = addDemoOrderRefund(orderId, amount, trimmedReason, actor)
     if (!order) {
-      throw new Error('Montant invalide (dépasse le solde restant à rembourser).')
+      return { ok: false, error: 'Montant invalide (dépasse le solde restant à rembourser).' }
     }
     const refund = order.refunds[order.refunds.length - 1]
     try {
@@ -42,34 +52,38 @@ export async function refundOrderAction(orderId: string, amount: number, reason:
       console.error('[commandes] refund confirmation email failed:', error)
     }
     revalidateOrderPaths(orderId)
-    return
+    return { ok: true }
   }
 
   const order = await getAdminOrderById(orderId)
   if (!order) {
-    throw new Error('Commande introuvable.')
+    return { ok: false, error: 'Commande introuvable.' }
   }
   const remaining = order.amount - getOrderRefundTotal(order)
   if (amount > remaining + 0.005) {
-    throw new Error('Montant invalide (dépasse le solde restant à rembourser).')
+    return { ok: false, error: 'Montant invalide (dépasse le solde restant à rembourser).' }
   }
 
   // Real (CAWL) orders: actually move the money back to the card BEFORE
   // recording anything — a manual order was never charged through CAWL
   // (paid by virement/lien_cb/boutique instead), so there's nothing to call
-  // there. If the CAWL call fails, throw immediately and record nothing:
+  // there. If the CAWL call fails, stop immediately and record nothing:
   // recording a refund that never actually happened would be worse than
   // this button silently doing nothing (previous behaviour), since staff
   // would trust the record. See lib/cawl.ts refundPayment().
   if (order.source === 'real') {
     if (!order.cawlPaymentId) {
-      throw new Error('Identifiant de paiement CAWL manquant sur cette commande.')
+      return { ok: false, error: 'Identifiant de paiement CAWL manquant sur cette commande.' }
     }
     try {
       await refundPayment({ cawlPaymentId: order.cawlPaymentId, amount })
     } catch (cawlError) {
       console.error('[commandes] CAWL refundPayment failed:', cawlError)
-      throw new Error('Le remboursement CAWL a échoué, merci de réessayer ou de le faire manuellement sur le back-office CAWL.')
+      return {
+        ok: false,
+        error:
+          'Le remboursement CAWL a échoué, merci de réessayer ou de le faire manuellement sur le back-office CAWL.',
+      }
     }
   }
 
@@ -81,7 +95,7 @@ export async function refundOrderAction(orderId: string, amount: number, reason:
     .single()
   if (error || !refundRow) {
     console.error('[commandes] refund insert failed:', error)
-    throw new Error('Une erreur est survenue, merci de réessayer.')
+    return { ok: false, error: 'Une erreur est survenue, merci de réessayer.' }
   }
 
   const orderWithNewRefund = { ...order, refunds: [...order.refunds, refundRow] }
@@ -110,6 +124,7 @@ export async function refundOrderAction(orderId: string, amount: number, reason:
     console.error('[commandes] refund confirmation email failed:', error)
   }
   revalidateOrderPaths(orderId)
+  return { ok: true }
 }
 
 export type RegenerateDocumentResult = { ok: true } | { ok: false; error: string }

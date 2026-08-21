@@ -67,13 +67,13 @@ export function RefundForm({
     }
     setError(null)
     startTransition(async () => {
-      try {
-        await refundOrderAction(orderId, parsedAmount, reason.trim())
-        setReason('')
-        setAmountInput('')
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Une erreur est survenue, merci de réessayer.')
+      const result = await refundOrderAction(orderId, parsedAmount, reason.trim())
+      if (!result.ok) {
+        setError(result.error)
+        return
       }
+      setReason('')
+      setAmountInput('')
     })
   }
 
