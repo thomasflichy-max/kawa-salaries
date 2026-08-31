@@ -2,17 +2,20 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from './supabase/types'
 
 // Shared by app/api/webhooks/cawl/route.ts (facture + BL, minted on
-// payment.captured) and app/admin/commandes/actions.ts (justificatif de
-// remboursement, minted when a refund is recorded) — the only two places
-// allowed to call next_document_number(), since every call permanently
-// consumes a number (see migration 0032: gapless numbering is the whole
+// payment.captured), app/admin/commandes/refund-actions.ts (justificatif de
+// remboursement, minted when a refund is recorded), and
+// app/actions/checkout.ts (order_number, minted right before creating the
+// CAWL hosted checkout) — the only places allowed to call
+// next_document_number(), since every call permanently consumes a number
+// (see migration 0032/0046: gapless, never-reused numbering is the whole
 // point, so this must never be called speculatively/for a preview).
-export type DocumentSeries = 'facture' | 'bon_livraison' | 'avoir'
+export type DocumentSeries = 'facture' | 'bon_livraison' | 'avoir' | 'commande'
 
 const SERIES_PREFIX: Record<DocumentSeries, string> = {
   facture: 'FACT',
   bon_livraison: 'BL',
   avoir: 'AVOIR',
+  commande: 'CMD',
 }
 
 export async function mintDocumentNumber(

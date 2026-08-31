@@ -9,6 +9,7 @@ import { getCoffeePricing } from '@/lib/coffee-pricing'
 import { createHostedCheckout } from '@/lib/cawl'
 import { SITE_URL } from '@/lib/emails/shared'
 import { KAWA_OFFICE } from '@/app/admin/demo-data'
+import { mintDocumentNumber } from '@/lib/document-storage'
 
 export type PlaceOrderState = { error: string } | undefined
 
@@ -87,11 +88,19 @@ export async function placeOrderAction(
     : `${KAWA_OFFICE.name} — ${KAWA_OFFICE.address}`
 
   const year = new Date().getFullYear()
-  const { count } = await supabase
-    .from('orders')
-    .select('id', { count: 'exact', head: true })
-    .gte('created_at', `${year}-01-01`)
-  const orderNumber = `CMD-${year}-${String((count ?? 0) + 1).padStart(4, '0')}`
+  // Atomic, gapless, NEVER-reused sequence (migration 0046) — this used to
+  // be a live count(*) of existing orders, which recycled numbers whenever
+  // an order got deleted (a declined payment, a test cleanup). That's fatal
+  // here: order_number is sent to CAWL as merchantReference, and CAWL
+  // rejects a hostedcheckout creation outright if that reference was ever
+  // used before, even by a since-deleted order.
+  let orderNumber: string
+  try {
+    orderNumber = await mintDocumentNumber(supabase, 'commande', year)
+  } catch (error) {
+    console.error('[placeOrderAction] failed to mint order number:', error)
+    return { error: 'Une erreur est survenue, merci de réessayer.' }
+  }
 
   const { data: order, error: insertError } = await supabase
     .from('orders')
