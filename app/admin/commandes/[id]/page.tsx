@@ -12,6 +12,7 @@ import { StatusUpdateForm } from '../status-update-form'
 import { EditableAddressField } from '../editable-address-field'
 import { InvoiceIcon, DeliveryNoteIcon } from '../document-icons'
 import { RefundForm } from '../refund-form'
+import { DeleteOrderButton } from '../delete-order-button'
 import { OrderItemsEditor, type CatalogProduct } from '../order-items-editor'
 import { getActiveProducts } from '@/lib/products'
 import {
@@ -98,6 +99,9 @@ export default async function AdminOrderDetailPage({
             <DeliveryNoteIcon />
             Bon de livraison PDF
           </a>
+          {order.source !== 'demo' && !order.invoiceNumber && (
+            <DeleteOrderButton orderId={order.id} orderNumber={order.orderNumber} />
+          )}
         </div>
       </div>
 

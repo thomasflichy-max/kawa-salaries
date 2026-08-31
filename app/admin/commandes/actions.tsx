@@ -1,5 +1,7 @@
 'use server'
 
+import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import {
   advanceDemoOrderStatus,
@@ -199,4 +201,40 @@ export async function removeOrderItemAction(orderId: string, itemId: string) {
   const actor = await requireKawaStaffActor()
   removeDemoOrderItem(orderId, itemId, actor)
   revalidateOrderPaths(orderId)
+}
+
+export type DeleteOrderResult = { ok: false; error: string }
+
+// Blocked once a real invoice has been archived (invoiceNumber set) — at
+// that point the order must be corrected via a refund/avoir instead, to
+// keep the accounting trail intact (see lib/order-documents.tsx). Only
+// unpaid/never-invoiced orders (abandoned checkouts, test orders) can be
+// deleted outright. Demo orders (in-memory, not in the database) aren't
+// handled here — nothing to delete. On success, redirects to the list
+// (the return type only ever surfaces the error case).
+export async function deleteOrderAction(orderId: string): Promise<DeleteOrderResult> {
+  await requireKawaStaffActor()
+
+  const order = await getAdminOrderById(orderId)
+  if (!order || order.source === 'demo') {
+    return { ok: false, error: 'Commande introuvable.' }
+  }
+  if (order.invoiceNumber) {
+    return {
+      ok: false,
+      error: `Commande déjà facturée (${order.invoiceNumber}) — utilise un remboursement plutôt qu'une suppression.`,
+    }
+  }
+
+  const supabase = await createClient()
+  const table = order.source === 'manual' ? 'manual_orders' : 'orders'
+  const { error } = await supabase.from(table).delete().eq('id', orderId)
+  if (error) {
+    console.error('[commandes] deleteOrderAction failed:', error)
+    return { ok: false, error: 'Une erreur est survenue, merci de réessayer.' }
+  }
+
+  revalidatePath('/admin/commandes')
+  revalidatePath('/admin')
+  redirect('/admin/commandes')
 }
