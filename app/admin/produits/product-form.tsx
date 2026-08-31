@@ -15,7 +15,7 @@ const COFFEE_SUBCATEGORIES = [
 // Kept in sync with app/compte/produits/choisir-son-cafe/guide-wizard.tsx's
 // FLAVOR_KEYWORDS — these are the only tags the guide knows how to show as
 // a button.
-const FLAVOR_OPTIONS = ['chocolat', 'corsé', 'doux', 'épicé', 'intense', 'noisette', 'caramel']
+const FLAVOR_OPTIONS = ['chocolat', 'acidulé', 'doux', 'épicé', 'intense', 'noisette', 'caramel']
 
 type ProductDefaults = {
   category: string

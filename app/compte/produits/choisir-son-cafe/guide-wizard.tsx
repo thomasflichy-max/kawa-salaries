@@ -74,7 +74,7 @@ type Machine = (typeof MACHINES)[number]
 // also fighting the human-facing description's wording.
 const FLAVOR_KEYWORDS = [
   'chocolat',
-  'corsé',
+  'acidulé',
   'doux',
   'épicé',
   'intense',
