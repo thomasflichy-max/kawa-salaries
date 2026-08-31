@@ -890,6 +890,10 @@ export type Database = {
         Args: { p_series: string; p_year: number }
         Returns: number
       }
+      next_order_number: {
+        Args: { p_year: number }
+        Returns: number
+      }
       generate_mfa_recovery_codes: {
         Args: { p_code_hashes: string[] }
         Returns: undefined
