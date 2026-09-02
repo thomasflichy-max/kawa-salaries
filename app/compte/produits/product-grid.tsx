@@ -1,6 +1,6 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { AddToCartButton } from './add-to-cart-button'
+import { ProductImage } from './product-image'
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -43,28 +43,11 @@ export function ProductGrid({ products }: { products: Product[] }) {
                 {product.tag}
               </p>
             )}
-            <div className="relative aspect-[4/3] bg-white">
-              {product.image_url && (
-                <Image
-                  src={product.image_url}
-                  alt={product.name}
-                  fill
-                  sizes="(min-width:1024px) 22vw, 50vw"
-                  className={`object-contain transition-opacity duration-500 ${
-                    product.hover_image_url ? 'group-hover:opacity-0' : ''
-                  }`}
-                />
-              )}
-              {product.hover_image_url && (
-                <Image
-                  src={product.hover_image_url}
-                  alt={product.name}
-                  fill
-                  sizes="(min-width:1024px) 22vw, 50vw"
-                  className="object-contain opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                />
-              )}
-            </div>
+            <ProductImage
+              imageUrl={product.image_url}
+              hoverImageUrl={product.hover_image_url}
+              name={product.name}
+            />
             <div className="flex flex-col gap-2 p-5 pb-0">
               <p className="font-semibold text-kawa-800 hover:underline decoration-sky-500">
                 {product.name}
