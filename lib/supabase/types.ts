@@ -1,3 +1,12 @@
+export type PendingCheckoutItem = {
+  productName: string
+  quantity: number
+  imageUrl: string
+  unit: string
+  unitPriceTTC: number
+  vatRate: number
+}
+
 export type Database = {
   __InternalSupabase: {
     PostgrestVersion: string
@@ -574,6 +583,63 @@ export type Database = {
           },
           {
             foreignKeyName: 'orders_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      pending_checkouts: {
+        Row: {
+          order_number: string
+          profile_id: string
+          organization_id: string
+          employee_name: string
+          employee_email: string
+          billing_address: string
+          delivery_mode: string
+          address: string
+          amount: number
+          items: PendingCheckoutItem[]
+          created_at: string
+        }
+        Insert: {
+          order_number: string
+          profile_id: string
+          organization_id: string
+          employee_name: string
+          employee_email: string
+          billing_address: string
+          delivery_mode: string
+          address: string
+          amount: number
+          items: PendingCheckoutItem[]
+          created_at?: string
+        }
+        Update: {
+          order_number?: string
+          profile_id?: string
+          organization_id?: string
+          employee_name?: string
+          employee_email?: string
+          billing_address?: string
+          delivery_mode?: string
+          address?: string
+          amount?: number
+          items?: PendingCheckoutItem[]
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'pending_checkouts_profile_id_fkey'
+            columns: ['profile_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'pending_checkouts_organization_id_fkey'
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'

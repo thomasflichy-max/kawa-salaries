@@ -104,40 +104,25 @@ export async function placeOrderAction(
     return { error: 'Une erreur est survenue, merci de réessayer.' }
   }
 
-  const { data: order, error: insertError } = await supabase
-    .from('orders')
-    .insert({
-      order_number: orderNumber,
-      profile_id: user.id,
-      organization_id: profile.organization_id,
-      employee_name: profile.full_name ?? user.email ?? '',
-      employee_email: user.email ?? '',
-      billing_address: billingAddress,
-      delivery_mode: deliveryMode,
-      address,
-      amount,
-    })
-    .select('id')
-    .single()
+  // Staged, not a real order yet (migration 0048) — no row in `orders`
+  // exists until the webhook sees payment.captured. If the payment is
+  // declined/abandoned, this reservation is just deleted and the cart is
+  // exactly as the employee left it, nothing to undo.
+  const { error: insertError } = await supabase.from('pending_checkouts').insert({
+    order_number: orderNumber,
+    profile_id: user.id,
+    organization_id: profile.organization_id,
+    employee_name: profile.full_name ?? user.email ?? '',
+    employee_email: user.email ?? '',
+    billing_address: billingAddress,
+    delivery_mode: deliveryMode,
+    address,
+    amount,
+    items,
+  })
 
-  if (insertError || !order) {
-    console.error('[placeOrderAction] order insert failed:', insertError)
-    return { error: 'Une erreur est survenue, merci de réessayer.' }
-  }
-
-  const { error: itemsError } = await supabase.from('order_items').insert(
-    items.map((item) => ({
-      order_id: order.id,
-      product_name: item.productName,
-      quantity: item.quantity,
-      image_url: item.imageUrl,
-      unit: item.unit,
-      unit_price_ttc: item.unitPriceTTC,
-      vat_rate: item.vatRate,
-    }))
-  )
-  if (itemsError) {
-    console.error('[placeOrderAction] items insert failed:', itemsError)
+  if (insertError) {
+    console.error('[placeOrderAction] pending checkout insert failed:', insertError)
     return { error: 'Une erreur est survenue, merci de réessayer.' }
   }
 
@@ -146,30 +131,22 @@ export async function placeOrderAction(
     const checkout = await createHostedCheckout({
       amount,
       orderNumber,
-      returnUrl: `${SITE_URL}/compte/panier/retour?commande=${order.id}`,
+      returnUrl: `${SITE_URL}/compte/panier/retour`,
     })
     redirectUrl = checkout.redirectUrl
-    await supabase
-      .from('orders')
-      .update({ cawl_hosted_checkout_id: checkout.hostedCheckoutId })
-      .eq('id', order.id)
   } catch (error) {
     console.error('[placeOrderAction] CAWL checkout creation failed:', error)
-    // Don't leave a ghost order behind if we can't even get a payment link
-    // for it — same reasoning as the webhook deleting rejected/cancelled
-    // orders (see app/api/webhooks/cawl/route.ts): an order that was never
-    // paid for shouldn't linger in Liste Commande or block the cart.
-    await supabase.from('orders').delete().eq('id', order.id)
+    await supabase.from('pending_checkouts').delete().eq('order_number', orderNumber)
     return {
       error:
         "Le paiement n'a pas pu être initialisé, merci de réessayer ou de contacter KAWA.",
     }
   }
 
-  // The cart is deliberately NOT cleared here — the order exists but isn't
-  // paid yet. It's cleared by the webhook once payment.captured actually
-  // confirms the purchase (app/api/webhooks/cawl/route.ts); if the customer
-  // cancels or their card is declined, the webhook deletes this order
-  // instead, and their cart is exactly as they left it — nothing to redo.
+  // The cart is deliberately NOT cleared here — nothing has been bought
+  // yet. It's cleared by the webhook once payment.captured actually
+  // confirms the purchase (app/api/webhooks/cawl/route.ts), which is also
+  // where the real `orders`/`order_items` rows get created from this
+  // reservation for the first time.
   redirect(redirectUrl)
 }
