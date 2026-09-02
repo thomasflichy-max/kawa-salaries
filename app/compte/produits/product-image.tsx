@@ -1,51 +1,48 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import Image from 'next/image'
 
-// Desktop already gets the swap via CSS group-hover (see product-grid.tsx's
-// `group` class on the card) — nothing to do there. Touch devices have no
-// hover state at all, so :hover never fires; the fix is to intercept the
-// first tap on touch devices only (matchMedia('(hover: none)'), the correct
-// way to detect "this input can't hover", rather than guessing from touch
-// support alone) and reveal the alternate photo instead of navigating. A
-// second tap (or tapping the name/button below the image) continues on to
-// the product page as normal.
+// Clicking the image toggles between the main and hover photo — it never
+// navigates, on any device (no CSS :hover reliance, which never fires on
+// touch anyway). Only the title/description link to the product page (see
+// product-grid.tsx and the product detail page).
 export function ProductImage({
   imageUrl,
   hoverImageUrl,
   name,
+  sizes = '(min-width:1024px) 22vw, 50vw',
+  className = 'aspect-[4/3] bg-white',
+  children,
 }: {
   imageUrl: string | null
   hoverImageUrl: string | null
   name: string
+  sizes?: string
+  className?: string
+  children?: ReactNode
 }) {
-  const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [revealed, setRevealed] = useState(false)
-
-  useEffect(() => {
-    setIsTouchDevice(window.matchMedia('(hover: none)').matches)
-  }, [])
 
   return (
     <div
-      className="relative aspect-[4/3] bg-white"
-      onClick={(e) => {
-        if (isTouchDevice && hoverImageUrl && !revealed) {
-          e.preventDefault()
-          e.stopPropagation()
-          setRevealed(true)
-        }
-      }}
+      className={`relative ${className} ${hoverImageUrl ? 'cursor-pointer' : ''}`}
+      onClick={
+        hoverImageUrl
+          ? () => {
+              setRevealed((r) => !r)
+            }
+          : undefined
+      }
     >
       {imageUrl && (
         <Image
           src={imageUrl}
           alt={name}
           fill
-          sizes="(min-width:1024px) 22vw, 50vw"
+          sizes={sizes}
           className={`object-contain transition-opacity duration-500 ${
-            hoverImageUrl ? `group-hover:opacity-0 ${revealed ? 'opacity-0' : ''}` : ''
+            revealed ? 'opacity-0' : 'opacity-100'
           }`}
         />
       )}
@@ -54,12 +51,13 @@ export function ProductImage({
           src={hoverImageUrl}
           alt={name}
           fill
-          sizes="(min-width:1024px) 22vw, 50vw"
-          className={`object-contain transition-opacity duration-500 group-hover:opacity-100 ${
+          sizes={sizes}
+          className={`object-contain transition-opacity duration-500 ${
             revealed ? 'opacity-100' : 'opacity-0'
           }`}
         />
       )}
+      {children}
     </div>
   )
 }

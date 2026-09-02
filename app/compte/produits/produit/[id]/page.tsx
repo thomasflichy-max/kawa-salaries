@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProductById } from '@/lib/products'
@@ -6,6 +5,7 @@ import { getEmployee } from '@/lib/get-employee'
 import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
 import { QuantityAddForm } from '../../quantity-add-form'
 import { InterestForm } from '../../interest-form'
+import { ProductImage } from '../../product-image'
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -61,33 +61,19 @@ export default async function ProductDetailPage({
       </nav>
 
       <div className="grid md:grid-cols-2 gap-10">
-        <div className="group relative aspect-square bg-white rounded-2xl border border-kawa-200 overflow-hidden">
-          {product.image_url && (
-            <Image
-              src={product.image_url}
-              alt={product.name}
-              fill
-              sizes="(min-width:768px) 40vw, 90vw"
-              className={`object-contain transition-opacity duration-500 ${
-                product.hover_image_url ? 'group-hover:opacity-0' : ''
-              }`}
-            />
-          )}
-          {product.hover_image_url && (
-            <Image
-              src={product.hover_image_url}
-              alt={product.name}
-              fill
-              sizes="(min-width:768px) 40vw, 90vw"
-              className="object-contain opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            />
-          )}
+        <ProductImage
+          imageUrl={product.image_url}
+          hoverImageUrl={product.hover_image_url}
+          name={product.name}
+          sizes="(min-width:768px) 40vw, 90vw"
+          className="aspect-square bg-white rounded-2xl border border-kawa-200 overflow-hidden"
+        >
           {product.tag && (
             <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs uppercase tracking-wide text-sky-700 font-medium">
               {product.tag}
             </span>
           )}
-        </div>
+        </ProductImage>
 
         <div className="flex flex-col gap-6">
           <div>

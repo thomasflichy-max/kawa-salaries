@@ -37,25 +37,26 @@ export function ProductGrid({ products }: { products: Product[] }) {
           key={product.id}
           className="group flex flex-col overflow-hidden rounded-2xl border border-kawa-200 bg-kawa-50"
         >
-          <Link href={`/compte/produits/produit/${product.id}`}>
-            {product.tag && (
-              <p className="px-5 pt-4 text-[10px] uppercase tracking-wide text-sky-700 font-medium">
-                {product.tag}
-              </p>
+          {product.tag && (
+            <p className="px-5 pt-4 text-[10px] uppercase tracking-wide text-sky-700 font-medium">
+              {product.tag}
+            </p>
+          )}
+          <ProductImage
+            imageUrl={product.image_url}
+            hoverImageUrl={product.hover_image_url}
+            name={product.name}
+          />
+          <Link
+            href={`/compte/produits/produit/${product.id}`}
+            className="flex flex-col gap-2 p-5 pb-0"
+          >
+            <p className="font-semibold text-kawa-800 hover:underline decoration-sky-500">
+              {product.name}
+            </p>
+            {product.category === 'cafe' && product.short_description && (
+              <p className="text-sm text-kawa-500">{product.short_description}</p>
             )}
-            <ProductImage
-              imageUrl={product.image_url}
-              hoverImageUrl={product.hover_image_url}
-              name={product.name}
-            />
-            <div className="flex flex-col gap-2 p-5 pb-0">
-              <p className="font-semibold text-kawa-800 hover:underline decoration-sky-500">
-                {product.name}
-              </p>
-              {product.category === 'cafe' && product.short_description && (
-                <p className="text-sm text-kawa-500">{product.short_description}</p>
-              )}
-            </div>
           </Link>
           <div className="flex flex-col gap-2 p-5 pt-2 mt-auto">
             {product.price != null ? (
