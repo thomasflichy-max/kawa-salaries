@@ -28,6 +28,10 @@ export function PaymentMethodBadges() {
       <span className="flex items-center justify-center h-10 w-20 rounded-lg border border-kawa-200 bg-[#1a1f71] text-white text-base font-bold italic tracking-wide">
         VISA
       </span>
+
+      <span className="flex items-center justify-center h-10 w-20 rounded-lg border border-kawa-200 bg-white text-sm font-bold tracking-wide text-sky-700">
+        CAWL
+      </span>
     </div>
   )
 }
