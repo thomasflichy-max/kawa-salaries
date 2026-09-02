@@ -27,7 +27,7 @@ export default async function AvantagePage() {
               alt="Sachets de café KAWA"
               fill
               sizes="(min-width: 640px) 192px, 100vw"
-              className="object-cover"
+              className="object-cover object-[50%_65%]"
             />
           </div>
         </div>

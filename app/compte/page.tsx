@@ -3,6 +3,7 @@ import { logout } from '@/app/actions/auth'
 import { ChangePasswordForm } from './change-password-form'
 import { ProfileForm } from './profile-form'
 import { DefaultAddressForm } from './default-address-form'
+import { PaymentMethodBadges } from './payment-method-badges'
 
 export default async function ComptePage() {
   const { user, profile, organization, organizationAddresses } = await getEmployee()
@@ -56,6 +57,7 @@ export default async function ComptePage() {
             via notre prestataire sécurisé CAWL (Crédit Agricole) — aucune carte n&apos;est
             enregistrée ni conservée dans votre compte KAWA.
           </p>
+          <PaymentMethodBadges />
         </div>
       </div>
 
