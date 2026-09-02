@@ -23,7 +23,7 @@ export default async function AvantagePage() {
           </div>
           <div className="relative w-40 sm:w-48 h-full min-h-40 mx-auto sm:mx-0 rounded-xl overflow-hidden">
             <Image
-              src="/avantage/sachets-oranges.jpg"
+              src="/avantage/sachets-tanat.jpg"
               alt="Sachets de café KAWA"
               fill
               sizes="192px"
