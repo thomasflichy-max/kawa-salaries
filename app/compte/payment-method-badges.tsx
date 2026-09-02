@@ -1,6 +1,9 @@
+import Image from 'next/image'
+
 // Simple CSS/SVG recreations of the accepted payment network marks —
 // purely illustrative (nominative use, "we accept these"), not the
-// official brand assets.
+// official brand assets. CAWL's badge uses their real logo (provided by
+// the client), the others don't since we don't have those brands' files.
 export function PaymentMethodBadges() {
   return (
     <div className="flex flex-wrap gap-3 mt-4">
@@ -29,8 +32,14 @@ export function PaymentMethodBadges() {
         VISA
       </span>
 
-      <span className="flex items-center justify-center h-10 w-20 rounded-lg border border-kawa-200 bg-white text-sm font-bold tracking-wide text-sky-700">
-        CAWL
+      <span className="relative flex items-center justify-center h-10 w-20 rounded-lg border border-kawa-200 bg-white p-2">
+        <Image
+          src="/payment-icons/cawl.png"
+          alt="CAWL"
+          fill
+          sizes="80px"
+          className="object-contain p-2"
+        />
       </span>
     </div>
   )
