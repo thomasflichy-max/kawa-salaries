@@ -52,8 +52,9 @@ export default async function ComptePage() {
         <h2 className="text-lg font-semibold text-kawa-800 mb-4">Moyens de paiement</h2>
         <div className="bg-white rounded-2xl border border-kawa-200 p-6 max-w-sm">
           <p className="text-sm text-kawa-500">
-            Bientôt disponible — l&apos;ajout d&apos;un moyen de paiement sera possible dès
-            l&apos;intégration du paiement CAWL (Crédit Agricole).
+            Le paiement se fait par carte bancaire directement au moment de la commande,
+            via notre prestataire sécurisé CAWL (Crédit Agricole) — aucune carte n&apos;est
+            enregistrée ni conservée dans votre compte KAWA.
           </p>
         </div>
       </div>

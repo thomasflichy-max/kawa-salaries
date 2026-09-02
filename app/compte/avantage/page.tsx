@@ -21,12 +21,12 @@ export default async function AvantagePage() {
               {`Parce que ${organization?.name ?? 'votre entreprise'} est client de KAWA Nantes, vous bénéficiez d'une réduction sur nos cafés ainsi que l'accès à nos produits d'entretiens et à nos machines reconditionnées. C'est une offre réservée exclusivement aux salariés des entreprises clientes de KAWA, basés à Nantes.`}
             </p>
           </div>
-          <div className="relative w-40 sm:w-48 h-full min-h-40 mx-auto sm:mx-0 rounded-xl overflow-hidden">
+          <div className="relative w-full h-56 sm:w-48 sm:h-full sm:min-h-40 rounded-xl overflow-hidden">
             <Image
               src="/avantage/sachets-tanat.jpg"
               alt="Sachets de café KAWA"
               fill
-              sizes="192px"
+              sizes="(min-width: 640px) 192px, 100vw"
               className="object-cover"
             />
           </div>
@@ -42,12 +42,12 @@ export default async function AvantagePage() {
               locaux du 75 Bd Ernest Dalby, entre 9h et 18h.
             </p>
           </div>
-          <div className="relative w-40 sm:w-48 h-full min-h-40 mx-auto sm:mx-0 rounded-xl overflow-hidden">
+          <div className="relative w-full h-56 sm:w-48 sm:h-full sm:min-h-40 rounded-xl overflow-hidden">
             <Image
               src="/avantage/grains-cafe.jpg"
               alt="Grains de café KAWA"
               fill
-              sizes="192px"
+              sizes="(min-width: 640px) 192px, 100vw"
               className="object-cover"
             />
           </div>
