@@ -22,6 +22,24 @@ function normalizeDomain(input: string) {
     .split('/')[0]
 }
 
+// "Autres domaines" free-text field — one per line or comma-separated.
+// Returns normalized, de-duplicated domains, excluding the primary.
+function parseAdditionalDomains(input: string, primaryDomain: string) {
+  const seen = new Set<string>([primaryDomain])
+  const out: string[] = []
+  for (const raw of input.split(/[\n,]/)) {
+    const domain = normalizeDomain(raw)
+    if (!domain || seen.has(domain)) continue
+    seen.add(domain)
+    out.push(domain)
+  }
+  return out
+}
+
+function invalidDomain(domain: string) {
+  return !domain || !domain.includes('.') || /\s/.test(domain)
+}
+
 const COFFEE_SUBCATEGORIES = ['classique', 'bio', 'decafeine'] as const
 
 export async function createOrganization(
@@ -50,15 +68,26 @@ export async function createOrganization(
   if (!name) {
     return { error: "Le nom de l'entreprise est requis." }
   }
-  if (!domain || !domain.includes('.') || /\s/.test(domain)) {
+  if (invalidDomain(domain)) {
     return {
       error:
         'Domaine invalide. Renseigne le domaine email des salariés (ex: colbertgroupe.com), pas une URL de site web.',
     }
   }
-  const invalidSampleEmail = sampleEmails.find((email) => !email.toLowerCase().endsWith(`@${domain}`))
+  const additionalDomains = parseAdditionalDomains(
+    String(formData.get('additional_domains') ?? ''),
+    domain
+  )
+  const badAdditional = additionalDomains.find(invalidDomain)
+  if (badAdditional) {
+    return { error: `Domaine additionnel invalide : "${badAdditional}".` }
+  }
+  const allDomains = [domain, ...additionalDomains]
+  const invalidSampleEmail = sampleEmails.find(
+    (email) => !allDomains.some((d) => email.toLowerCase().endsWith(`@${d}`))
+  )
   if (invalidSampleEmail) {
-    return { error: `Le mail type "${invalidSampleEmail}" doit se terminer par "@${domain}".` }
+    return { error: `Le mail type "${invalidSampleEmail}" doit correspondre à un des domaines de l'entreprise.` }
   }
 
   const discountAmounts: Record<(typeof COFFEE_SUBCATEGORIES)[number], number> = {
@@ -108,6 +137,21 @@ export async function createOrganization(
   if (discountsError) {
     console.error('[createOrganization] discounts insert failed:', discountsError)
     return { error: "L'entreprise a été créée mais l'enregistrement des remises a échoué." }
+  }
+
+  if (additionalDomains.length > 0) {
+    const { error: domainsError } = await supabase.from('organization_domains').insert(
+      additionalDomains.map((d) => ({ organization_id: org.id, domain: d }))
+    )
+    if (domainsError) {
+      console.error('[createOrganization] additional domains insert failed:', domainsError)
+      return {
+        error:
+          domainsError.code === '23505' || domainsError.code === '23514'
+            ? "L'entreprise a été créée, mais un des domaines additionnels est déjà utilisé ailleurs."
+            : "L'entreprise a été créée mais l'enregistrement des domaines additionnels a échoué.",
+      }
+    }
   }
 
   if (sites.length > 0) {
@@ -232,11 +276,19 @@ export async function updateOrganizationInfo(
   if (!name) {
     return { error: "Le nom de l'entreprise est requis." }
   }
-  if (!domain || !domain.includes('.') || /\s/.test(domain)) {
+  if (invalidDomain(domain)) {
     return {
       error:
         'Domaine invalide. Renseigne le domaine email des salariés (ex: colbertgroupe.com), pas une URL de site web.',
     }
+  }
+  const additionalDomains = parseAdditionalDomains(
+    String(formData.get('additional_domains') ?? ''),
+    domain
+  )
+  const badAdditional = additionalDomains.find(invalidDomain)
+  if (badAdditional) {
+    return { error: `Domaine additionnel invalide : "${badAdditional}".` }
   }
 
   const { error } = await supabase
@@ -250,6 +302,31 @@ export async function updateOrganizationInfo(
         error.code === '23505'
           ? `Une entreprise avec le domaine "${domain}" existe déjà.`
           : 'Une erreur est survenue, merci de réessayer.',
+    }
+  }
+
+  // Additional domains have no dependent rows, so a clean replace is simpler
+  // than reconciling ids like the sites/sample-emails forms do.
+  const { error: deleteError } = await supabase
+    .from('organization_domains')
+    .delete()
+    .eq('organization_id', organizationId)
+  if (deleteError) {
+    console.error('[updateOrganizationInfo] domains delete failed:', deleteError)
+    return { error: 'Le domaine principal a été mis à jour, mais pas les domaines additionnels.' }
+  }
+  if (additionalDomains.length > 0) {
+    const { error: insertError } = await supabase
+      .from('organization_domains')
+      .insert(additionalDomains.map((d) => ({ organization_id: organizationId, domain: d })))
+    if (insertError) {
+      console.error('[updateOrganizationInfo] domains insert failed:', insertError)
+      return {
+        error:
+          insertError.code === '23505' || insertError.code === '23514'
+            ? "Un des domaines additionnels est déjà utilisé par une autre entreprise."
+            : 'Le domaine principal a été mis à jour, mais pas les domaines additionnels.',
+      }
     }
   }
 
@@ -431,16 +508,17 @@ export async function updateOrganizationSampleEmails(
     return { error: 'Non autorisé.' }
   }
 
-  const { data: org, error: orgError } = await supabase
-    .from('organizations')
-    .select('domain')
-    .eq('id', organizationId)
-    .single()
+  const [{ data: org, error: orgError }, { data: extraDomains }] = await Promise.all([
+    supabase.from('organizations').select('domain').eq('id', organizationId).single(),
+    supabase.from('organization_domains').select('domain').eq('organization_id', organizationId),
+  ])
 
   if (orgError || !org) {
     console.error('[updateOrganizationSampleEmails] org fetch failed:', orgError)
     return { error: 'Une erreur est survenue, merci de réessayer.' }
   }
+
+  const orgDomains = [org.domain, ...(extraDomains ?? []).map((d) => d.domain)]
 
   const emailIds = formData.getAll('email_id').map((v) => String(v))
   const emailValues = formData.getAll('email_value').map((v) => String(v).trim())
@@ -449,10 +527,12 @@ export async function updateOrganizationSampleEmails(
     .filter((entry) => entry.email)
 
   const invalidEmail = submitted.find(
-    (entry) => !entry.email.toLowerCase().endsWith(`@${org.domain}`)
+    (entry) => !orgDomains.some((d) => entry.email.toLowerCase().endsWith(`@${d}`))
   )
   if (invalidEmail) {
-    return { error: `Le mail type "${invalidEmail.email}" doit se terminer par "@${org.domain}".` }
+    return {
+      error: `Le mail type "${invalidEmail.email}" doit correspondre à un des domaines de l'entreprise (${orgDomains.join(', ')}).`,
+    }
   }
 
   const { data: existingEmails, error: fetchError } = await supabase

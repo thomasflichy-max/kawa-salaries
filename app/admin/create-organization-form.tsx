@@ -55,7 +55,7 @@ export function CreateOrganizationForm() {
         </div>
 
         <div>
-          <label className="text-sm font-medium text-kawa-700">Domaine email (sans le @)</label>
+          <label className="text-sm font-medium text-kawa-700">Domaine email principal (sans le @)</label>
           <input
             type="text"
             name="domain"
@@ -64,6 +64,21 @@ export function CreateOrganizationForm() {
             className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-kawa-700">
+          Autres domaines email{' '}
+          <span className="text-kawa-400 font-normal">
+            (facultatif, un par ligne — si l&apos;entité a plusieurs domaines)
+          </span>
+        </label>
+        <textarea
+          name="additional_domains"
+          rows={2}
+          placeholder="altavia-nantes.com"
+          className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+        />
       </div>
 
       <div>

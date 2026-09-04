@@ -26,8 +26,14 @@ export default async function AdminAccountDetailPage({
   const range = resolveDateRange(await searchParams)
   const supabase = await createClient()
 
-  const [{ data: org }, { data: employees }, { data: addresses }, { data: sampleEmails }, { data: discounts }] =
-    await Promise.all([
+  const [
+    { data: org },
+    { data: employees },
+    { data: addresses },
+    { data: sampleEmails },
+    { data: discounts },
+    { data: extraDomains },
+  ] = await Promise.all([
       supabase
         .from('organizations')
         .select('id, name, domain, active, created_at')
@@ -52,6 +58,11 @@ export default async function AdminAccountDetailPage({
         .from('organization_coffee_discounts')
         .select('subcategory, discount_amount')
         .eq('organization_id', id),
+      supabase
+        .from('organization_domains')
+        .select('domain')
+        .eq('organization_id', id)
+        .order('domain'),
     ])
 
   if (!org) {
@@ -110,6 +121,7 @@ export default async function AdminAccountDetailPage({
           organizationId={org.id}
           name={org.name}
           domain={org.domain}
+          additionalDomains={(extraDomains ?? []).map((d) => d.domain)}
           active={org.active ?? false}
         />
       </section>

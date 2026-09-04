@@ -335,6 +335,32 @@ export type Database = {
           }
         ]
       }
+      organization_domains: {
+        Row: {
+          domain: string
+          organization_id: string
+          created_at: string
+        }
+        Insert: {
+          domain: string
+          organization_id: string
+          created_at?: string
+        }
+        Update: {
+          domain?: string
+          organization_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'organization_domains_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       organization_sample_emails: {
         Row: {
           id: string

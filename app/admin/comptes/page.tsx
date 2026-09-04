@@ -14,11 +14,20 @@ const currency = new Intl.NumberFormat('fr-FR', {
 
 export default async function AdminAccountsPage() {
   const supabase = await createClient()
-  const [{ data: organizations }, { data: profiles }, { data: discounts }] = await Promise.all([
-    supabase.from('organizations').select('id, name, domain, active').order('name'),
-    supabase.from('profiles').select('id, organization_id'),
-    supabase.from('organization_coffee_discounts').select('organization_id, subcategory, discount_amount'),
-  ])
+  const [{ data: organizations }, { data: profiles }, { data: discounts }, { data: extraDomains }] =
+    await Promise.all([
+      supabase.from('organizations').select('id, name, domain, active').order('name'),
+      supabase.from('profiles').select('id, organization_id'),
+      supabase.from('organization_coffee_discounts').select('organization_id, subcategory, discount_amount'),
+      supabase.from('organization_domains').select('organization_id, domain'),
+    ])
+
+  const extraDomainsByOrg = new Map<string, string[]>()
+  for (const row of extraDomains ?? []) {
+    const list = extraDomainsByOrg.get(row.organization_id) ?? []
+    list.push(row.domain)
+    extraDomainsByOrg.set(row.organization_id, list)
+  }
 
   const orgs = organizations ?? []
   const employeeCountByOrg = new Map<string, number>()
@@ -68,7 +77,14 @@ export default async function AdminAccountsPage() {
                       {org.name}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-kawa-500">{org.domain}</td>
+                  <td className="px-5 py-3 text-kawa-500">
+                    {org.domain}
+                    {(extraDomainsByOrg.get(org.id) ?? []).map((d) => (
+                      <span key={d} className="block text-xs text-kawa-400">
+                        + {d}
+                      </span>
+                    ))}
+                  </td>
                   <td className="px-5 py-3 text-kawa-500 whitespace-nowrap">
                     {discountsByOrg.get(org.id) ?? '—'}
                   </td>

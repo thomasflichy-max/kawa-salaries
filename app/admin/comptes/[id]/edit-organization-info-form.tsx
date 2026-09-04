@@ -7,11 +7,13 @@ export function EditOrganizationInfoForm({
   organizationId,
   name,
   domain,
+  additionalDomains,
   active,
 }: {
   organizationId: string
   name: string
   domain: string
+  additionalDomains: string[]
   active: boolean
 }) {
   const boundAction = updateOrganizationInfo.bind(null, organizationId)
@@ -31,7 +33,7 @@ export function EditOrganizationInfoForm({
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-kawa-700">Domaine email (sans le @)</label>
+          <label className="text-sm font-medium text-kawa-700">Domaine email principal (sans le @)</label>
           <input
             type="text"
             name="domain"
@@ -40,6 +42,22 @@ export function EditOrganizationInfoForm({
             className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-kawa-700">
+          Autres domaines email{' '}
+          <span className="text-kawa-400 font-normal">
+            (un par ligne — pour une entité qui a plusieurs domaines)
+          </span>
+        </label>
+        <textarea
+          name="additional_domains"
+          defaultValue={additionalDomains.join('\n')}
+          rows={Math.max(2, additionalDomains.length + 1)}
+          placeholder="altavia-nantes.com"
+          className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+        />
       </div>
 
       <div className="flex items-center justify-between">
