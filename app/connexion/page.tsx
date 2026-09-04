@@ -60,14 +60,6 @@ export default async function ConnexionPage({
             Créer un compte
           </Link>
         </p>
-        {wantsAdmin && (
-          <p className="text-center text-sm text-kawa-400 mt-2">
-            Équipe KAWA sans accès admin ?{' '}
-            <Link href="/inscription-staff" className="text-sky-700 underline">
-              Créer mon accès
-            </Link>
-          </p>
-        )}
       </div>
     </main>
   )
