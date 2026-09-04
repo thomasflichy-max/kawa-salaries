@@ -111,12 +111,30 @@ export async function createOrganization(
   }
 
   if (sites.length > 0) {
+    // Geocode each site up front so it shows on the clients map immediately —
+    // otherwise it stays invisible until someone opens the org's edit form
+    // and re-saves. Nominatim caps at 1 req/sec, so this stays sequential.
+    const coordsByAddress = new Map<string, { lat: number; lng: number } | null>()
+    for (const site of sites) {
+      if (coordsByAddress.has(site.address)) continue
+      const coords = await geocodeAddress(site.address)
+      if (!coords) {
+        console.error('[createOrganization] geocoding found no match for address:', site.address)
+      }
+      coordsByAddress.set(site.address, coords)
+    }
+
     const { error: sitesError } = await supabase.from('organization_addresses').insert(
-      sites.map((site) => ({
-        organization_id: org.id,
-        label: site.label,
-        address: site.address,
-      }))
+      sites.map((site) => {
+        const coords = coordsByAddress.get(site.address)
+        return {
+          organization_id: org.id,
+          label: site.label,
+          address: site.address,
+          lat: coords?.lat ?? null,
+          lng: coords?.lng ?? null,
+        }
+      })
     )
     if (sitesError) {
       console.error('[createOrganization] sites insert failed:', sitesError)
