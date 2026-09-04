@@ -5,12 +5,12 @@
 // and break the build — see the "You're importing a module that depends on
 // next/headers" Turbopack error this file was split out to fix.
 
-// Coffee (category "cafe") is taxed as a food product at 5.5%, everything
-// else (machines, entretien) at the standard 20% rate — same split used
-// everywhere an order line item is built, from admin manual orders to real
-// checkout, to the invoice PDF.
+// Coffee and tea (categories "cafe"/"the") are foodstuffs, taxed at the
+// reduced 5.5% rate; everything else (machines, entretien) at the standard
+// 20% rate — same split used everywhere an order line item is built, from
+// admin manual orders to real checkout, to the invoice PDF.
 export function vatRateFor(category: string) {
-  return category === 'cafe' ? 0.055 : 0.2
+  return category === 'cafe' || category === 'the' ? 0.055 : 0.2
 }
 export function unitFor(category: string) {
   return category === 'cafe' ? ('Kg' as const) : ('unité' as const)
