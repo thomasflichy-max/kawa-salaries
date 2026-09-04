@@ -204,6 +204,15 @@ export async function login(
 
   if (error) {
     console.error('[login] signInWithPassword failed:', error)
+    // Not a security signal — the credentials are right, the account just
+    // isn't activated yet. Say so plainly (the generic message sends people
+    // into retry loops) and keep it out of the security feed.
+    if (error.code === 'email_not_confirmed') {
+      return {
+        error:
+          "Votre compte est créé, mais vous devez d'abord l'activer : cliquez sur le lien dans l'email de confirmation que nous vous avons envoyé (pensez à vérifier vos spams).",
+      }
+    }
     logSecurityEvent(supabase, { eventType: 'login_failed', email, detail: error.message })
     return { error: 'Email ou mot de passe incorrect.' }
   }
