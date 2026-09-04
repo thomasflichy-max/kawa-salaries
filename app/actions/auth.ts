@@ -103,25 +103,36 @@ export async function signup(
     }
   }
 
-  const { error: logError } = await supabase.from('signup_attempts').insert({
-    email,
-    full_name: `${firstName} ${lastName}`,
-    domain,
-    organization_id: org.id,
-    success: true,
-  })
-  if (logError) {
-    console.error('[signup] failed to log signup attempt:', logError)
-  } else {
-    notifyStaffDevices(supabase, {
-      title: 'Nouvelle inscription',
-      body: `${firstName} ${lastName} (${email}) — ${org.name}`,
-      url: '/admin/inscriptions',
-    }).catch((pushError) => console.error('[signup] push notification failed:', pushError))
-  }
+  // With "Confirm email" on, Supabase doesn't error when the address is
+  // already registered (unconfirmed) — it returns an obfuscated user with no
+  // identities and silently re-sends the confirmation email. Without this
+  // guard, someone submitting the form twice shows up as two "Nouvelle
+  // inscription" events. Treat it as a repeat: skip the log, the staff ping
+  // and the password-history write, and just send them back to the same
+  // confirmation screen.
+  const alreadyRegistered = (signUpData.user?.identities?.length ?? 0) === 0
 
-  if (signUpData.user) {
-    await recordPasswordHistory(supabase, signUpData.user.id, password)
+  if (!alreadyRegistered) {
+    const { error: logError } = await supabase.from('signup_attempts').insert({
+      email,
+      full_name: `${firstName} ${lastName}`,
+      domain,
+      organization_id: org.id,
+      success: true,
+    })
+    if (logError) {
+      console.error('[signup] failed to log signup attempt:', logError)
+    } else {
+      notifyStaffDevices(supabase, {
+        title: 'Nouvelle inscription',
+        body: `${firstName} ${lastName} (${email}) — ${org.name}`,
+        url: '/admin/inscriptions',
+      }).catch((pushError) => console.error('[signup] push notification failed:', pushError))
+    }
+
+    if (signUpData.user) {
+      await recordPasswordHistory(supabase, signUpData.user.id, password)
+    }
   }
 
   // If email confirmation is disabled on the project, signUp already returns
@@ -176,7 +187,9 @@ export async function adminSignup(
     }
   }
 
-  if (signUpData.user) {
+  // Empty identities means the address was already registered (see the note
+  // in signup() above) — nothing new to record.
+  if (signUpData.user && (signUpData.user.identities?.length ?? 0) > 0) {
     await recordPasswordHistory(supabase, signUpData.user.id, password)
   }
 
