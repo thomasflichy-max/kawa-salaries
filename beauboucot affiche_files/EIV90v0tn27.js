@@ -1,0 +1,3 @@
+;/*FB_PKG_DELIM*/
+
+__d("PolarisSharedAccessStrings",["fbt"],(function(t,n,r,o,a,i,l,s){"use strict";var e=s._(/*BTDS*/"Acc\u00e8s partag\u00e9"),u=s._(/*BTDS*/"Fonctionnalit\u00e9 indisponible"),c=s._(/*BTDS*/"Certaines fonctionnalit\u00e9s sont indisponibles pour les comptes avec un acc\u00e8s partag\u00e9."),d=s._(/*BTDS*/"Messaging is unavailable");l.SHARED_ACCESS=e,l.FEATURE_UNAVAILABLE_HEADING=u,l.FEATURE_UNAVAILABLE_DESCRIPTION=c,l.MESSAGING_UNAVAILABLE_HEADING=d}),226);

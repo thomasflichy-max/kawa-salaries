@@ -2,32 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { ReactionBar } from './reaction-bar'
 import { CommentThread } from './comment-thread'
 import { MarkSeen } from './mark-seen'
-
-const timeFormat = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short' })
-const dayLabelFormat = new Intl.DateTimeFormat('fr-FR', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-})
+import { parisDayKey as dayKey, parisDayLabel as dayLabel, parisTimeFormat as timeFormat } from '@/lib/dates'
 
 const REASON_LABELS: Record<string, string> = {
   domain_not_recognized: "Domaine d'entreprise non reconnu",
-}
-
-function dayKey(date: Date) {
-  return date.toISOString().slice(0, 10)
-}
-
-function dayLabel(date: Date) {
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1)
-
-  if (dayKey(date) === dayKey(today)) return "Aujourd'hui"
-  if (dayKey(date) === dayKey(yesterday)) return 'Hier'
-
-  const label = dayLabelFormat.format(date)
-  return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
 type Attempt = {
