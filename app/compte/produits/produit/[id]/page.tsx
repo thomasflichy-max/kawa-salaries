@@ -14,6 +14,44 @@ const currency = new Intl.NumberFormat('fr-FR', {
 
 const VALID_GRINDS = ['grain', 'filtre', 'espresso'] as const
 
+// Render the free-text detailed description: lines starting with -, *, • or –
+// become a proper bullet list, everything else stays a paragraph. Blank lines
+// separate blocks.
+function ProductDescription({ text }: { text: string }) {
+  const blocks: { type: 'p' | 'ul'; lines: string[] }[] = []
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim()
+    if (!line) continue
+    const bulletMatch = line.match(/^[-*•–]\s+(.*)$/)
+    const last = blocks[blocks.length - 1]
+    if (bulletMatch) {
+      if (last?.type === 'ul') last.lines.push(bulletMatch[1])
+      else blocks.push({ type: 'ul', lines: [bulletMatch[1]] })
+    } else {
+      if (last?.type === 'p') last.lines.push(line)
+      else blocks.push({ type: 'p', lines: [line] })
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2 text-kawa-600 leading-relaxed">
+      {blocks.map((block, i) =>
+        block.type === 'ul' ? (
+          <ul key={i} className="list-disc pl-5 flex flex-col gap-1">
+            {block.lines.map((item, j) => (
+              <li key={j}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p key={i} className="whitespace-pre-line">
+            {block.lines.join('\n')}
+          </p>
+        )
+      )}
+    </div>
+  )
+}
+
 export default async function ProductDetailPage({
   params,
   searchParams,
@@ -96,9 +134,7 @@ export default async function ProductDetailPage({
             )}
           </div>
 
-          {product.description && (
-            <p className="text-kawa-600 leading-relaxed whitespace-pre-line">{product.description}</p>
-          )}
+          {product.description && <ProductDescription text={product.description} />}
 
           {isCoffee && (
             <p className="text-sm text-kawa-500">
