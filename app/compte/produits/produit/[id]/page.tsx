@@ -97,7 +97,7 @@ export default async function ProductDetailPage({
           </div>
 
           {product.description && (
-            <p className="text-kawa-600 leading-relaxed">{product.description}</p>
+            <p className="text-kawa-600 leading-relaxed whitespace-pre-line">{product.description}</p>
           )}
 
           {isCoffee && (
