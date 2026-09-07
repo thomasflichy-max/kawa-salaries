@@ -68,7 +68,7 @@ export function InterestForm({ productId }: { productId: string }) {
         disabled={pending}
         className="bg-sky-500 text-kawa-950 py-3 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
       >
-        {pending ? 'Envoi…' : 'Je veux commander une machine reconditionnée'}
+        {pending ? 'Envoi…' : 'Envoyer ma demande'}
       </button>
     </form>
   )

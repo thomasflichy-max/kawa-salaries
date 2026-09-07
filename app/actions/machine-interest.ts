@@ -63,7 +63,7 @@ export async function submitMachineInterest(
         from: 'kawa-salaries <onboarding@resend.dev>',
         to: NOTIFY_EMAIL,
         replyTo: email,
-        subject: `Demande machine reconditionnée — ${product?.name ?? 'produit'}`,
+        subject: `Demande de contact — ${product?.name ?? 'produit'}`,
         text: [
           `Produit : ${product?.name ?? productId}`,
           `Nom : ${firstName} ${lastName}`,
