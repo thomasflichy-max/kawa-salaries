@@ -46,11 +46,19 @@ export default async function AdminAccountsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-bold text-kawa-800">Comptes clients</h1>
-        <p className="text-kawa-500 text-sm mt-1">
-          Toutes les entreprises clientes, par ordre alphabétique.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-bold text-kawa-800">Comptes clients</h1>
+          <p className="text-kawa-500 text-sm mt-1">
+            Toutes les entreprises clientes, par ordre alphabétique.
+          </p>
+        </div>
+        <a
+          href="/admin/export/salaries"
+          className="shrink-0 text-sm border border-kawa-200 rounded-lg px-3 py-2 text-kawa-700 hover:bg-kawa-50 transition"
+        >
+          Exporter les salariés (CSV)
+        </a>
       </div>
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
