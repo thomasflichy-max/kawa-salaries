@@ -13,7 +13,9 @@ export async function getEmployee() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, organization_id, billing_address, default_address_id, is_suspended')
+    .select(
+      'full_name, organization_id, billing_address, default_address_id, is_suspended, marketing_opt_out'
+    )
     .eq('id', user.id)
     .single()
 

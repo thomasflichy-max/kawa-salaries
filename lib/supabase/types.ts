@@ -162,6 +162,9 @@ export type Database = {
           created_at: string | null
           is_suspended: boolean
           mfa_recovery_bypass_until: string | null
+          marketing_opt_out: boolean
+          marketing_notice_ack_at: string | null
+          marketing_unsub_token: string
         }
         Insert: {
           id: string
@@ -173,6 +176,9 @@ export type Database = {
           created_at?: string | null
           is_suspended?: boolean
           mfa_recovery_bypass_until?: string | null
+          marketing_opt_out?: boolean
+          marketing_notice_ack_at?: string | null
+          marketing_unsub_token?: string
         }
         Update: {
           id?: string
@@ -184,6 +190,9 @@ export type Database = {
           created_at?: string | null
           is_suspended?: boolean
           mfa_recovery_bypass_until?: string | null
+          marketing_opt_out?: boolean
+          marketing_notice_ack_at?: string | null
+          marketing_unsub_token?: string
         }
         Relationships: [
           {
@@ -1001,6 +1010,10 @@ export type Database = {
       prune_push_subscription: {
         Args: { p_id: string }
         Returns: undefined
+      }
+      unsubscribe_marketing: {
+        Args: { p_token: string }
+        Returns: boolean
       }
     }
     Enums: Record<string, never>

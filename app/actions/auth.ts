@@ -314,6 +314,41 @@ export async function updateProfile(
   return { success: true }
 }
 
+export type UpdateMarketingPreferenceState =
+  | { error: string; success?: false }
+  | { success: true; error?: undefined }
+  | undefined
+
+export async function updateMarketingPreference(
+  _prevState: UpdateMarketingPreferenceState,
+  formData: FormData
+): Promise<UpdateMarketingPreferenceState> {
+  // Checkbox "je veux recevoir les communications" — checked means opted IN,
+  // so opt_out is the inverse.
+  const subscribe = formData.get('subscribe') === 'on'
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Session expirée, merci de vous reconnecter.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ marketing_opt_out: !subscribe })
+    .eq('id', user.id)
+
+  if (error) {
+    console.error('[updateMarketingPreference] update failed:', error)
+    return { error: 'Une erreur est survenue, merci de réessayer.' }
+  }
+
+  return { success: true }
+}
+
 export type UpdateDefaultAddressState =
   | { error: string; success?: false }
   | { success: true; error?: undefined }

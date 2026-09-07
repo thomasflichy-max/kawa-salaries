@@ -3,6 +3,7 @@ import { logout } from '@/app/actions/auth'
 import { ChangePasswordForm } from './change-password-form'
 import { ProfileForm } from './profile-form'
 import { DefaultAddressForm } from './default-address-form'
+import { MarketingPreferenceForm } from './marketing-preference-form'
 import { PaymentMethodBadges } from './payment-method-badges'
 
 export default async function ComptePage() {
@@ -42,6 +43,11 @@ export default async function ComptePage() {
           addresses={organizationAddresses}
           defaultAddressId={profile?.default_address_id ?? null}
         />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-kawa-800 mb-4">Communications</h2>
+        <MarketingPreferenceForm optedOut={profile?.marketing_opt_out ?? false} />
       </div>
 
       <div>

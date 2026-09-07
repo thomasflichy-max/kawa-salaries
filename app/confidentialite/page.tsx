@@ -23,8 +23,10 @@ export default function ConfidentialitePage() {
           <h2 className="font-semibold text-kawa-800 mb-1">Finalités du traitement</h2>
           <p className="text-sm text-kawa-600 leading-relaxed">
             Ces données sont utilisées pour gérer votre compte et vos commandes,
-            appliquer la remise liée à votre entreprise, répondre à vos demandes, et
-            assurer la relation commerciale entre KAWA et votre entreprise.
+            appliquer la remise liée à votre entreprise, répondre à vos demandes,
+            assurer la relation commerciale entre KAWA et votre entreprise, et — si vous
+            avez déjà commandé — vous adresser nos offres et actualités (voir
+            « Prospection commerciale » ci-dessous).
           </p>
         </section>
 
@@ -34,6 +36,21 @@ export default function ConfidentialitePage() {
             Le traitement repose sur l&apos;exécution du contrat qui lie votre
             entreprise à KAWA, notre intérêt légitime à assurer la sécurité du service,
             et le cas échéant vos obligations comptables et légales.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-semibold text-kawa-800 mb-1">Prospection commerciale</h2>
+          <p className="text-sm text-kawa-600 leading-relaxed">
+            Si vous avez passé au moins une commande sur la plateforme, KAWA peut utiliser
+            votre adresse email pour vous adresser ses offres et actualités portant sur des
+            produits ou services analogues à ceux que vous avez commandés, conformément à
+            l&apos;article L34-5 du Code des postes et des communications électroniques. Vous
+            en êtes informé·e au moment de la commande. Vous pouvez vous y opposer sans frais
+            à tout moment, depuis la rubrique « Communications » de votre compte ou via le
+            lien de désinscription présent dans chacun de ces emails. Cette opposition est
+            sans effet sur les emails liés à la gestion de vos commandes (confirmations,
+            factures).
           </p>
         </section>
 

@@ -53,12 +53,21 @@ export default async function AdminAccountsPage() {
             Toutes les entreprises clientes, par ordre alphabétique.
           </p>
         </div>
-        <a
-          href="/admin/export/salaries"
-          className="shrink-0 text-sm border border-kawa-200 rounded-lg px-3 py-2 text-kawa-700 hover:bg-kawa-50 transition"
-        >
-          Exporter les salariés (CSV)
-        </a>
+        <div className="shrink-0 flex flex-wrap gap-2">
+          <a
+            href="/admin/export/salaries"
+            className="text-sm border border-kawa-200 rounded-lg px-3 py-2 text-kawa-700 hover:bg-kawa-50 transition"
+          >
+            Exporter les salariés (CSV)
+          </a>
+          <a
+            href="/admin/export/newsletter"
+            className="text-sm border border-kawa-200 rounded-lg px-3 py-2 text-kawa-700 hover:bg-kawa-50 transition"
+            title="Salariés ayant déjà commandé et non désinscrits — liste de prospection art. L34-5 CPCE"
+          >
+            Contacts newsletter (CSV)
+          </a>
+        </div>
       </div>
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">

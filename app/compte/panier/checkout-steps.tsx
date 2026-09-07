@@ -174,6 +174,12 @@ export function CheckoutSteps({
               Vous allez être redirigé·e vers la page de paiement sécurisée CAWL (Crédit
               Agricole) — livraison : {selectedSite ? selectedSite.label : 'Retrait KAWA Nantes'}.
             </p>
+            <p className="text-xs text-kawa-400 max-w-md">
+              En finalisant votre commande, vous acceptez que KAWA utilise votre email pour
+              vous informer de ses offres et actualités sur des produits similaires. Vous
+              pouvez vous y opposer à tout moment depuis Mon Compte ou via le lien de
+              désinscription présent dans chaque email.
+            </p>
           </form>
         )}
       </div>

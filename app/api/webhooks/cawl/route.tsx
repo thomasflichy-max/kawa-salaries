@@ -148,6 +148,15 @@ async function handlePaymentCaptured(
   await supabase.from('cart_items').delete().eq('user_id', pending.profile_id)
   await supabase.from('pending_checkouts').delete().eq('order_number', merchantReference)
 
+  // Record that this buyer completed a purchase during which the commercial
+  // prospection notice was shown (art. L34-5 CPCE "clients existants" basis).
+  // Stamp once; a later opt-out is tracked separately by marketing_opt_out.
+  await supabase
+    .from('profiles')
+    .update({ marketing_notice_ack_at: new Date().toISOString() })
+    .eq('id', pending.profile_id)
+    .is('marketing_notice_ack_at', null)
+
   const { data: fullOrderData, error: fullOrderError } = await supabase
     .from('orders')
     .select(REAL_ORDER_SELECT)
