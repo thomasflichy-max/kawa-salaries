@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
+import { SITE_URL } from '@/lib/emails/shared'
 
 export const runtime = 'nodejs'
 
@@ -34,13 +35,15 @@ export async function GET() {
   for (const row of realOrders ?? []) if (row.profile_id) buyerIds.add(row.profile_id)
   for (const row of manualOrders ?? []) if (row.profile_id) buyerIds.add(row.profile_id)
 
+  const header = 'Nom;Email;Entreprise;Lien désinscription'
+
   if (buyerIds.size === 0) {
-    return csvResponse(BOM + 'Nom;Email;Entreprise')
+    return csvResponse(BOM + header)
   }
 
   const { data: rows, error } = await supabase
     .from('profiles')
-    .select('id, full_name, email, organization_id, marketing_opt_out')
+    .select('id, full_name, email, organization_id, marketing_opt_out, marketing_unsub_token')
     .in('id', [...buyerIds])
     .eq('marketing_opt_out', false)
     .order('email')
@@ -51,13 +54,14 @@ export async function GET() {
   }
 
   const orgById = new Map((orgs ?? []).map((o) => [o.id, o.name]))
-  const lines = ['Nom;Email;Entreprise']
+  const lines = [header]
   for (const row of rows ?? []) {
     lines.push(
       [
         row.full_name ?? '',
         row.email ?? '',
         row.organization_id ? orgById.get(row.organization_id) ?? '' : '',
+        `${SITE_URL}/desinscription?t=${row.marketing_unsub_token}`,
       ]
         .map(csvCell)
         .join(';')
