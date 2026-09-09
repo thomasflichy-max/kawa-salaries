@@ -72,44 +72,47 @@ export default async function AdminOrdersPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-kawa-500 border-b border-kawa-100">
-                <th className="px-5 py-3 font-medium">Date</th>
-                <th className="px-5 py-3 font-medium">N° commande</th>
-                <th className="px-5 py-3 font-medium" />
-                <th className="px-5 py-3 font-medium">Salarié</th>
-                <th className="px-5 py-3 font-medium">Entreprise</th>
-                <th className="px-5 py-3 font-medium">Livraison</th>
-                <th className="px-5 py-3 font-medium">Statut</th>
-                <th className="px-5 py-3 font-medium">Paiement</th>
-                <th className="px-5 py-3 font-medium text-right">Montant TTC</th>
-                <th className="px-5 py-3 font-medium text-right">Actions</th>
+                <th className="px-3 py-3 font-medium">Date</th>
+                <th className="px-3 py-3 font-medium">N° commande</th>
+                <th className="px-3 py-3 font-medium">Salarié</th>
+                <th className="px-3 py-3 font-medium">Entreprise</th>
+                <th className="px-3 py-3 font-medium">Livraison</th>
+                <th className="px-3 py-3 font-medium">Statut</th>
+                <th className="px-3 py-3 font-medium">Paiement</th>
+                <th className="px-3 py-3 font-medium text-right">Montant TTC</th>
+                <th className="px-3 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((order) => {
                 return (
                   <OrderRow key={order.id} id={order.id}>
-                    <td className="px-5 py-3 text-kawa-500 whitespace-nowrap">
+                    <td className="px-3 py-3 text-kawa-500 whitespace-nowrap">
                       {dateFormat.format(new Date(order.createdAt))}
                     </td>
-                    <td className="px-5 py-3 text-kawa-800 font-medium whitespace-nowrap">
-                      {order.orderNumber}
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className="flex items-center gap-2">
+                        <OrderPreviewButton order={order} />
+                        <span className="text-kawa-800 font-medium">{order.orderNumber}</span>
+                      </span>
                     </td>
-                    <td className="px-5 py-3">
-                      <OrderPreviewButton order={order} />
+                    <td className="px-3 py-3 text-kawa-800 max-w-[150px] truncate" title={order.employeeName}>
+                      {order.employeeName}
                     </td>
-                    <td className="px-5 py-3 text-kawa-800">{order.employeeName}</td>
-                    <td className="px-5 py-3 text-kawa-500">{order.organizationName}</td>
-                    <td className="px-5 py-3 text-kawa-500 max-w-[220px]">
+                    <td className="px-3 py-3 text-kawa-500 max-w-[150px] truncate" title={order.organizationName}>
+                      {order.organizationName}
+                    </td>
+                    <td className="px-3 py-3 text-kawa-500 max-w-[160px] truncate" title={getDeliveryLabel(order)}>
                       {getDeliveryLabel(order)}
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="px-3 py-3">
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
                       >
                         {DEMO_ORDER_STATUS_LABELS[order.status]}
                       </span>
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="px-3 py-3">
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
                           order.paid ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
@@ -118,10 +121,10 @@ export default async function AdminOrdersPage({
                         {order.paid ? 'Payée' : 'Non payée'}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-kawa-800 text-right whitespace-nowrap">
+                    <td className="px-3 py-3 text-kawa-800 text-right whitespace-nowrap">
                       {currency.format(order.amount)}
                     </td>
-                    <td className="px-5 py-3 text-right">
+                    <td className="px-3 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <AdvanceStatusButton
                           orderId={order.id}
@@ -140,7 +143,7 @@ export default async function AdminOrdersPage({
               })}
               {orders.length === 0 && (
                 <tr>
-                  <td className="px-5 py-6 text-kawa-400 text-center" colSpan={10}>
+                  <td className="px-3 py-6 text-kawa-400 text-center" colSpan={9}>
                     {status || entreprise
                       ? 'Aucune commande ne correspond à ce filtre.'
                       : 'Aucune commande pour le moment.'}
