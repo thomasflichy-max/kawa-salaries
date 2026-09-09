@@ -122,8 +122,7 @@ export default async function CommandeDetailPage({
             <p className="font-semibold text-kawa-800">Créneau de retrait</p>
             <p className="text-sm text-kawa-500 mt-1">
               Indiquez quand vous comptez passer récupérer votre commande chez KAWA Nantes
-              ({KAWA_OFFICE.address}). C&apos;est indicatif — vous pouvez venir à un autre moment
-              pendant les heures d&apos;ouverture.
+              ({KAWA_OFFICE.address}).
             </p>
           </div>
           <PickupScheduler
