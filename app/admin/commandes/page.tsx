@@ -73,6 +73,7 @@ export default async function AdminOrdersPage({
             <thead>
               <tr className="text-left text-kawa-500 border-b border-kawa-100">
                 <th className="px-5 py-3 font-medium">Date</th>
+                <th className="px-5 py-3 font-medium">N° commande</th>
                 <th className="px-5 py-3 font-medium" />
                 <th className="px-5 py-3 font-medium">Salarié</th>
                 <th className="px-5 py-3 font-medium">Entreprise</th>
@@ -89,6 +90,9 @@ export default async function AdminOrdersPage({
                   <OrderRow key={order.id} id={order.id}>
                     <td className="px-5 py-3 text-kawa-500 whitespace-nowrap">
                       {dateFormat.format(new Date(order.createdAt))}
+                    </td>
+                    <td className="px-5 py-3 text-kawa-800 font-medium whitespace-nowrap">
+                      {order.orderNumber}
                     </td>
                     <td className="px-5 py-3">
                       <OrderPreviewButton order={order} />
@@ -136,7 +140,7 @@ export default async function AdminOrdersPage({
               })}
               {orders.length === 0 && (
                 <tr>
-                  <td className="px-5 py-6 text-kawa-400 text-center" colSpan={9}>
+                  <td className="px-5 py-6 text-kawa-400 text-center" colSpan={10}>
                     {status || entreprise
                       ? 'Aucune commande ne correspond à ce filtre.'
                       : 'Aucune commande pour le moment.'}
