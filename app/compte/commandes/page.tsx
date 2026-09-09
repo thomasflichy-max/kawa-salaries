@@ -15,15 +15,14 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' })
 export default async function CommandesPage() {
   const { user } = await getEmployee()
 
-  // getManualOrders/getRealOrders run under the employee's own session — RLS
-  // ("employees can read own manual orders"/"own orders") already scopes
-  // the result to just their rows, same as this page's DEMO_ORDERS filter.
+  // RLS scopes getManualOrders/getRealOrders to the caller's own rows for a
+  // regular employee — but a @kawa.coffee staff account also matches the
+  // "kawa staff can manage orders" policy and would otherwise get EVERY
+  // order here. Filter by the current user explicitly, same as DEMO_ORDERS.
   const [manualOrders, realOrders] = await Promise.all([getManualOrders(), getRealOrders()])
-  const orders = [
-    ...DEMO_ORDERS.filter((order) => order.employeeEmail === user.email),
-    ...manualOrders,
-    ...realOrders,
-  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const orders = [...DEMO_ORDERS, ...manualOrders, ...realOrders]
+    .filter((order) => order.employeeEmail === user.email)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   return (
     <div className="flex flex-col gap-8">

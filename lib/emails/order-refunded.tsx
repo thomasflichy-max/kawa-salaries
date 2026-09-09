@@ -43,7 +43,7 @@ export function renderOrderRefundedEmail(order: DemoOrder, refund: DemoOrderRefu
       Vous trouverez le justificatif de ce remboursement en pièce jointe.
     </p>
 
-    ${renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes`)}
+    ${renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes/${order.id}`)}
   `
 
   const text = [
@@ -55,7 +55,7 @@ export function renderOrderRefundedEmail(order: DemoOrder, refund: DemoOrderRefu
       ? 'Cette commande est désormais intégralement remboursée.'
       : `À ce jour, ${currency.format(totalRefunded)} ont été remboursés sur ${currency.format(order.amount)} payés.`,
     '',
-    `Voir ma commande : ${SITE_URL}/compte/commandes`,
+    `Voir ma commande : ${SITE_URL}/compte/commandes/${order.id}`,
   ].join('\n')
 
   return {

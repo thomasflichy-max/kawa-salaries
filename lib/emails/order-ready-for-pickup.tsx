@@ -66,7 +66,7 @@ export function renderOrderReadyForPickupEmail(order: DemoOrder) {
             slotLabel ? 'Modifier mon créneau de passage' : 'Choisir mon créneau de passage',
             scheduleUrl
           )
-        : renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes`)
+        : renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes/${order.id}`)
     }
   `
 
@@ -83,7 +83,7 @@ export function renderOrderReadyForPickupEmail(order: DemoOrder) {
     '',
     scheduleUrl
       ? `${slotLabel ? 'Modifier' : 'Choisir'} mon créneau de passage : ${scheduleUrl}`
-      : `Voir ma commande : ${SITE_URL}/compte/commandes`,
+      : `Voir ma commande : ${SITE_URL}/compte/commandes/${order.id}`,
   ].join('\n')
 
   return {

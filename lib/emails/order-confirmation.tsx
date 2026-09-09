@@ -76,7 +76,7 @@ export function renderOrderConfirmationEmail(order: DemoOrder) {
       }
     </table>
 
-    ${renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes`)}
+    ${renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes/${order.id}`)}
   `
 
   const text = [
@@ -94,7 +94,7 @@ export function renderOrderConfirmationEmail(order: DemoOrder) {
     `${order.deliveryMode === 'pickup' ? 'Retrait' : 'Livraison'} : ${deliveryLabel}`,
     ...(order.deliveryMode === 'pickup' ? [PICKUP_HOURS_NOTE] : []),
     '',
-    `Voir ma commande : ${SITE_URL}/compte/commandes`,
+    `Voir ma commande : ${SITE_URL}/compte/commandes/${order.id}`,
   ].join('\n')
 
   return {
