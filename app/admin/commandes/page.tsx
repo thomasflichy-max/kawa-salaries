@@ -99,15 +99,11 @@ export default async function AdminOrdersPage({
                       {getDeliveryLabel(order)}
                     </td>
                     <td className="px-5 py-3">
-                      {order.source === 'manual' ? (
-                        <span className="text-kawa-400">—</span>
-                      ) : (
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
-                        >
-                          {DEMO_ORDER_STATUS_LABELS[order.status]}
-                        </span>
-                      )}
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
+                      >
+                        {DEMO_ORDER_STATUS_LABELS[order.status]}
+                      </span>
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -127,7 +123,7 @@ export default async function AdminOrdersPage({
                           orderId={order.id}
                           status={order.status}
                           label={DEMO_ORDER_STATUS_LABELS[order.status]}
-                          disabled={order.source === 'manual' || !getNextOrderStatus(order.status)}
+                          disabled={!getNextOrderStatus(order.status)}
                         />
                         <DocumentDownloadLinks orderId={order.id} />
                         {order.source === 'real' && order.paid && !order.invoiceNumber && (

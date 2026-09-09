@@ -168,18 +168,16 @@ export default async function AdminOrderDetailPage({
               </dd>
             </div>
           )}
-          {(order.source === 'demo' || order.source === 'real') && (
-            <div>
-              <dt className="text-kawa-500 mb-1">Statut actuel</dt>
-              <dd className="mt-0.5">
-                <span
-                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
-                >
-                  {DEMO_ORDER_STATUS_LABELS[order.status]}
-                </span>
-              </dd>
-            </div>
-          )}
+          <div>
+            <dt className="text-kawa-500 mb-1">Statut actuel</dt>
+            <dd className="mt-0.5">
+              <span
+                className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
+              >
+                {DEMO_ORDER_STATUS_LABELS[order.status]}
+              </span>
+            </dd>
+          </div>
           {order.source === 'manual' && order.paymentMethod && (
             <div>
               <dt className="text-kawa-500">Mode de paiement</dt>
@@ -203,16 +201,16 @@ export default async function AdminOrderDetailPage({
             </dd>
           </div>
         </dl>
-        {(order.source === 'demo' || order.source === 'real') && (
-          <div className="px-5 pb-5 flex flex-col gap-4">
-            <div>
-              <p className="text-sm font-medium text-kawa-700 mb-2">Changer le statut</p>
-              <StatusUpdateForm orderId={order.id} status={order.status} />
-              <p className="text-xs text-kawa-400 mt-2">
-                Seul un administrateur peut confirmer l&apos;annulation — le salarié peut uniquement
-                en faire la demande.
-              </p>
-            </div>
+        <div className="px-5 pb-5 flex flex-col gap-4">
+          <div>
+            <p className="text-sm font-medium text-kawa-700 mb-2">Changer le statut</p>
+            <StatusUpdateForm orderId={order.id} status={order.status} />
+            <p className="text-xs text-kawa-400 mt-2">
+              Seul un administrateur peut confirmer l&apos;annulation — le salarié peut uniquement
+              en faire la demande.
+            </p>
+          </div>
+          {(order.source === 'demo' || order.source === 'real') && (
             <div>
               <p className="text-sm font-medium text-kawa-700 mb-2">Remboursement</p>
               <RefundForm
@@ -222,21 +220,25 @@ export default async function AdminOrderDetailPage({
                 isRealCawlOrder={order.source === 'real'}
               />
             </div>
-          </div>
-        )}
-        {order.source === 'manual' && (
-          <div className="px-5 pb-5 flex flex-col gap-4">
-            <PaymentLinkForm orderId={order.id} initialLink={order.paymentLink} paid={order.paid} />
-            {order.comment && (
-              <div>
-                <p className="text-sm font-medium text-kawa-700 mb-1">Commentaire</p>
-                <p className="text-sm text-kawa-600 whitespace-pre-line bg-kawa-50 rounded-lg px-3 py-2">
-                  {order.comment}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+          )}
+          {order.source === 'manual' && (
+            <>
+              <PaymentLinkForm
+                orderId={order.id}
+                initialLink={order.paymentLink}
+                paid={order.paid}
+              />
+              {order.comment && (
+                <div>
+                  <p className="text-sm font-medium text-kawa-700 mb-1">Commentaire</p>
+                  <p className="text-sm text-kawa-600 whitespace-pre-line bg-kawa-50 rounded-lg px-3 py-2">
+                    {order.comment}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </section>
 
       <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">

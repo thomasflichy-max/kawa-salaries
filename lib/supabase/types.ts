@@ -444,6 +444,7 @@ export type Database = {
           payment_method: string
           created_at: string
           created_by: string | null
+          status: string
         }
         Insert: {
           id?: string
@@ -463,6 +464,7 @@ export type Database = {
           payment_method?: string
           created_at?: string
           created_by?: string | null
+          status?: string
         }
         Update: {
           id?: string
@@ -482,6 +484,7 @@ export type Database = {
           payment_method?: string
           created_at?: string
           created_by?: string | null
+          status?: string
         }
         Relationships: [
           {
@@ -534,6 +537,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'manual_order_items_manual_order_id_fkey'
+            columns: ['manual_order_id']
+            isOneToOne: false
+            referencedRelation: 'manual_orders'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      manual_order_status_history: {
+        Row: {
+          id: string
+          manual_order_id: string
+          actor: string
+          action: string
+          at: string
+        }
+        Insert: {
+          id?: string
+          manual_order_id: string
+          actor: string
+          action: string
+          at?: string
+        }
+        Update: {
+          id?: string
+          manual_order_id?: string
+          actor?: string
+          action?: string
+          at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'manual_order_status_history_manual_order_id_fkey'
             columns: ['manual_order_id']
             isOneToOne: false
             referencedRelation: 'manual_orders'

@@ -49,6 +49,31 @@ async function updateRealOrderStatus(orderId: string, status: DemoOrderStatus, a
   return getAdminOrderById(orderId)
 }
 
+// Same as updateRealOrderStatus but against manual_orders /
+// manual_order_status_history (migration 0053) — manually-entered orders
+// carry the same prep/delivery lifecycle now.
+async function updateManualOrderStatus(orderId: string, status: DemoOrderStatus, actor: string) {
+  const supabase = await createClient()
+  const { data: current } = await supabase
+    .from('manual_orders')
+    .select('status')
+    .eq('id', orderId)
+    .maybeSingle()
+  if (!current || current.status === status) return null
+
+  const { error } = await supabase.from('manual_orders').update({ status }).eq('id', orderId)
+  if (error) {
+    console.error('[commandes] manual order status update failed:', error)
+    return null
+  }
+  await supabase.from('manual_order_status_history').insert({
+    manual_order_id: orderId,
+    actor,
+    action: `Statut changé : ${DEMO_ORDER_STATUS_LABELS[current.status as DemoOrderStatus]} → ${DEMO_ORDER_STATUS_LABELS[status]}`,
+  })
+  return getAdminOrderById(orderId)
+}
+
 // Fires only the moment an order actually transitions into "prêt à l'envoi"
 // (not on every no-op re-save of the same status) and only for pickup
 // orders — delivery orders have nothing for the client to come collect.
@@ -74,6 +99,21 @@ export async function advanceOrderStatusAction(orderId: string) {
   }
 
   const supabase = await createClient()
+
+  const { data: manual } = await supabase
+    .from('manual_orders')
+    .select('status')
+    .eq('id', orderId)
+    .maybeSingle()
+  if (manual) {
+    const wasReady = manual.status === 'pret'
+    const next = getNextOrderStatus(manual.status as DemoOrderStatus)
+    const order = next ? await updateManualOrderStatus(orderId, next, actor) : null
+    await notifyIfJustReadyForPickup(order, wasReady)
+    revalidateOrderPaths(orderId)
+    return
+  }
+
   const { data: current } = await supabase
     .from('orders')
     .select('status')
@@ -105,6 +145,20 @@ export async function updateOrderStatusAction(orderId: string, status: DemoOrder
   }
 
   const supabase = await createClient()
+
+  const { data: manual } = await supabase
+    .from('manual_orders')
+    .select('status')
+    .eq('id', orderId)
+    .maybeSingle()
+  if (manual) {
+    const wasReady = manual.status === 'pret'
+    const order = await updateManualOrderStatus(orderId, status, actor)
+    await notifyIfJustReadyForPickup(order, wasReady)
+    revalidateOrderPaths(orderId)
+    return
+  }
+
   const { data: current } = await supabase
     .from('orders')
     .select('status')

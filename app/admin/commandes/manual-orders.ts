@@ -58,7 +58,7 @@ export function toAdminOrder(order: DemoOrder): AdminOrder {
 }
 
 const MANUAL_ORDER_SELECT =
-  'id, order_number, employee_name, employee_email, organization_id, organizations(name), delivery_mode, address, billing_address, amount, paid, payment_link, order_date, comment, payment_method, created_at, created_by, manual_order_items(id, product_name, quantity, image_url, unit, unit_price_ttc, vat_rate)'
+  'id, order_number, employee_name, employee_email, organization_id, organizations(name), delivery_mode, address, billing_address, amount, paid, status, payment_link, order_date, comment, payment_method, created_at, created_by, manual_order_items(id, product_name, quantity, image_url, unit, unit_price_ttc, vat_rate), manual_order_status_history(actor, action, at)'
 
 type ManualOrderItemRow = {
   id: string
@@ -82,6 +82,7 @@ type ManualOrderRow = {
   billing_address: string
   amount: number
   paid: boolean
+  status: string
   payment_link: string | null
   order_date: string
   comment: string | null
@@ -89,6 +90,7 @@ type ManualOrderRow = {
   created_at: string
   created_by: string | null
   manual_order_items: ManualOrderItemRow[]
+  manual_order_status_history: { actor: string; action: string; at: string }[]
 }
 
 function mapManualOrderRow(row: ManualOrderRow): AdminOrder {
@@ -99,7 +101,7 @@ function mapManualOrderRow(row: ManualOrderRow): AdminOrder {
     employeeEmail: row.employee_email,
     employeePhone: '',
     organizationName: row.organizations?.name ?? '',
-    status: 'en_cours',
+    status: row.status as DemoOrder['status'],
     deliveryMode: row.delivery_mode === 'pickup' ? 'pickup' : 'delivery',
     address: row.address,
     billingAddress: row.billing_address,
@@ -120,7 +122,12 @@ function mapManualOrderRow(row: ManualOrderRow): AdminOrder {
         action: 'Commande créée manuellement',
         at: row.created_at,
       },
-    ],
+      ...row.manual_order_status_history.map((h) => ({
+        actor: h.actor,
+        action: h.action,
+        at: h.at,
+      })),
+    ].sort((a, b) => a.at.localeCompare(b.at)),
     refunds: [],
     paid: row.paid,
     source: 'manual',
