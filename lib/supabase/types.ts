@@ -445,6 +445,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           status: string
+          pickup_slot_date: string | null
+          pickup_slot_hour: number | null
+          pickup_token: string
         }
         Insert: {
           id?: string
@@ -465,6 +468,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           status?: string
+          pickup_slot_date?: string | null
+          pickup_slot_hour?: number | null
+          pickup_token?: string
         }
         Update: {
           id?: string
@@ -485,6 +491,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           status?: string
+          pickup_slot_date?: string | null
+          pickup_slot_hour?: number | null
+          pickup_token?: string
         }
         Relationships: [
           {
