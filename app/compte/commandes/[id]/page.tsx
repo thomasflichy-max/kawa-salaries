@@ -10,6 +10,9 @@ import {
 import { getAdminOrderById } from '@/app/admin/commandes/manual-orders'
 import { InvoiceIcon } from '@/app/admin/commandes/document-icons'
 import { OrderContactButton } from '../order-contact-button'
+import { PickupScheduler } from '@/app/retrait/pickup-scheduler'
+import { upcomingWeekdays } from '@/lib/pickup-slot'
+import { KAWA_OFFICE } from '@/app/admin/demo-data'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
@@ -109,6 +112,25 @@ export default async function CommandeDetailPage({
           </div>
         </div>
       </div>
+
+      {order.deliveryMode === 'pickup' && order.pickupToken && order.status !== 'annulee' && (
+        <div className="bg-white rounded-2xl border border-kawa-200 p-5 flex flex-col gap-4">
+          <div>
+            <p className="font-semibold text-kawa-800">Créneau de retrait</p>
+            <p className="text-sm text-kawa-500 mt-1">
+              Indiquez quand vous comptez passer récupérer votre commande chez KAWA Nantes
+              ({KAWA_OFFICE.address}). C&apos;est indicatif — vous pouvez venir à un autre moment
+              pendant les heures d&apos;ouverture.
+            </p>
+          </div>
+          <PickupScheduler
+            token={order.pickupToken}
+            dates={upcomingWeekdays(30)}
+            currentDate={order.pickupSlotDate ?? null}
+            currentHour={order.pickupSlotHour ?? null}
+          />
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-kawa-200 p-5 grid sm:grid-cols-2 gap-6">
         <div>
