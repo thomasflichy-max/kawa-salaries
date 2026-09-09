@@ -17,6 +17,7 @@ type Coffee = {
   hover_image_url: string | null
   tag: string | null
   purchasable: boolean
+  in_stock: boolean
 }
 type GrindValue = 'grain' | 'filtre' | 'espresso'
 

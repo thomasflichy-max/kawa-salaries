@@ -19,6 +19,7 @@ type Product = {
   hover_image_url: string | null
   tag: string | null
   purchasable: boolean
+  in_stock: boolean
 }
 
 export function ProductGrid({ products }: { products: Product[] }) {
@@ -72,7 +73,11 @@ export function ProductGrid({ products }: { products: Product[] }) {
               <p className="text-kawa-600 font-bold">Sur demande</p>
             )}
 
-            {product.purchasable ? (
+            {!product.in_stock ? (
+              <p className="text-center w-full bg-kawa-100 text-kawa-600 py-2 rounded-lg font-medium">
+                En rupture de stock
+              </p>
+            ) : product.purchasable ? (
               <AddToCartButton productId={product.id} />
             ) : (
               <Link

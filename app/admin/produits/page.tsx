@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
 import { DeleteProductButton } from './delete-product-button'
 import { ToggleActiveButton } from './toggle-active-button'
+import { ToggleStockButton } from './toggle-stock-button'
 import { CoffeePricingForm } from '@/app/admin/coffee-pricing-form'
 
 const currency = new Intl.NumberFormat('fr-FR', {
@@ -17,7 +18,7 @@ export default async function AdminProductsPage() {
     supabase
       .from('products')
       .select(
-        'id, category, subcategory, tag, name, price, image_url, sort_order, purchasable, active'
+        'id, category, subcategory, tag, name, price, image_url, sort_order, purchasable, active, in_stock'
       )
       .order('category')
       .order('sort_order')
@@ -64,6 +65,7 @@ export default async function AdminProductsPage() {
                 <th className="px-5 py-3 font-medium">Sous-catégorie</th>
                 <th className="px-5 py-3 font-medium">Prix</th>
                 <th className="px-5 py-3 font-medium">Statut</th>
+                <th className="px-5 py-3 font-medium">Stock</th>
                 <th className="px-5 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
@@ -102,6 +104,9 @@ export default async function AdminProductsPage() {
                     <ToggleActiveButton productId={product.id} active={product.active} />
                   </td>
                   <td className="px-5 py-3">
+                    <ToggleStockButton productId={product.id} inStock={product.in_stock} />
+                  </td>
+                  <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-3">
                       <Link
                         href={`/admin/produits/${product.id}`}
@@ -116,7 +121,7 @@ export default async function AdminProductsPage() {
               ))}
               {allProducts.length === 0 && (
                 <tr>
-                  <td className="px-5 py-6 text-kawa-400 text-center" colSpan={6}>
+                  <td className="px-5 py-6 text-kawa-400 text-center" colSpan={7}>
                     Aucun produit pour le moment.
                   </td>
                 </tr>

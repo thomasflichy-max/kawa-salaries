@@ -31,6 +31,7 @@ type ParsedProductForm =
         sort_order: number
         purchasable: boolean
         active: boolean
+        in_stock: boolean
         net_weight_grams: number
       }
     }
@@ -50,6 +51,7 @@ function parseProductForm(formData: FormData): ParsedProductForm {
   const netWeightRaw = String(formData.get('net_weight_grams') ?? '1000').trim()
   const purchasable = formData.get('purchasable') === 'on'
   const active = formData.get('active') === 'on'
+  const inStock = formData.get('in_stock') === 'on'
 
   if (!name) return { ok: false, error: 'Le nom du produit est requis.' }
   if (!VALID_CATEGORIES.includes(category as (typeof VALID_CATEGORIES)[number])) {
@@ -87,6 +89,7 @@ function parseProductForm(formData: FormData): ParsedProductForm {
       sort_order: sortOrder,
       purchasable,
       active,
+      in_stock: inStock,
       net_weight_grams: netWeightGrams,
     },
   }
@@ -180,6 +183,26 @@ export async function toggleProductActive(productId: string, active: boolean) {
   const { error } = await supabase.from('products').update({ active }).eq('id', productId)
   if (error) {
     console.error('[toggleProductActive] update failed:', error)
+    throw new Error('Mise à jour impossible.')
+  }
+
+  revalidatePath('/admin/produits')
+  revalidatePath('/compte/produits')
+}
+
+export async function toggleProductInStock(productId: string, inStock: boolean) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!isKawaStaffEmail(user?.email)) {
+    throw new Error('Non autorisé.')
+  }
+
+  const { error } = await supabase.from('products').update({ in_stock: inStock }).eq('id', productId)
+  if (error) {
+    console.error('[toggleProductInStock] update failed:', error)
     throw new Error('Mise à jour impossible.')
   }
 

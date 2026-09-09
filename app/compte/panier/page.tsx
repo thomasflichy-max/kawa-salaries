@@ -24,7 +24,7 @@ export default async function PanierPage() {
   const { data: items, error } = await supabase
     .from('cart_items')
     .select(
-      'id, quantity, grind_type, product:products(id, name, price, image_url, category, subcategory)'
+      'id, quantity, grind_type, product:products(id, name, price, image_url, category, subcategory, in_stock)'
     )
     .eq('user_id', user.id)
     .order('created_at')
@@ -41,6 +41,9 @@ export default async function PanierPage() {
     return { ...item, unitPrice: price ?? 0, baseUnitPrice: basePrice }
   })
   const total = cartItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+  const outOfStockNames = cartItems
+    .filter((item) => item.product && !item.product.in_stock)
+    .map((item) => item.product!.name)
   const savings = cartItems.reduce((sum, item) => {
     if (item.baseUnitPrice == null) return sum
     return sum + (item.baseUnitPrice - item.unitPrice) * item.quantity
@@ -89,6 +92,9 @@ export default async function PanierPage() {
                       {currency.format(item.unitPrice)}
                       {item.baseUnitPrice != null && ' / kg'}
                     </p>
+                    {item.product && !item.product.in_stock && (
+                      <p className="text-xs font-medium text-red-700 mt-1">En rupture de stock</p>
+                    )}
                   </div>
                 </div>
 
@@ -151,12 +157,22 @@ export default async function PanierPage() {
             </div>
           </div>
 
-          <CheckoutSteps
-            total={total}
-            itemCount={cartItems.length}
-            addresses={organizationAddresses}
-            defaultAddressId={profile?.default_address_id ?? null}
-          />
+          {outOfStockNames.length > 0 ? (
+            <div className="p-5 border-t border-kawa-100">
+              <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                {outOfStockNames.length === 1
+                  ? `« ${outOfStockNames[0]} » est en rupture de stock. Retirez-le du panier pour finaliser votre commande.`
+                  : `Certains produits sont en rupture de stock (${outOfStockNames.join(', ')}). Retirez-les du panier pour finaliser votre commande.`}
+              </p>
+            </div>
+          ) : (
+            <CheckoutSteps
+              total={total}
+              itemCount={cartItems.length}
+              addresses={organizationAddresses}
+              defaultAddressId={profile?.default_address_id ?? null}
+            />
+          )}
         </div>
       )}
     </div>

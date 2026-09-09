@@ -247,6 +247,7 @@ export type Database = {
           sort_order: number
           purchasable: boolean
           active: boolean
+          in_stock: boolean
           net_weight_grams: number
           created_at: string
         }
@@ -265,6 +266,7 @@ export type Database = {
           sort_order?: number
           purchasable?: boolean
           active?: boolean
+          in_stock?: boolean
           net_weight_grams?: number
           created_at?: string
         }
@@ -283,6 +285,7 @@ export type Database = {
           sort_order?: number
           purchasable?: boolean
           active?: boolean
+          in_stock?: boolean
           net_weight_grams?: number
           created_at?: string
         }

@@ -43,7 +43,7 @@ export async function placeOrderAction(
   const { data: cartRows, error: cartError } = await supabase
     .from('cart_items')
     .select(
-      'id, quantity, grind_type, product:products(id, name, category, price, image_url, subcategory)'
+      'id, quantity, grind_type, product:products(id, name, category, price, image_url, subcategory, in_stock)'
     )
     .eq('user_id', user.id)
     .order('created_at')
@@ -54,6 +54,15 @@ export async function placeOrderAction(
   }
   if (!cartRows || cartRows.length === 0) {
     return { error: 'Votre panier est vide.' }
+  }
+
+  const outOfStock = cartRows.filter((row) => row.product && !row.product.in_stock)
+  if (outOfStock.length > 0) {
+    return {
+      error: `${outOfStock.map((r) => `« ${r.product!.name} »`).join(', ')} ${
+        outOfStock.length > 1 ? 'sont' : 'est'
+      } en rupture de stock. Retirez ${outOfStock.length > 1 ? 'ces produits' : 'ce produit'} du panier.`,
+    }
   }
 
   const pricingRules = await getCoffeePricing()

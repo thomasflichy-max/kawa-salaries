@@ -31,6 +31,7 @@ type ProductDefaults = {
   sort_order: number
   purchasable: boolean
   active: boolean
+  in_stock: boolean
   net_weight_grams: number
 }
 
@@ -257,6 +258,15 @@ export function ProductForm({
             className="rounded"
           />
           Actif (visible dans le catalogue)
+        </label>
+        <label className="flex items-center gap-2 text-sm text-kawa-700 pb-2">
+          <input
+            type="checkbox"
+            name="in_stock"
+            defaultChecked={defaults?.in_stock ?? true}
+            className="rounded"
+          />
+          En stock (décochez pour « rupture de stock »)
         </label>
       </div>
 

@@ -24,6 +24,17 @@ export async function addToCart(
 ) {
   const { supabase, userId } = await requireUserId()
 
+  // The catalog hides the add button for out-of-stock products — this is
+  // the server-side backstop (stale page, direct call).
+  const { data: product } = await supabase
+    .from('products')
+    .select('in_stock, active')
+    .eq('id', productId)
+    .maybeSingle()
+  if (!product || !product.active || !product.in_stock) {
+    return
+  }
+
   let existingQuery = supabase
     .from('cart_items')
     .select('id, quantity')
