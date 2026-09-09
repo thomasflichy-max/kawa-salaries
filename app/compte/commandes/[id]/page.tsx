@@ -113,7 +113,10 @@ export default async function CommandeDetailPage({
         </div>
       </div>
 
-      {order.deliveryMode === 'pickup' && order.pickupToken && order.status !== 'annulee' && (
+      {order.deliveryMode === 'pickup' &&
+        order.pickupToken &&
+        order.status !== 'annulee' &&
+        order.status !== 'livree' && (
         <div className="bg-white rounded-2xl border border-kawa-200 p-5 flex flex-col gap-4">
           <div>
             <p className="font-semibold text-kawa-800">Créneau de retrait</p>

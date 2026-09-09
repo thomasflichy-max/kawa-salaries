@@ -3,7 +3,7 @@ import { LegalHeader } from '../legal-header'
 import { createClient } from '@/lib/supabase/server'
 import { KAWA_OFFICE } from '@/app/admin/demo-data'
 import { PICKUP_HOURS_NOTE } from '@/lib/emails/shared'
-import { upcomingWeekdays } from '@/lib/pickup-slot'
+import { upcomingWeekdays, formatPickupSlot } from '@/lib/pickup-slot'
 import { PickupScheduler } from './pickup-scheduler'
 
 // Public scheduling page reached from the "commande prête" email. The ?t=
@@ -18,6 +18,7 @@ export default async function RetraitPage({
   let order: {
     order_number: string
     delivery_mode: string
+    status: string
     pickup_slot_date: string | null
     pickup_slot_hour: number | null
   } | null = null
@@ -28,6 +29,8 @@ export default async function RetraitPage({
     if (error) console.error('[retrait] get_pickup_slot failed:', error)
     order = data?.[0] ?? null
   }
+
+  const locked = order?.status === 'livree' || order?.status === 'annulee'
 
   return (
     <div className="min-h-screen bg-kawa-50">
@@ -40,6 +43,23 @@ export default async function RetraitPage({
               <p className="text-kawa-600 text-sm leading-relaxed">
                 Ce lien de prise de rendez-vous n&apos;est pas valide, ou cette commande n&apos;est
                 pas un retrait au bureau KAWA.
+              </p>
+              <Link href="/compte/commandes" className="text-sky-700 underline text-sm">
+                Voir mes commandes
+              </Link>
+            </>
+          ) : locked ? (
+            <>
+              <h1 className="text-2xl font-bold text-kawa-800">
+                {order.status === 'livree' ? 'Commande déjà récupérée' : 'Commande annulée'}
+              </h1>
+              <p className="text-kawa-600 text-sm leading-relaxed">
+                {order.status === 'livree'
+                  ? `La commande ${order.order_number} a été marquée comme récupérée — il n'y a plus de créneau à choisir.`
+                  : `La commande ${order.order_number} a été annulée.`}
+                {order.status === 'livree' &&
+                  formatPickupSlot(order.pickup_slot_date, order.pickup_slot_hour) &&
+                  ` Créneau qui avait été indiqué : ${formatPickupSlot(order.pickup_slot_date, order.pickup_slot_hour)}.`}
               </p>
               <Link href="/compte/commandes" className="text-sky-700 underline text-sm">
                 Voir mes commandes

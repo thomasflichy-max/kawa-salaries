@@ -1073,6 +1073,7 @@ export type Database = {
         Returns: {
           order_number: string
           delivery_mode: string
+          status: string
           pickup_slot_date: string | null
           pickup_slot_hour: number | null
         }[]
