@@ -81,11 +81,6 @@ export function PickupScheduler({
       >
         {pending ? 'Enregistrement…' : savedLabel ? 'Modifier mon créneau' : 'Confirmer mon créneau'}
       </button>
-
-      <p className="text-xs text-kawa-400">
-        Créneau indicatif — il aide l&apos;équipe à préparer votre passage, mais vous pouvez venir
-        à un autre moment pendant les heures d&apos;ouverture (lun–ven, 9h–18h).
-      </p>
     </form>
   )
 }
