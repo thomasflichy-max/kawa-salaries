@@ -76,6 +76,14 @@ export type DemoOrder = {
   // so a real checkout flow can later create an order before payment
   // confirms (e.g. waiting on a webhook) without changing the shape.
   paid: boolean
+  // Pickup orders only — the slot the customer picked from the "commande
+  // prête" email (hour = start of a 1h window). Undefined for demo/manual
+  // orders and for pickup orders where nothing was chosen yet.
+  pickupSlotDate?: string | null
+  pickupSlotHour?: number | null
+  // Per-order token behind the "choisir mon créneau" link in that email.
+  // Real checkout orders only.
+  pickupToken?: string
 }
 
 export const DEMO_ORDER_STATUS_LABELS: Record<DemoOrderStatus, string> = {

@@ -563,6 +563,9 @@ export type Database = {
           delivery_note_number: string | null
           delivery_note_pdf_path: string | null
           created_at: string
+          pickup_slot_date: string | null
+          pickup_slot_hour: number | null
+          pickup_token: string
         }
         Insert: {
           id?: string
@@ -585,6 +588,9 @@ export type Database = {
           delivery_note_number?: string | null
           delivery_note_pdf_path?: string | null
           created_at?: string
+          pickup_slot_date?: string | null
+          pickup_slot_hour?: number | null
+          pickup_token?: string
         }
         Update: {
           id?: string
@@ -607,6 +613,9 @@ export type Database = {
           delivery_note_number?: string | null
           delivery_note_pdf_path?: string | null
           created_at?: string
+          pickup_slot_date?: string | null
+          pickup_slot_hour?: number | null
+          pickup_token?: string
         }
         Relationships: [
           {
@@ -1013,6 +1022,19 @@ export type Database = {
       }
       unsubscribe_marketing: {
         Args: { p_token: string }
+        Returns: boolean
+      }
+      get_pickup_slot: {
+        Args: { p_token: string }
+        Returns: {
+          order_number: string
+          delivery_mode: string
+          pickup_slot_date: string | null
+          pickup_slot_hour: number | null
+        }[]
+      }
+      set_pickup_slot: {
+        Args: { p_token: string; p_date: string; p_hour: number }
         Returns: boolean
       }
     }

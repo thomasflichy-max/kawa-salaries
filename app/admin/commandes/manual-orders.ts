@@ -158,7 +158,7 @@ export async function getManualOrders(): Promise<AdminOrder[]> {
 // and reuse mapRealOrderRow to build the object sendOrderConfirmationEmail
 // expects, without duplicating this select string.
 export const REAL_ORDER_SELECT =
-  'id, order_number, employee_name, employee_email, organization_id, organizations(name), delivery_mode, address, billing_address, amount, status, payment_status, paid, cawl_hosted_checkout_id, cawl_payment_id, invoice_number, invoice_pdf_path, delivery_note_number, delivery_note_pdf_path, created_at, order_items(id, product_name, quantity, image_url, unit, unit_price_ttc, vat_rate), order_status_history(actor, action, at), order_refunds(id, amount, reason, actor, refund_number, pdf_path, at)'
+  'id, order_number, employee_name, employee_email, organization_id, organizations(name), delivery_mode, address, billing_address, amount, status, payment_status, paid, cawl_hosted_checkout_id, cawl_payment_id, invoice_number, invoice_pdf_path, delivery_note_number, delivery_note_pdf_path, created_at, pickup_slot_date, pickup_slot_hour, pickup_token, order_items(id, product_name, quantity, image_url, unit, unit_price_ttc, vat_rate), order_status_history(actor, action, at), order_refunds(id, amount, reason, actor, refund_number, pdf_path, at)'
 
 type RealOrderItemRow = ManualOrderItemRow
 type RealOrderHistoryRow = { actor: string; action: string; at: string }
@@ -193,6 +193,9 @@ export type RealOrderRow = {
   delivery_note_number: string | null
   delivery_note_pdf_path: string | null
   created_at: string
+  pickup_slot_date: string | null
+  pickup_slot_hour: number | null
+  pickup_token: string
   order_items: RealOrderItemRow[]
   order_status_history: RealOrderHistoryRow[]
   order_refunds: RealOrderRefundRow[]
@@ -212,6 +215,9 @@ export function mapRealOrderRow(row: RealOrderRow): AdminOrder {
     billingAddress: row.billing_address,
     amount: row.amount,
     createdAt: row.created_at,
+    pickupSlotDate: row.pickup_slot_date,
+    pickupSlotHour: row.pickup_slot_hour,
+    pickupToken: row.pickup_token,
     items: row.order_items.map((item) => ({
       id: item.id,
       productName: item.product_name,

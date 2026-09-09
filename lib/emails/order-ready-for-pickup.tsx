@@ -1,5 +1,6 @@
 import type { DemoOrder } from '@/app/admin/demo-data'
 import { KAWA_OFFICE } from '@/app/admin/demo-data'
+import { formatPickupSlot } from '@/lib/pickup-slot'
 import {
   SITE_URL,
   KAWA_SKY,
@@ -19,6 +20,8 @@ import {
 // re-attached here, it was already sent with the confirmation email).
 export function renderOrderReadyForPickupEmail(order: DemoOrder) {
   const firstName = order.employeeName.split(' ')[0] ?? order.employeeName
+  const slotLabel = formatPickupSlot(order.pickupSlotDate, order.pickupSlotHour)
+  const scheduleUrl = order.pickupToken ? `${SITE_URL}/retrait?t=${order.pickupToken}` : null
 
   const bodyHtml = `
     <p style="margin:0 0 4px;color:${KAWA_SKY};font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">
@@ -48,11 +51,23 @@ export function renderOrderReadyForPickupEmail(order: DemoOrder) {
       <tr>
         <td style="padding:0 20px 16px;">
           <p style="margin:0;color:${KAWA_MUTED};font-size:13px;line-height:1.5;">${escapeHtml(PICKUP_HOURS_NOTE)}</p>
+          ${
+            slotLabel
+              ? `<p style="margin:8px 0 0;color:${KAWA_INK};font-size:13px;">Passage prévu : <strong>${escapeHtml(slotLabel)}</strong></p>`
+              : ''
+          }
         </td>
       </tr>
     </table>
 
-    ${renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes`)}
+    ${
+      scheduleUrl
+        ? renderCtaButton(
+            slotLabel ? 'Modifier mon créneau de passage' : 'Choisir mon créneau de passage',
+            scheduleUrl
+          )
+        : renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes`)
+    }
   `
 
   const text = [
@@ -64,8 +79,11 @@ export function renderOrderReadyForPickupEmail(order: DemoOrder) {
     '',
     `Retrait : ${KAWA_OFFICE.address}`,
     PICKUP_HOURS_NOTE,
+    ...(slotLabel ? [`Passage prévu : ${slotLabel}`] : []),
     '',
-    `Voir ma commande : ${SITE_URL}/compte/commandes`,
+    scheduleUrl
+      ? `${slotLabel ? 'Modifier' : 'Choisir'} mon créneau de passage : ${scheduleUrl}`
+      : `Voir ma commande : ${SITE_URL}/compte/commandes`,
   ].join('\n')
 
   return {

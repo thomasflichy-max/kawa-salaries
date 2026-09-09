@@ -8,6 +8,7 @@ import {
   getOrderRefundStatus,
 } from '@/app/admin/demo-data'
 import { getAdminOrderById, type ManualOrderPaymentMethod } from '../manual-orders'
+import { formatPickupSlot } from '@/lib/pickup-slot'
 import { StatusUpdateForm } from '../status-update-form'
 import { EditableAddressField } from '../editable-address-field'
 import { InvoiceIcon, DeliveryNoteIcon } from '../document-icons'
@@ -157,6 +158,16 @@ export default async function AdminOrderDetailPage({
               {order.deliveryMode === 'pickup' ? 'Retrait KAWA Nantes' : 'Livraison chez le client'}
             </dd>
           </div>
+          {order.deliveryMode === 'pickup' && (
+            <div>
+              <dt className="text-kawa-500">Passage prévu</dt>
+              <dd className="text-kawa-800 mt-0.5">
+                {formatPickupSlot(order.pickupSlotDate, order.pickupSlotHour) ?? (
+                  <span className="text-kawa-400">Pas encore choisi par le salarié</span>
+                )}
+              </dd>
+            </div>
+          )}
           {(order.source === 'demo' || order.source === 'real') && (
             <div>
               <dt className="text-kawa-500 mb-1">Statut actuel</dt>
