@@ -84,10 +84,10 @@ export const pdfStyles = StyleSheet.create({
     gap: 8,
   },
   productImage: {
-    width: 24,
-    height: 24,
+    width: 40,
+    height: 40,
     borderRadius: 3,
-    objectFit: 'cover',
+    objectFit: 'contain',
   },
   colDate: { flex: 1.2, textAlign: 'right' },
   colQty: { flex: 0.8, textAlign: 'right' },

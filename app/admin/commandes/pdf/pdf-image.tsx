@@ -3,62 +3,81 @@ import path from 'node:path'
 
 const cache = new Map<string, string | null>()
 
-// Reads an image from /public and returns it as a data URI so @react-pdf/
-// renderer can embed it without a network fetch — same approach as the KAWA
-// logo in pdf-header.tsx. Node-only; never imported by client components.
-function readPublicImageAsDataUri(publicPath: string): string | null {
+// Product images render as ~40px thumbnails on the invoice/BL — downscale to
+// this width so an emailed facture doesn't carry a multi-MB source photo.
+const THUMB_WIDTH = 200
+
+// Shrink + normalise to PNG via sharp when it's available, otherwise fall
+// back to the raw bytes (only works for formats @react-pdf/renderer can
+// decode itself, i.e. PNG/JPEG). sharp is imported dynamically inside the
+// try: its native binary has failed to load in some Vercel serverless
+// bundles for this project, and a static import throws at module-load time
+// (before any try/catch), which would take down the whole PDF. Here a sharp
+// failure just means a slightly larger image, or — for an exotic format
+// with no usable fallback — that one image is dropped.
+async function toThumbnailDataUri(
+  buffer: Buffer,
+  opts: { isPng: boolean; isJpeg: boolean }
+): Promise<string | null> {
+  try {
+    const sharp = (await import('sharp')).default
+    const png = await sharp(buffer)
+      .resize({ width: THUMB_WIDTH, withoutEnlargement: true })
+      .png()
+      .toBuffer()
+    return `data:image/png;base64,${png.toString('base64')}`
+  } catch (sharpError) {
+    if (opts.isPng || opts.isJpeg) {
+      return `data:image/${opts.isPng ? 'png' : 'jpeg'};base64,${buffer.toString('base64')}`
+    }
+    console.error('[pdf-image] sharp unavailable and format not embeddable:', sharpError)
+    return null
+  }
+}
+
+// Reads an image from /public (older catalog entries bundled at build time,
+// e.g. "/products/cafes/x.jpg"). Node-only; never imported by client code.
+async function readPublicImageAsDataUri(publicPath: string): Promise<string | null> {
   try {
     const filePath = path.join(process.cwd(), 'public', publicPath)
     const ext = path.extname(filePath).slice(1).toLowerCase()
-    const mime = ext === 'jpg' ? 'jpeg' : ext
-    const base64 = fs.readFileSync(filePath).toString('base64')
-    return `data:image/${mime};base64,${base64}`
+    const buffer = await fs.promises.readFile(filePath)
+    return toThumbnailDataUri(buffer, { isPng: ext === 'png', isJpeg: ext === 'jpg' || ext === 'jpeg' })
   } catch {
     return null
   }
 }
 
-// Fetches a remote product image and normalizes it to PNG via sharp before
-// embedding — @react-pdf/renderer's internal image decoder only understands
-// JPEG/PNG. Supabase Storage happily serves whatever format was uploaded
-// (confirmed: a real product's image is .avif), which silently failed to
-// render on the facture/BL PDFs even after pointing <Image> straight at the
-// URL, since fetching isn't the part that was broken — decoding was.
-//
-// sharp is imported dynamically, inside the try, rather than as a static
-// top-level import: sharp's native binary has failed to load in some Vercel
-// serverless function bundles for this project (works from the CAWL webhook
-// route, not from Server Actions) — a static import throws at module-load
-// time, before this function's own try/catch ever runs, which took down the
-// entire caller (a refund, an invoice archive) instead of just this one
-// image. A dynamic import's failure is caught right here instead.
+// Fetches a remote product image (Supabase Storage URL — see migration
+// 0016_product_images_storage.sql).
 async function fetchRemoteImageAsDataUri(url: string): Promise<string | null> {
   try {
     const res = await fetch(url)
     if (!res.ok) return null
     const buffer = Buffer.from(await res.arrayBuffer())
-    const sharp = (await import('sharp')).default
-    const png = await sharp(buffer).png().toBuffer()
-    return `data:image/png;base64,${png.toString('base64')}`
+
+    const contentType = (res.headers.get('content-type') ?? '').toLowerCase()
+    const pathname = new URL(url).pathname.toLowerCase()
+    const isPng = contentType.includes('png') || pathname.endsWith('.png')
+    const isJpeg =
+      contentType.includes('jpeg') || pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')
+
+    return toThumbnailDataUri(buffer, { isPng, isJpeg })
   } catch (error) {
-    console.error('[pdf-image] failed to fetch/convert remote image:', url, error)
+    console.error('[pdf-image] failed to fetch remote image:', url, error)
     return null
   }
 }
 
 // Resolves a product's image for @react-pdf/renderer's <Image src=... />.
-// Products can have either a local /public path (older catalog entries,
-// bundled at build time — e.g. "/products/cafes/x.jpg") or a full remote
-// Supabase Storage URL (see supabase/migrations/0016_product_images_storage.sql).
-// Async because the remote path needs a network fetch + format conversion —
-// callers must resolve every item's image before rendering (PDF documents
+// Callers must resolve every item's image before rendering (PDF documents
 // render synchronously), see resolveOrderImages below.
 export async function resolveProductImageSrc(imageUrl: string): Promise<string | null> {
   if (cache.has(imageUrl)) return cache.get(imageUrl) ?? null
 
   const result = /^https?:\/\//.test(imageUrl)
     ? await fetchRemoteImageAsDataUri(imageUrl)
-    : readPublicImageAsDataUri(imageUrl)
+    : await readPublicImageAsDataUri(imageUrl)
 
   cache.set(imageUrl, result)
   return result
