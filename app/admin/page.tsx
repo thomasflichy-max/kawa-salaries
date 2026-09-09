@@ -200,6 +200,7 @@ export default async function AdminDashboardPage({
                   <th className="px-5 py-3 font-medium">Commande</th>
                   <th className="px-5 py-3 font-medium">Salarié</th>
                   <th className="px-5 py-3 font-medium">Entreprise</th>
+                  <th className="px-5 py-3 font-medium">Paiement</th>
                   <th className="px-5 py-3 font-medium">Statut</th>
                 </tr>
               </thead>
@@ -228,18 +229,20 @@ export default async function AdminDashboardPage({
                       <td className="px-5 py-3 text-kawa-700">{order.employeeName}</td>
                       <td className="px-5 py-3 text-kawa-500">{order.organizationName}</td>
                       <td className="px-5 py-3">
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
-                          >
-                            {DEMO_ORDER_STATUS_LABELS[order.status]}
-                          </span>
-                          {!order.paid && (
-                            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 whitespace-nowrap">
-                              non payée
-                            </span>
-                          )}
-                        </div>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                            order.paid ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                          }`}
+                        >
+                          {order.paid ? 'Payée' : 'Non payée'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
+                        >
+                          {DEMO_ORDER_STATUS_LABELS[order.status]}
+                        </span>
                       </td>
                     </tr>
                   )
