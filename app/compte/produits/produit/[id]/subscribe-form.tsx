@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useActionState } from 'react'
-import { createSubscription, FREQUENCY_WEEKS } from '@/app/actions/subscriptions'
+import { createSubscription } from '@/app/actions/subscriptions'
+import { FREQUENCY_WEEKS } from '@/lib/subscription-frequency'
 
 const FREQUENCY_LABELS: Record<number, string> = {
   2: 'Toutes les 2 semaines',

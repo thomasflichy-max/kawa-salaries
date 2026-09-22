@@ -4,10 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { addToCart } from './cart'
-
-// Kept in sync with the migration's `frequency_weeks in (...)` check and the
-// <select> in subscribe-form.tsx.
-export const FREQUENCY_WEEKS = [2, 4, 6, 8] as const
+import { FREQUENCY_WEEKS } from '@/lib/subscription-frequency'
 
 async function requireUserId() {
   const supabase = await createClient()
