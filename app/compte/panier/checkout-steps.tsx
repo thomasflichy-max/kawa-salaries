@@ -127,12 +127,13 @@ export function CheckoutSteps({
             </select>
             {selectedAddress !== '' ? (
               <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                Votre livraison sera effectuée lors de la prochaine commande de café passée par
-                votre entreprise, est-ce que c&apos;est bon pour vous ?
+                Votre café sera livré gratuitement à vos bureaux sous 7 jours ouvrés, est-ce que
+                c&apos;est bon pour vous ?
               </p>
             ) : (
               <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                Nous vous enverrons un mail quand votre commande sera prête à être récupérée.
+                Votre commande sera disponible au retrait sous 24h — nous vous enverrons un mail
+                quand elle sera prête à être récupérée.
               </p>
             )}
             {state?.error && (

@@ -10,6 +10,8 @@ import {
   KAWA_MUTED,
   KAWA_BG,
   PICKUP_HOURS_NOTE,
+  PICKUP_READY_NOTE,
+  DELIVERY_LEAD_TIME_NOTE,
   currency,
   dateFormat,
   escapeHtml,
@@ -58,22 +60,24 @@ export function renderOrderConfirmationEmail(order: DemoOrder) {
         </td>
       </tr>
       <tr>
-        <td style="padding:0 20px ${order.deliveryMode === 'pickup' ? '4px' : '16px'};">
+        <td style="padding:0 20px 4px;">
           <p style="margin:0 0 2px;color:${KAWA_MUTED};font-size:12px;text-transform:uppercase;letter-spacing:0.03em;">
             ${order.deliveryMode === 'pickup' ? 'Retrait' : 'Livraison'}
           </p>
           <p style="margin:0;color:${KAWA_INK};font-size:14px;">${escapeHtml(deliveryLabel)}</p>
         </td>
       </tr>
-      ${
-        order.deliveryMode === 'pickup'
-          ? `<tr>
+      <tr>
         <td style="padding:0 20px 16px;">
-          <p style="margin:0;color:${KAWA_MUTED};font-size:13px;line-height:1.5;">${escapeHtml(PICKUP_HOURS_NOTE)}</p>
+          <p style="margin:0;color:${KAWA_MUTED};font-size:13px;line-height:1.5;">
+            ${
+              order.deliveryMode === 'pickup'
+                ? `${escapeHtml(PICKUP_READY_NOTE)} ${escapeHtml(PICKUP_HOURS_NOTE)}`
+                : escapeHtml(DELIVERY_LEAD_TIME_NOTE)
+            }
+          </p>
         </td>
-      </tr>`
-          : ''
-      }
+      </tr>
     </table>
 
     ${renderCtaButton('Voir ma commande', `${SITE_URL}/compte/commandes/${order.id}`)}
@@ -92,7 +96,9 @@ export function renderOrderConfirmationEmail(order: DemoOrder) {
     '',
     `Adresse de facturation : ${order.billingAddress}`,
     `${order.deliveryMode === 'pickup' ? 'Retrait' : 'Livraison'} : ${deliveryLabel}`,
-    ...(order.deliveryMode === 'pickup' ? [PICKUP_HOURS_NOTE] : []),
+    order.deliveryMode === 'pickup'
+      ? `${PICKUP_READY_NOTE} ${PICKUP_HOURS_NOTE}`
+      : DELIVERY_LEAD_TIME_NOTE,
     '',
     `Voir ma commande : ${SITE_URL}/compte/commandes/${order.id}`,
   ].join('\n')

@@ -52,9 +52,9 @@ export default function CGVPage() {
           <h2 className="font-semibold text-kawa-800 mb-1">4. Livraison</h2>
           <p className="text-sm text-kawa-600 leading-relaxed">
             La livraison est offerte, selon deux modalités au choix : livraison dans
-            les locaux de l&apos;entreprise cliente à l&apos;occasion de sa prochaine
-            commande groupée, ou retrait directement dans les locaux de KAWA au 75 Bd
-            Ernest Dalby, 44000 Nantes, entre 9h et 18h.
+            les locaux de l&apos;entreprise cliente sous 7 jours ouvrés, ou retrait
+            directement dans les locaux de KAWA au 75 Bd Ernest Dalby, 44000 Nantes,
+            entre 9h et 18h, sous 24h.
           </p>
         </section>
 

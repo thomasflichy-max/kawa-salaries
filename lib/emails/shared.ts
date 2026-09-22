@@ -21,6 +21,12 @@ export const REPLY_TO_EMAIL = 'thomas.flichy@kawa.coffee'
 export const PICKUP_HOURS_NOTE =
   'Vous pouvez venir récupérer votre commande du lundi au vendredi de 09h à 18h.'
 
+// Lead-time expectations shown right after ordering (order-confirmation
+// email) — kept in sync with app/compte/avantage and app/cgv.
+export const PICKUP_READY_NOTE = 'Votre commande sera disponible sous 24h.'
+export const DELIVERY_LEAD_TIME_NOTE =
+  'Votre commande sera livrée gratuitement dans vos locaux sous 7 jours ouvrés.'
+
 export const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 export const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' })
 
