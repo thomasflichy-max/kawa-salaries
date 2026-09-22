@@ -45,7 +45,7 @@ export function SubscribeForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="self-start text-sm text-sky-700 hover:underline"
+        className="w-full py-2.5 rounded-lg font-medium border-2 border-sky-500 text-sky-700 hover:bg-sky-50 transition"
       >
         Créer un abonnement →
       </button>
