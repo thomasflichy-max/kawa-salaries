@@ -147,8 +147,8 @@ export default async function AvantagePage() {
         </p>
 
         <div className="grid sm:grid-cols-2 gap-5 mt-8">
-          <div className="rounded-2xl overflow-hidden">
-            <div className="relative h-48">
+          <div>
+            <div className="relative h-48 rounded-2xl overflow-hidden">
               <Image
                 src="/avantage/agence-kawa.jpg"
                 alt="Façade de l'agence KAWA à Nantes"
@@ -167,8 +167,8 @@ export default async function AvantagePage() {
             </p>
           </div>
 
-          <div className="rounded-2xl overflow-hidden">
-            <div className="relative h-48">
+          <div>
+            <div className="relative h-48 rounded-2xl overflow-hidden">
               <Image
                 src="/avantage/triporteur-anneaux.jpg"
                 alt="Triporteur électrique KAWA devant Les Anneaux de Buren, à Nantes"
