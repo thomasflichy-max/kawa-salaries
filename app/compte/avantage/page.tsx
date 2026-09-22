@@ -3,8 +3,6 @@ import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
 import { createClient } from '@/lib/supabase/server'
 
-const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
-
 const SAVOIR_FAIRE = [
   {
     title: 'Torréfacteur TANAT',
@@ -21,9 +19,8 @@ const SAVOIR_FAIRE = [
 ]
 
 export default async function AvantagePage() {
-  const { organization, coffeeDiscounts } = await getEmployee()
+  const { organization } = await getEmployee()
   const orgName = organization?.name ?? 'votre entreprise'
-  const headlineDiscount = coffeeDiscounts.classique ?? Object.values(coffeeDiscounts)[0]
 
   const supabase = await createClient()
   const { count: coffeeCount } = await supabase
@@ -33,7 +30,7 @@ export default async function AvantagePage() {
     .eq('active', true)
 
   const stats = [
-    { value: '2020', label: 'Fondée à Nantes' },
+    { value: '12ᵉ', label: 'Meilleur torréfacteur mondial' },
     { value: String(coffeeCount ?? 9), label: 'Cafés à découvrir' },
     { value: '24h', label: 'Retrait en agence' },
     { value: '7j ouvrés', label: 'Livraison au travail' },
@@ -86,19 +83,13 @@ export default async function AvantagePage() {
             Un café d&apos;exception, à prix réduit, pour la maison
           </h2>
         </div>
-        <div className="sm:col-span-8 flex flex-col sm:flex-row items-start gap-6">
-          <p className="text-kawa-600 leading-relaxed flex-1">
+        <div className="sm:col-span-8">
+          <p className="text-kawa-600 leading-relaxed">
             Parce que {orgName} est partenaire de KAWA Nantes, vous bénéficiez d&apos;une réduction
             personnelle sur nos cafés à déguster chez vous, ainsi que sur nos produits
             d&apos;entretien et nos machines reconditionnées. Une offre réservée aux salariés des
             entreprises partenaires de KAWA, basés à Nantes.
           </p>
-          {headlineDiscount != null && headlineDiscount > 0 && (
-            <div className="shrink-0 self-stretch sm:w-40 rounded-2xl bg-sky-50 border border-sky-100 flex flex-col items-center justify-center text-center px-4 py-6">
-              <p className="text-2xl font-bold text-sky-700">-{currency.format(headlineDiscount)}</p>
-              <p className="text-xs text-sky-700/80 mt-1">par kg de café</p>
-            </div>
-          )}
         </div>
       </section>
 
