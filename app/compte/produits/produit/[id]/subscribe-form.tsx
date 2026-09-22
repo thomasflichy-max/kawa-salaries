@@ -47,7 +47,7 @@ export function SubscribeForm({
         onClick={() => setOpen(true)}
         className="self-start text-sm text-sky-700 hover:underline"
       >
-        Recevoir un rappel régulier pour ce café →
+        Créer un abonnement →
       </button>
     )
   }
