@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
 import { logout } from '@/app/actions/auth'
 import { ChangePasswordForm } from './change-password-form'
@@ -43,6 +44,21 @@ export default async function ComptePage() {
           addresses={organizationAddresses}
           defaultAddressId={profile?.default_address_id ?? null}
         />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-kawa-800 mb-4">Réassort automatique</h2>
+        <div className="bg-white rounded-2xl border border-kawa-200 p-6 max-w-sm flex items-center justify-between gap-4">
+          <p className="text-sm text-kawa-500">
+            Recevez un rappel automatique pour vos cafés préférés, à la fréquence de votre choix.
+          </p>
+          <Link
+            href="/compte/abonnements"
+            className="shrink-0 text-sm text-sky-700 hover:underline whitespace-nowrap"
+          >
+            Gérer →
+          </Link>
+        </div>
       </div>
 
       <div>

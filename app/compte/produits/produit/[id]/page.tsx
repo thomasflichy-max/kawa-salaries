@@ -8,6 +8,7 @@ import { QuantityAddForm } from '../../quantity-add-form'
 import { InterestForm } from '../../interest-form'
 import { ProductImage } from '../../product-image'
 import { ProductInterestSurvey } from './product-interest-survey'
+import { SubscribeForm } from './subscribe-form'
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -177,6 +178,7 @@ export default async function ProductDetailPage({
               <p className="text-xs text-kawa-400">
                 Les options de livraison seront à choisir au moment du passage de commande.
               </p>
+              <SubscribeForm productId={product.id} showGrind={isCoffee} />
             </>
           ) : (
             <div className="flex flex-col gap-3">

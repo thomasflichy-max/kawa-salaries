@@ -291,6 +291,60 @@ export type Database = {
         }
         Relationships: []
       }
+      product_subscriptions: {
+        Row: {
+          id: string
+          profile_id: string
+          product_id: string
+          quantity: number
+          grind_type: string | null
+          frequency_weeks: number
+          active: boolean
+          next_reminder_at: string
+          last_reminded_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          product_id: string
+          quantity?: number
+          grind_type?: string | null
+          frequency_weeks: number
+          active?: boolean
+          next_reminder_at: string
+          last_reminded_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          product_id?: string
+          quantity?: number
+          grind_type?: string | null
+          frequency_weeks?: number
+          active?: boolean
+          next_reminder_at?: string
+          last_reminded_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'product_subscriptions_profile_id_fkey'
+            columns: ['profile_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'product_subscriptions_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       product_interest_votes: {
         Row: {
           id: string

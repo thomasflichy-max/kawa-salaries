@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { upsertCartItem } from '@/lib/cart-items'
 
 async function requireUserId() {
   const supabase = await createClient()
@@ -35,28 +36,7 @@ export async function addToCart(
     return
   }
 
-  let existingQuery = supabase
-    .from('cart_items')
-    .select('id, quantity')
-    .eq('user_id', userId)
-    .eq('product_id', productId)
-
-  existingQuery = grindType
-    ? existingQuery.eq('grind_type', grindType)
-    : existingQuery.is('grind_type', null)
-
-  const { data: existing } = await existingQuery.maybeSingle()
-
-  if (existing) {
-    await supabase
-      .from('cart_items')
-      .update({ quantity: existing.quantity + quantity })
-      .eq('id', existing.id)
-  } else {
-    await supabase
-      .from('cart_items')
-      .insert({ user_id: userId, product_id: productId, quantity, grind_type: grindType })
-  }
+  await upsertCartItem(supabase, userId, productId, quantity, grindType)
 
   revalidatePath('/compte/panier')
   revalidatePath('/compte/produits')
