@@ -1,6 +1,13 @@
 import { CreateOrganizationForm } from '@/app/admin/create-organization-form'
+import { getCoffeePricing } from '@/lib/coffee-pricing'
 
-export default function AdminAddClientPage() {
+export default async function AdminAddClientPage() {
+  const pricingRules = await getCoffeePricing()
+  const basePrices = {
+    classique: pricingRules.get('classique')?.base_price ?? 0,
+    bio: pricingRules.get('bio')?.base_price ?? 0,
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -12,7 +19,7 @@ export default function AdminAddClientPage() {
       </div>
 
       <section className="bg-white rounded-2xl border border-kawa-200 p-6">
-        <CreateOrganizationForm />
+        <CreateOrganizationForm basePrices={basePrices} />
       </section>
     </div>
   )

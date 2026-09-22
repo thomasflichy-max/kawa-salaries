@@ -8,6 +8,8 @@ import { EditOrganizationInfoForm } from './edit-organization-info-form'
 import { EditOrganizationSitesForm } from './edit-organization-sites-form'
 import { EditOrganizationSampleEmailsForm } from './edit-organization-sample-emails-form'
 import { EditOrganizationDiscountsForm } from './edit-organization-discounts-form'
+import { getCoffeePricing } from '@/lib/coffee-pricing'
+import { htPriceFromCoffeeDiscount } from '@/lib/order-item-vat'
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -72,6 +74,12 @@ export default async function AdminAccountDetailPage({
   const discountBySubcategory = new Map(
     (discounts ?? []).map((rule) => [rule.subcategory, rule.discount_amount])
   )
+
+  const pricingRules = await getCoffeePricing()
+  const basePrices = {
+    classique: pricingRules.get('classique')?.base_price ?? 0,
+    bio: pricingRules.get('bio')?.base_price ?? 0,
+  }
 
   // Demo orders aren't wired to real organizations — matched here by name,
   // same fragile-by-name convention used elsewhere (dashboard map, order
@@ -159,8 +167,12 @@ export default async function AdminAccountDetailPage({
         </h2>
         <EditOrganizationDiscountsForm
           organizationId={org.id}
-          classique={discountBySubcategory.get('classique') ?? 0}
-          bio={discountBySubcategory.get('bio') ?? 0}
+          basePrices={basePrices}
+          htClassique={htPriceFromCoffeeDiscount(
+            basePrices.classique,
+            discountBySubcategory.get('classique') ?? 0
+          )}
+          htBio={htPriceFromCoffeeDiscount(basePrices.bio, discountBySubcategory.get('bio') ?? 0)}
           decafeine={discountBySubcategory.get('decafeine') ?? 0}
         />
       </section>

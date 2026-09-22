@@ -5,6 +5,8 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
 import { geocodeAddress } from '@/lib/geocode'
+import { getCoffeePricing } from '@/lib/coffee-pricing'
+import { coffeeDiscountFromHtPrice } from '@/lib/order-item-vat'
 import type { Database } from '@/lib/supabase/types'
 
 type OrganizationAddressUpdate = Database['public']['Tables']['organization_addresses']['Update']
@@ -41,6 +43,52 @@ function invalidDomain(domain: string) {
 }
 
 const COFFEE_SUBCATEGORIES = ['classique', 'bio', 'decafeine'] as const
+
+// Staff type the price the employer actually pays HT per kg for classique/
+// bio — the salarié-facing remise is derived from it (coffeeDiscountFromHtPrice),
+// against the shared coffee_pricing.base_price (TTC). Décaféiné has no B2B
+// price to derive from (not sold that way) so it stays a plain € remise.
+async function resolveCoffeeDiscounts(
+  formData: FormData
+): Promise<
+  | { ok: true; values: Record<(typeof COFFEE_SUBCATEGORIES)[number], number> }
+  | { ok: false; error: string }
+> {
+  const pricingRules = await getCoffeePricing()
+  const basePrice = (subcategory: string) => pricingRules.get(subcategory)?.base_price ?? 0
+
+  const htClassique = Number(formData.get('ht_classique'))
+  const htBio = Number(formData.get('ht_bio'))
+  const decafeine = Number(formData.get('discount_decafeine'))
+
+  if (!Number.isFinite(htClassique) || htClassique < 0) {
+    return { ok: false, error: 'Le prix HT "classique" doit être un montant positif en €.' }
+  }
+  if (!Number.isFinite(htBio) || htBio < 0) {
+    return { ok: false, error: 'Le prix HT "bio" doit être un montant positif en €.' }
+  }
+  if (!Number.isFinite(decafeine) || decafeine < 0) {
+    return { ok: false, error: 'La remise "décaféiné" doit être un montant positif en €.' }
+  }
+
+  const classique = coffeeDiscountFromHtPrice(basePrice('classique'), htClassique)
+  const bio = coffeeDiscountFromHtPrice(basePrice('bio'), htBio)
+
+  if (classique < 0) {
+    return {
+      ok: false,
+      error: `Le prix HT "classique" (${htClassique} €) est supérieur au tarif de base salarié — vérifiez la valeur.`,
+    }
+  }
+  if (bio < 0) {
+    return {
+      ok: false,
+      error: `Le prix HT "bio" (${htBio} €) est supérieur au tarif de base salarié — vérifiez la valeur.`,
+    }
+  }
+
+  return { ok: true, values: { classique, bio, decafeine } }
+}
 
 export async function createOrganization(
   _prevState: CreateOrganizationState,
@@ -90,17 +138,11 @@ export async function createOrganization(
     return { error: `Le mail type "${invalidSampleEmail}" doit correspondre à un des domaines de l'entreprise.` }
   }
 
-  const discountAmounts: Record<(typeof COFFEE_SUBCATEGORIES)[number], number> = {
-    classique: Number(formData.get('discount_classique')),
-    bio: Number(formData.get('discount_bio')),
-    decafeine: Number(formData.get('discount_decafeine')),
+  const discountsResult = await resolveCoffeeDiscounts(formData)
+  if (!discountsResult.ok) {
+    return { error: discountsResult.error }
   }
-  for (const subcategory of COFFEE_SUBCATEGORIES) {
-    const amount = discountAmounts[subcategory]
-    if (!Number.isFinite(amount) || amount < 0) {
-      return { error: `La remise "${subcategory}" doit être un montant positif en €.` }
-    }
-  }
+  const discountAmounts = discountsResult.values
 
   const siteLabels = formData.getAll('site_label').map((v) => String(v).trim())
   const siteAddresses = formData.getAll('site_address').map((v) => String(v).trim())
@@ -349,17 +391,11 @@ export async function updateOrganizationDiscounts(
     return { error: 'Non autorisé.' }
   }
 
-  const discountAmounts: Record<(typeof COFFEE_SUBCATEGORIES)[number], number> = {
-    classique: Number(formData.get('discount_classique')),
-    bio: Number(formData.get('discount_bio')),
-    decafeine: Number(formData.get('discount_decafeine')),
+  const discountsResult = await resolveCoffeeDiscounts(formData)
+  if (!discountsResult.ok) {
+    return { error: discountsResult.error }
   }
-  for (const subcategory of COFFEE_SUBCATEGORIES) {
-    const amount = discountAmounts[subcategory]
-    if (!Number.isFinite(amount) || amount < 0) {
-      return { error: `La remise "${subcategory}" doit être un montant positif en €.` }
-    }
-  }
+  const discountAmounts = discountsResult.values
 
   const { error } = await supabase.from('organization_coffee_discounts').upsert(
     COFFEE_SUBCATEGORIES.map((subcategory) => ({

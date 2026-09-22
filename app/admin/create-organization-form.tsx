@@ -2,15 +2,24 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { createOrganization } from '@/app/admin/actions'
+import { CoffeeHtPriceField } from './coffee-ht-price-field'
 
 type Site = { label: string; address: string }
 type SampleEmail = { email: string }
 
-export function CreateOrganizationForm() {
+export function CreateOrganizationForm({
+  basePrices,
+}: {
+  basePrices: { classique: number; bio: number }
+}) {
   const formRef = useRef<HTMLFormElement>(null)
   const [state, action, pending] = useActionState(createOrganization, undefined)
   const [sites, setSites] = useState<Site[]>([{ label: '', address: '' }])
   const [sampleEmails, setSampleEmails] = useState<SampleEmail[]>([{ email: '' }])
+  // Bumped on success to remount the (React-controlled) HT-price fields with
+  // empty state — formRef.current.reset() below doesn't affect them since
+  // their value is driven by React state, not the DOM.
+  const [formVersion, setFormVersion] = useState(0)
 
   // Imperative DOM reset stays in an effect (that's what effects are for);
   // it doesn't call setState so it doesn't trip the set-state-in-effect rule.
@@ -29,6 +38,7 @@ export function CreateOrganizationForm() {
     if (state?.success) {
       setSites([{ label: '', address: '' }])
       setSampleEmails([{ email: '' }])
+      setFormVersion((v) => v + 1)
     }
   }
 
@@ -117,44 +127,38 @@ export function CreateOrganizationForm() {
 
       <div>
         <p className="text-sm font-medium text-kawa-700 mb-2">
-          Remise par sous-catégorie de café (€ déduits du prix de base)
+          Prix HT payé par l&apos;entreprise (€/kg){' '}
+          <span className="text-kawa-400 font-normal">
+            — la remise salarié en est déduite automatiquement
+          </span>
         </p>
         <div className="grid sm:grid-cols-3 gap-4">
+          <CoffeeHtPriceField
+            key={`classique-${formVersion}`}
+            name="ht_classique"
+            label="Classique HT (€/kg)"
+            basePriceTtc={basePrices.classique}
+          />
+          <CoffeeHtPriceField
+            key={`bio-${formVersion}`}
+            name="ht_bio"
+            label="Bio HT (€/kg)"
+            basePriceTtc={basePrices.bio}
+          />
           <div>
-            <label className="text-xs text-kawa-500">Classique (€)</label>
-            <input
-              type="number"
-              name="discount_classique"
-              min={0}
-              step="0.01"
-              defaultValue={3}
-              required
-              className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-kawa-500">Bio (€)</label>
-            <input
-              type="number"
-              name="discount_bio"
-              min={0}
-              step="0.01"
-              defaultValue={3}
-              required
-              className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-kawa-500">Décaféiné (€)</label>
+            <label className="text-xs text-kawa-500">Décaféiné — remise (€)</label>
             <input
               type="number"
               name="discount_decafeine"
               min={0}
               step="0.01"
-              defaultValue={3}
+              defaultValue={1}
               required
               className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
+            <p className="text-xs text-kawa-400 mt-1">
+              Pas de tarif B2B pour ce format — remise fixe.
+            </p>
           </div>
         </div>
       </div>

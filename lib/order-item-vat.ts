@@ -15,3 +15,25 @@ export function vatRateFor(category: string) {
 export function unitFor(category: string) {
   return category === 'cafe' ? ('Kg' as const) : ('unité' as const)
 }
+
+// The admin "ajout client" / discounts form lets staff enter what the
+// employer actually pays HT per kg, instead of a raw discount amount — this
+// converts between the two. coffee_pricing.base_price is TTC (what the
+// salarié sees with no discount at all), so the employer's HT price has to
+// become TTC before it can be subtracted from it.
+//
+// coffeeDiscountFromHtPrice can return a negative number (HT price above the
+// base retail price) — callers must reject that rather than silently
+// clamping it to 0, since a negative "remise" means the admin mistyped the
+// price, not that there's genuinely no discount.
+export function coffeeDiscountFromHtPrice(basePriceTtc: number, htPricePerKg: number) {
+  const ttc = Math.round(htPricePerKg * (1 + vatRateFor('cafe')) * 100) / 100
+  return Math.round((basePriceTtc - ttc) * 100) / 100
+}
+
+// Inverse — used to prefill the HT-price field from an already-stored
+// discount_amount when editing an existing organization.
+export function htPriceFromCoffeeDiscount(basePriceTtc: number, discountAmount: number) {
+  const ttc = basePriceTtc - discountAmount
+  return Math.round((ttc / (1 + vatRateFor('cafe'))) * 100) / 100
+}
