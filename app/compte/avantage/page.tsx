@@ -1,113 +1,200 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
 
+const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
+
+const STATS = [
+  { value: '2020', label: 'Fondée à Nantes' },
+  { value: '200+', label: 'Entreprises clientes' },
+  { value: '24h', label: 'Retrait en agence' },
+  { value: '7j ouvrés', label: 'Livraison au bureau' },
+]
+
+const SAVOIR_FAIRE = [
+  {
+    title: 'Torréfacteur TANAT',
+    text: '12ᵉ meilleur torréfacteur mondial en 2024, torréfié en petites séries dans son atelier parisien.',
+  },
+  {
+    title: 'Circuit court',
+    text: 'Une relation directe avec nos producteurs de cafés de spécialité, pour des cafés tracés.',
+  },
+  {
+    title: 'Toujours frais',
+    text: 'Chaque café est torréfié spécialement pour votre machine, en petite série.',
+  },
+]
+
 export default async function AvantagePage() {
-  const { organization } = await getEmployee()
+  const { organization, coffeeDiscounts } = await getEmployee()
+  const orgName = organization?.name ?? 'votre entreprise'
+  const headlineDiscount = coffeeDiscounts.classique ?? Object.values(coffeeDiscounts)[0]
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-bold text-kawa-800">Votre Avantage</h1>
-        <p className="text-kawa-500 mt-1">
-          Ce que {organization?.name ?? 'votre entreprise'} vous fait gagner chez KAWA.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-10 w-full">
-        <div className="grid sm:grid-cols-2 gap-16 items-stretch">
-          <div className="bg-white rounded-2xl border border-kawa-200 p-8">
-            <p className="font-semibold text-kawa-800 text-lg">Remise sur le café</p>
-            <p className="text-kawa-500 mt-2">
-              {`Parce que ${organization?.name ?? 'votre entreprise'} est client de KAWA Nantes, vous bénéficiez d'une réduction sur nos cafés ainsi que l'accès à nos produits d'entretiens et à nos machines reconditionnées. C'est une offre réservée exclusivement aux salariés des entreprises clientes de KAWA, basés à Nantes.`}
-            </p>
-          </div>
-          <div className="relative w-full h-56 sm:w-48 sm:h-full sm:min-h-40 rounded-xl overflow-hidden">
-            <Image
-              src="/avantage/sachets-tanat.jpg"
-              alt="Sachets de café KAWA"
-              fill
-              sizes="(min-width: 640px) 192px, 100vw"
-              className="object-cover object-[50%_65%]"
-            />
-          </div>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-16 items-stretch">
-          <div className="bg-white rounded-2xl border border-kawa-200 p-8">
-            <p className="font-semibold text-kawa-800 text-lg">Un savoir-faire artisanal</p>
-            <p className="text-kawa-500 mt-2">
-              KAWA Nantes vous propose les cafés TANAT, élu 12<sup>e</sup> meilleur torréfacteur
-              mondial en 2024. Des cafés de spécialité, torréfiés en petites séries dans l&apos;atelier
-              parisien de TANAT pour préserver toute leur fraîcheur et leurs arômes, sélectionnés en
-              direct avec nos producteurs, en circuit court, pour des cafés tracés et d&apos;une grande
-              qualité. Fondée à Nantes en 2020, notre équipe locale accompagne aujourd&apos;hui plus de
-              200 entreprises en Loire-Atlantique.
-            </p>
-          </div>
-          <div className="relative w-full h-56 sm:w-48 sm:h-full sm:min-h-40 rounded-xl overflow-hidden">
-            <Image
-              src="/avantage/torrefacteur-loring.jpg"
-              alt="Torréfacteur Loring — atelier TANAT"
-              fill
-              sizes="(min-width: 640px) 192px, 100vw"
-              className="object-cover"
-            />
-          </div>
-        </div>
-
-        <div>
-          <p className="font-semibold text-kawa-800 text-lg">Conditions de livraison</p>
-          <p className="text-kawa-500 mt-2 max-w-3xl">
-            La livraison est gratuite, avec deux solutions au choix selon vos besoins.
+    <div className="flex flex-col">
+      {/* HERO */}
+      <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden">
+        <Image
+          src="/avantage/triporteur-chateau.jpg"
+          alt="Triporteur électrique KAWA devant le Château des Ducs de Bretagne, à Nantes"
+          fill
+          priority
+          sizes="(min-width: 1024px) 896px, 100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-kawa-950/85 via-kawa-950/25 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">
+            Votre avantage KAWA
           </p>
-
-          <div className="grid sm:grid-cols-2 gap-6 mt-6">
-            <div className="bg-white rounded-2xl border border-kawa-200 overflow-hidden flex flex-col">
-              <div className="relative w-full h-44">
-                <Image
-                  src="/avantage/equipe-kawa.jpeg"
-                  alt="L'équipe KAWA Nantes"
-                  fill
-                  sizes="(min-width: 640px) 50vw, 100vw"
-                  className="object-cover object-top"
-                />
-              </div>
-              <div className="p-6 flex flex-col gap-2">
-                <span className="inline-block w-fit px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold uppercase tracking-wide">
-                  Retrait en agence — sous 24h
-                </span>
-                <p className="font-semibold text-kawa-800 mt-1">Récupérez votre commande rapidement</p>
-                <p className="text-kawa-500 text-sm">
-                  Venez la récupérer directement dans nos locaux du 75 Bd Ernest Dalby, à Nantes,
-                  entre 9h et 18h — disponible sous 24h.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-kawa-200 overflow-hidden flex flex-col">
-              <div className="relative w-full h-44">
-                <Image
-                  src="/avantage/triporteur-chateau.jpg"
-                  alt="Triporteur électrique KAWA à Nantes"
-                  fill
-                  sizes="(min-width: 640px) 50vw, 100vw"
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6 flex flex-col gap-2">
-                <span className="inline-block w-fit px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold uppercase tracking-wide">
-                  Livraison en entreprise — 7 jours ouvrés
-                </span>
-                <p className="font-semibold text-kawa-800 mt-1">Livré directement à vos bureaux</p>
-                <p className="text-kawa-500 text-sm">
-                  Votre café est livré gratuitement dans vos locaux, en triporteur électrique, sous 7
-                  jours ouvrés.
-                </p>
-              </div>
-            </div>
-          </div>
+          <h1 className="mt-2 text-2xl sm:text-4xl font-bold text-white max-w-xl leading-tight">
+            Le café de qualité, au bureau.
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-white/80 max-w-lg">
+            Ce que {orgName} vous fait gagner chez KAWA.
+          </p>
         </div>
       </div>
+
+      {/* STATS STRIP */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-kawa-200 bg-white rounded-2xl border border-kawa-200 mt-6 overflow-hidden">
+        {STATS.map((stat) => (
+          <div key={stat.label} className="p-5 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-kawa-800">{stat.value}</p>
+            <p className="text-xs text-kawa-500 mt-1 uppercase tracking-wide">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* VOTRE AVANTAGE */}
+      <section className="grid sm:grid-cols-12 gap-6 sm:gap-10 py-16">
+        <div className="sm:col-span-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">
+            Votre avantage
+          </p>
+          <h2 className="mt-2 text-2xl font-bold text-kawa-800 leading-snug">
+            Une remise réservée aux salariés {orgName}
+          </h2>
+        </div>
+        <div className="sm:col-span-8 flex flex-col sm:flex-row items-start gap-6">
+          <p className="text-kawa-600 leading-relaxed flex-1">
+            Parce que {orgName} est client de KAWA Nantes, vous bénéficiez d&apos;une réduction sur
+            nos cafés, ainsi que l&apos;accès à nos produits d&apos;entretien et à nos machines
+            reconditionnées. C&apos;est une offre réservée exclusivement aux salariés des entreprises
+            clientes de KAWA, basés à Nantes.
+          </p>
+          {headlineDiscount != null && headlineDiscount > 0 && (
+            <div className="shrink-0 self-stretch sm:w-40 rounded-2xl bg-sky-50 border border-sky-100 flex flex-col items-center justify-center text-center px-4 py-6">
+              <p className="text-2xl font-bold text-sky-700">-{currency.format(headlineDiscount)}</p>
+              <p className="text-xs text-sky-700/80 mt-1">par kg de café</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <div className="h-px bg-kawa-200" />
+
+      {/* SAVOIR-FAIRE / QUALITÉ */}
+      <section className="grid sm:grid-cols-12 gap-6 sm:gap-10 py-16 items-center">
+        <div className="sm:col-span-5 sm:order-2 relative h-64 sm:h-80 rounded-2xl overflow-hidden">
+          <Image
+            src="/avantage/torrefacteur-loring.jpg"
+            alt="Torréfacteur Loring — atelier TANAT"
+            fill
+            sizes="(min-width: 640px) 40vw, 100vw"
+            className="object-cover"
+          />
+        </div>
+        <div className="sm:col-span-7 sm:order-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">Qualité</p>
+          <h2 className="mt-2 text-2xl font-bold text-kawa-800 leading-snug">
+            Un café d&apos;exception, sélectionné avec soin
+          </h2>
+          <p className="mt-4 text-kawa-600 leading-relaxed">
+            KAWA Nantes vous propose les cafés TANAT — des cafés de spécialité choisis pour leur
+            qualité, dès la sélection des grains.
+          </p>
+          <dl className="mt-6 flex flex-col gap-4">
+            {SAVOIR_FAIRE.map((item) => (
+              <div key={item.title} className="flex gap-3">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0" />
+                <div>
+                  <dt className="font-medium text-kawa-800">{item.title}</dt>
+                  <dd className="text-sm text-kawa-500 mt-0.5">{item.text}</dd>
+                </div>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <div className="h-px bg-kawa-200" />
+
+      {/* LIVRAISON */}
+      <section className="py-16">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">Livraison</p>
+        <h2 className="mt-2 text-2xl font-bold text-kawa-800 leading-snug">
+          Deux façons de recevoir votre café
+        </h2>
+        <p className="mt-3 text-kawa-600 max-w-2xl">
+          La livraison est gratuite, avec deux solutions au choix selon vos besoins.
+        </p>
+
+        <div className="grid sm:grid-cols-2 gap-5 mt-8">
+          <div className="rounded-2xl overflow-hidden">
+            <div className="relative h-48">
+              <Image
+                src="/avantage/equipe-kawa.jpeg"
+                alt="L'équipe KAWA Nantes"
+                fill
+                sizes="(min-width: 640px) 50vw, 100vw"
+                className="object-cover object-top"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-kawa-950/80 via-kawa-950/10 to-transparent" />
+              <p className="absolute bottom-3 left-4 text-white font-bold text-lg">
+                Retrait en agence — sous 24h
+              </p>
+            </div>
+            <p className="text-sm text-kawa-500 mt-3">
+              Venez la récupérer directement dans nos locaux du 75 Bd Ernest Dalby, à Nantes, entre
+              9h et 18h.
+            </p>
+          </div>
+
+          <div className="rounded-2xl overflow-hidden">
+            <div className="relative h-48">
+              <Image
+                src="/avantage/triporteur-elephant.jpg"
+                alt="Triporteur électrique KAWA devant le Grand Éléphant, à Nantes"
+                fill
+                sizes="(min-width: 640px) 50vw, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-kawa-950/80 via-kawa-950/10 to-transparent" />
+              <p className="absolute bottom-3 left-4 text-white font-bold text-lg">
+                Livraison au bureau — 7 jours ouvrés
+              </p>
+            </div>
+            <p className="text-sm text-kawa-500 mt-3">
+              Votre café est livré gratuitement dans vos locaux, en triporteur électrique.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px bg-kawa-200" />
+
+      {/* CLOSER */}
+      <section className="py-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p className="text-kawa-600">Envie de découvrir nos cafés ?</p>
+        <Link
+          href="/compte/produits"
+          className="inline-flex items-center gap-2 self-start sm:self-auto bg-sky-500 text-kawa-950 px-5 py-2.5 rounded-lg font-medium hover:bg-sky-600 transition"
+        >
+          Voir le catalogue →
+        </Link>
+      </section>
     </div>
   )
 }
