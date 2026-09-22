@@ -291,6 +291,42 @@ export type Database = {
         }
         Relationships: []
       }
+      product_interest_votes: {
+        Row: {
+          id: string
+          product_id: string
+          profile_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          profile_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          profile_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'product_interest_votes_product_id_fkey'
+            columns: ['product_id']
+            isOneToOne: false
+            referencedRelation: 'products'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'product_interest_votes_profile_id_fkey'
+            columns: ['profile_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       coffee_pricing: {
         Row: {
           subcategory: string

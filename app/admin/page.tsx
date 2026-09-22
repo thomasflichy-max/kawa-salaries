@@ -50,22 +50,39 @@ export default async function AdminDashboardPage({
   const range = resolveDateRange(params)
 
   const supabase = await createClient()
-  const [{ data: organizations }, { data: profiles }, { data: addresses, error: addressesError }] =
-    await Promise.all([
-      supabase.from('organizations').select('id, name, active').order('name'),
-      supabase.from('profiles').select('id, organization_id'),
-      supabase
-        .from('organization_addresses')
-        .select('address, lat, lng, organizations(name)')
-        .not('lat', 'is', null)
-        .not('lng', 'is', null),
-    ])
+  const [
+    { data: organizations },
+    { data: profiles },
+    { data: addresses, error: addressesError },
+    { data: coffeeProducts },
+    { data: interestVotes },
+  ] = await Promise.all([
+    supabase.from('organizations').select('id, name, active').order('name'),
+    supabase.from('profiles').select('id, organization_id'),
+    supabase
+      .from('organization_addresses')
+      .select('address, lat, lng, organizations(name)')
+      .not('lat', 'is', null)
+      .not('lng', 'is', null),
+    // 200g interest poll — every coffee except the déca, already sold in
+    // 200g (see app/compte/produits/produit/[id]/page.tsx).
+    supabase.from('products').select('id, name').eq('category', 'cafe').neq('net_weight_grams', 200).order('name'),
+    supabase.from('product_interest_votes').select('product_id'),
+  ])
   if (addressesError) {
     console.error('[AdminDashboardPage] organization_addresses fetch failed:', addressesError)
   }
 
   const orgs = organizations ?? []
   const allProfiles = profiles ?? []
+
+  const voteCountByProduct = new Map<string, number>()
+  for (const row of interestVotes ?? []) {
+    voteCountByProduct.set(row.product_id, (voteCountByProduct.get(row.product_id) ?? 0) + 1)
+  }
+  const interest200gReport = (coffeeProducts ?? [])
+    .map((p) => ({ id: p.id, name: p.name, count: voteCountByProduct.get(p.id) ?? 0 }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
   const clientPins: DemoClientPin[] = (addresses ?? []).flatMap((site) => {
     const organizationName = (site.organizations as { name: string } | null)?.name
     if (!organizationName || site.lat == null || site.lng == null) return []
@@ -341,6 +358,45 @@ export default async function AdminDashboardPage({
           </div>
         </section>
       </div>
+
+      <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
+        <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
+          Intérêt pour le format 200g
+        </h2>
+        <p className="px-5 pt-4 text-xs text-kawa-400">
+          Réponses au sondage affiché sur la fiche de chaque café (sauf le déca, déjà en 200g) —
+          sur {allProfiles.length} salarié{allProfiles.length > 1 ? 's' : ''} inscrit
+          {allProfiles.length > 1 ? 's' : ''}.
+        </p>
+        <div className="p-5 flex flex-col gap-3">
+          {interest200gReport.length === 0 && (
+            <p className="text-sm text-kawa-400">Aucun café éligible pour l&apos;instant.</p>
+          )}
+          {interest200gReport.map(({ id, name, count }) => {
+            const percent = allProfiles.length > 0 ? Math.round((count / allProfiles.length) * 100) : 0
+            return (
+              <a
+                key={id}
+                href={`/compte/produits/produit/${id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 hover:opacity-80 transition"
+              >
+                <p className="w-40 shrink-0 text-sm text-kawa-700 truncate">{name}</p>
+                <div className="flex-1 bg-kawa-100 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="bg-sky-500 h-full rounded-full"
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+                <p className="w-24 text-right text-sm font-medium text-kawa-800">
+                  {count} intéressé{count > 1 ? 's' : ''}
+                </p>
+              </a>
+            )
+          })}
+        </div>
+      </section>
 
       <section className="bg-white rounded-2xl border border-kawa-200 p-5">
         <p className="text-sm text-kawa-500">

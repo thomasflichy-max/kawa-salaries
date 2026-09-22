@@ -2,10 +2,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProductById } from '@/lib/products'
 import { getEmployee } from '@/lib/get-employee'
+import { createClient } from '@/lib/supabase/server'
 import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
 import { QuantityAddForm } from '../../quantity-add-form'
 import { InterestForm } from '../../interest-form'
 import { ProductImage } from '../../product-image'
+import { ProductInterestSurvey } from './product-interest-survey'
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -61,7 +63,7 @@ export default async function ProductDetailPage({
 }) {
   const { id } = await params
   const { mouture } = await searchParams
-  const { coffeeDiscounts } = await getEmployee()
+  const { coffeeDiscounts, user } = await getEmployee()
   const product = await getProductById(id, coffeeDiscounts)
 
   if (!product) {
@@ -76,6 +78,21 @@ export default async function ProductDetailPage({
 
   const category = PRODUCT_CATEGORIES.find((c) => c.key === product.category)
   const isCoffee = product.category === 'cafe'
+
+  // 200g interest poll on every coffee except the déca, which is already
+  // sold in 200g — no format question to ask there.
+  const askAbout200g = isCoffee && product.net_weight_grams !== 200
+  let interestedIn200g = false
+  if (askAbout200g) {
+    const supabase = await createClient()
+    const { data: vote } = await supabase
+      .from('product_interest_votes')
+      .select('id')
+      .eq('product_id', product.id)
+      .eq('profile_id', user.id)
+      .maybeSingle()
+    interestedIn200g = !!vote
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -169,6 +186,10 @@ export default async function ProductDetailPage({
               </p>
               <InterestForm productId={product.id} />
             </div>
+          )}
+
+          {askAbout200g && (
+            <ProductInterestSurvey productId={product.id} initialInterested={interestedIn200g} />
           )}
         </div>
       </div>
