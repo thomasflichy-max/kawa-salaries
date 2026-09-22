@@ -36,18 +36,18 @@ export default async function AvantagePage() {
           <div className="bg-white rounded-2xl border border-kawa-200 p-8">
             <p className="font-semibold text-kawa-800 text-lg">Un savoir-faire artisanal</p>
             <p className="text-kawa-500 mt-2">
-              KAWA Nantes est un torréfacteur artisanal : chaque café est torréfié dans notre atelier,
-              en petites séries et spécialement pour votre machine, pour préserver toute sa fraîcheur
-              et ses arômes. Nous travaillons en direct avec nos producteurs de cafés de spécialité, en
-              circuit court, pour des cafés tracés et d&apos;une grande qualité. Fondée à Nantes en
-              2020, notre équipe locale accompagne aujourd&apos;hui plus de 200 entreprises en
-              Loire-Atlantique.
+              KAWA Nantes vous propose les cafés TANAT, élu 12<sup>e</sup> meilleur torréfacteur
+              mondial en 2024. Des cafés de spécialité, torréfiés en petites séries dans l&apos;atelier
+              parisien de TANAT pour préserver toute leur fraîcheur et leurs arômes, sélectionnés en
+              direct avec nos producteurs, en circuit court, pour des cafés tracés et d&apos;une grande
+              qualité. Fondée à Nantes en 2020, notre équipe locale accompagne aujourd&apos;hui plus de
+              200 entreprises en Loire-Atlantique.
             </p>
           </div>
           <div className="relative w-full h-56 sm:w-48 sm:h-full sm:min-h-40 rounded-xl overflow-hidden">
             <Image
               src="/avantage/torrefacteur-loring.jpg"
-              alt="Torréfacteur dans l'atelier KAWA à Nantes"
+              alt="Torréfacteur Loring — atelier TANAT"
               fill
               sizes="(min-width: 640px) 192px, 100vw"
               className="object-cover"
