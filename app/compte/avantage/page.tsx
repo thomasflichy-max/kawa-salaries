@@ -44,8 +44,8 @@ export default async function AvantagePage() {
       {/* HERO */}
       <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden">
         <Image
-          src="/avantage/triporteur-chateau.jpg"
-          alt="Triporteur électrique KAWA devant le Château des Ducs de Bretagne, à Nantes"
+          src="/avantage/hero-machine.png"
+          alt="Préparation d'un café à la machine KAWA"
           fill
           priority
           sizes="(min-width: 1024px) 896px, 100vw"
@@ -159,11 +159,11 @@ export default async function AvantagePage() {
           <div className="rounded-2xl overflow-hidden">
             <div className="relative h-48">
               <Image
-                src="/avantage/equipe-kawa.jpeg"
-                alt="L'équipe KAWA Nantes"
+                src="/avantage/agence-kawa.jpg"
+                alt="Façade de l'agence KAWA à Nantes"
                 fill
                 sizes="(min-width: 640px) 50vw, 100vw"
-                className="object-cover object-top"
+                className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-kawa-950/80 via-kawa-950/10 to-transparent" />
               <p className="absolute bottom-3 left-4 text-white font-bold text-lg">
@@ -179,8 +179,8 @@ export default async function AvantagePage() {
           <div className="rounded-2xl overflow-hidden">
             <div className="relative h-48">
               <Image
-                src="/avantage/triporteur-elephant.jpg"
-                alt="Triporteur électrique KAWA devant le Grand Éléphant, à Nantes"
+                src="/avantage/triporteur-anneaux.jpg"
+                alt="Triporteur électrique KAWA devant Les Anneaux de Buren, à Nantes"
                 fill
                 sizes="(min-width: 640px) 50vw, 100vw"
                 className="object-cover"
