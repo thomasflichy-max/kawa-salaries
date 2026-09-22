@@ -38,6 +38,7 @@ export function EditOrganizationDiscountsForm({
           label="Bio HT (€/kg)"
           basePriceTtc={basePrices.bio}
           defaultValue={htBio}
+          placeholder="26.00"
         />
         <div>
           <label className="text-xs text-kawa-500">Décaféiné — remise (€)</label>

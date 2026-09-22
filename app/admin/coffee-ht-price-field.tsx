@@ -15,11 +15,13 @@ export function CoffeeHtPriceField({
   label,
   basePriceTtc,
   defaultValue,
+  placeholder = '24.00',
 }: {
   name: string
   label: string
   basePriceTtc: number
   defaultValue?: number
+  placeholder?: string
 }) {
   const [raw, setRaw] = useState(defaultValue != null ? String(defaultValue) : '')
   const parsed = Number(raw)
@@ -34,7 +36,7 @@ export function CoffeeHtPriceField({
         name={name}
         min={0}
         step="0.01"
-        placeholder="24.00"
+        placeholder={placeholder}
         value={raw}
         onChange={(e) => setRaw(e.target.value)}
         required
