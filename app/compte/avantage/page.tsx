@@ -85,10 +85,10 @@ export default async function AvantagePage() {
         </div>
         <div className="sm:col-span-8">
           <p className="text-kawa-600 leading-relaxed">
-            Parce que {orgName} est partenaire de KAWA Nantes, vous bénéficiez d&apos;une réduction
-            personnelle sur nos cafés à déguster chez vous, ainsi que sur nos produits
-            d&apos;entretien et nos machines reconditionnées. Une offre réservée aux salariés des
-            entreprises partenaires de KAWA, basés à Nantes.
+            En tant que salarié de {orgName}, entreprise partenaire de KAWA Nantes, vous
+            bénéficiez d&apos;une réduction personnelle sur nos cafés à déguster chez vous, ainsi
+            que sur nos produits d&apos;entretien et nos machines reconditionnées. Une offre
+            réservée aux salariés des entreprises partenaires de KAWA, basés à Nantes.
           </p>
         </div>
       </section>
