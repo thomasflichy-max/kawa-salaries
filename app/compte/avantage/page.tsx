@@ -1,15 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
+import { createClient } from '@/lib/supabase/server'
 
 const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
-
-const STATS = [
-  { value: '2020', label: 'Fondée à Nantes' },
-  { value: '200+', label: 'Entreprises clientes' },
-  { value: '24h', label: 'Retrait en agence' },
-  { value: '7j ouvrés', label: 'Livraison au bureau' },
-]
 
 const SAVOIR_FAIRE = [
   {
@@ -31,6 +25,20 @@ export default async function AvantagePage() {
   const orgName = organization?.name ?? 'votre entreprise'
   const headlineDiscount = coffeeDiscounts.classique ?? Object.values(coffeeDiscounts)[0]
 
+  const supabase = await createClient()
+  const { count: coffeeCount } = await supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+    .eq('category', 'cafe')
+    .eq('active', true)
+
+  const stats = [
+    { value: '2020', label: 'Fondée à Nantes' },
+    { value: String(coffeeCount ?? 9), label: 'Cafés à découvrir' },
+    { value: '24h', label: 'Retrait en agence' },
+    { value: '7j ouvrés', label: 'Livraison au travail' },
+  ]
+
   return (
     <div className="flex flex-col">
       {/* HERO */}
@@ -49,17 +57,18 @@ export default async function AvantagePage() {
             Votre avantage KAWA
           </p>
           <h1 className="mt-2 text-2xl sm:text-4xl font-bold text-white max-w-xl leading-tight">
-            Le café de qualité, au bureau.
+            Le café d&apos;exception, à la maison.
           </h1>
           <p className="mt-2 text-sm sm:text-base text-white/80 max-w-lg">
-            Ce que {orgName} vous fait gagner chez KAWA.
+            Grâce à {orgName}, profitez d&apos;un café de qualité à prix réduit, à déguster chez
+            vous.
           </p>
         </div>
       </div>
 
       {/* STATS STRIP */}
       <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-kawa-200 bg-white rounded-2xl border border-kawa-200 mt-6 overflow-hidden">
-        {STATS.map((stat) => (
+        {stats.map((stat) => (
           <div key={stat.label} className="p-5 text-center">
             <p className="text-xl sm:text-2xl font-bold text-kawa-800">{stat.value}</p>
             <p className="text-xs text-kawa-500 mt-1 uppercase tracking-wide">{stat.label}</p>
@@ -74,15 +83,15 @@ export default async function AvantagePage() {
             Votre avantage
           </p>
           <h2 className="mt-2 text-2xl font-bold text-kawa-800 leading-snug">
-            Une remise réservée aux salariés {orgName}
+            Un café d&apos;exception, à prix réduit, pour la maison
           </h2>
         </div>
         <div className="sm:col-span-8 flex flex-col sm:flex-row items-start gap-6">
           <p className="text-kawa-600 leading-relaxed flex-1">
-            Parce que {orgName} est client de KAWA Nantes, vous bénéficiez d&apos;une réduction sur
-            nos cafés, ainsi que l&apos;accès à nos produits d&apos;entretien et à nos machines
-            reconditionnées. C&apos;est une offre réservée exclusivement aux salariés des entreprises
-            clientes de KAWA, basés à Nantes.
+            Parce que {orgName} est partenaire de KAWA Nantes, vous bénéficiez d&apos;une réduction
+            personnelle sur nos cafés à déguster chez vous, ainsi que sur nos produits
+            d&apos;entretien et nos machines reconditionnées. Une offre réservée aux salariés des
+            entreprises partenaires de KAWA, basés à Nantes.
           </p>
           {headlineDiscount != null && headlineDiscount > 0 && (
             <div className="shrink-0 self-stretch sm:w-40 rounded-2xl bg-sky-50 border border-sky-100 flex flex-col items-center justify-center text-center px-4 py-6">
@@ -126,6 +135,10 @@ export default async function AvantagePage() {
               </div>
             ))}
           </dl>
+          <p className="mt-6 text-sm text-kawa-500 leading-relaxed">
+            Le même café que nous servons à nos clients professionnels, à retrouver dans votre
+            tasse à la maison.
+          </p>
         </div>
       </section>
 
@@ -135,10 +148,11 @@ export default async function AvantagePage() {
       <section className="py-16">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">Livraison</p>
         <h2 className="mt-2 text-2xl font-bold text-kawa-800 leading-snug">
-          Deux façons de recevoir votre café
+          Deux façons de repartir avec votre café
         </h2>
         <p className="mt-3 text-kawa-600 max-w-2xl">
-          La livraison est gratuite, avec deux solutions au choix selon vos besoins.
+          La livraison est gratuite, avec deux solutions au choix — il ne vous reste plus qu&apos;à
+          l&apos;emporter chez vous.
         </p>
 
         <div className="grid sm:grid-cols-2 gap-5 mt-8">
@@ -157,8 +171,8 @@ export default async function AvantagePage() {
               </p>
             </div>
             <p className="text-sm text-kawa-500 mt-3">
-              Venez la récupérer directement dans nos locaux du 75 Bd Ernest Dalby, à Nantes, entre
-              9h et 18h.
+              Venez la récupérer directement dans nos locaux du 75 Bd Ernest Dalby, à Nantes,
+              entre 9h et 18h, et repartez avec votre café du jour.
             </p>
           </div>
 
@@ -173,11 +187,12 @@ export default async function AvantagePage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-kawa-950/80 via-kawa-950/10 to-transparent" />
               <p className="absolute bottom-3 left-4 text-white font-bold text-lg">
-                Livraison au bureau — 7 jours ouvrés
+                Livraison au travail — 7 jours ouvrés
               </p>
             </div>
             <p className="text-sm text-kawa-500 mt-3">
-              Votre café est livré gratuitement dans vos locaux, en triporteur électrique.
+              Votre café est livré gratuitement sur votre lieu de travail, en triporteur
+              électrique — vous n&apos;avez plus qu&apos;à l&apos;emporter chez vous le soir.
             </p>
           </div>
         </div>
@@ -187,7 +202,7 @@ export default async function AvantagePage() {
 
       {/* CLOSER */}
       <section className="py-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <p className="text-kawa-600">Envie de découvrir nos cafés ?</p>
+        <p className="text-kawa-600">Envie de vous régaler chez vous ?</p>
         <Link
           href="/compte/produits"
           className="inline-flex items-center gap-2 self-start sm:self-auto bg-sky-500 text-kawa-950 px-5 py-2.5 rounded-lg font-medium hover:bg-sky-600 transition"
