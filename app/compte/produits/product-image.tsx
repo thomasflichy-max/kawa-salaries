@@ -3,10 +3,13 @@
 import { useState, type ReactNode } from 'react'
 import Image from 'next/image'
 
-// Clicking the image toggles between the main and hover photo — it never
-// navigates, on any device (no CSS :hover reliance, which never fires on
-// touch anyway). Only the title/description link to the product page (see
-// product-grid.tsx and the product detail page).
+// On a device with a mouse, hovering swaps to the second photo (plain CSS
+// group-hover — :hover never fires on touch, so this is a no-op there).
+// Clicking still toggles between the two and pins whichever is showing —
+// that's the only way to see the second photo on touch, and on desktop it
+// lets you "lock" it without holding the pointer in place. The click never
+// navigates, on any device — only the title/description link to the
+// product page (see product-grid.tsx and the product detail page).
 export function ProductImage({
   imageUrl,
   hoverImageUrl,
@@ -23,10 +26,11 @@ export function ProductImage({
   children?: ReactNode
 }) {
   const [revealed, setRevealed] = useState(false)
+  const canSwap = Boolean(hoverImageUrl)
 
   return (
     <div
-      className={`relative ${className} ${hoverImageUrl ? 'cursor-pointer' : ''}`}
+      className={`relative group ${className} ${hoverImageUrl ? 'cursor-pointer' : ''}`}
       onClick={
         hoverImageUrl
           ? () => {
@@ -42,7 +46,7 @@ export function ProductImage({
           fill
           sizes={sizes}
           className={`object-contain transition-opacity duration-500 ${
-            revealed ? 'opacity-0' : 'opacity-100'
+            revealed ? 'opacity-0' : canSwap ? 'opacity-100 group-hover:opacity-0' : 'opacity-100'
           }`}
         />
       )}
@@ -53,7 +57,7 @@ export function ProductImage({
           fill
           sizes={sizes}
           className={`object-contain transition-opacity duration-500 ${
-            revealed ? 'opacity-100' : 'opacity-0'
+            revealed ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`}
         />
       )}
