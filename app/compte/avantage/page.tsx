@@ -182,8 +182,8 @@ export default async function AvantagePage() {
               </p>
             </div>
             <p className="text-sm text-kawa-500 mt-3">
-              Votre café est livré gratuitement sur votre lieu de travail, en triporteur
-              électrique — vous n&apos;avez plus qu&apos;à l&apos;emporter chez vous le soir.
+              Votre café est livré gratuitement sur votre lieu de travail — vous n&apos;avez plus
+              qu&apos;à l&apos;emporter chez vous le soir.
             </p>
           </div>
         </div>

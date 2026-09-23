@@ -4,14 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useActionState } from 'react'
 import { createSubscription } from '@/app/actions/subscriptions'
-import { FREQUENCY_WEEKS } from '@/lib/subscription-frequency'
-
-const FREQUENCY_LABELS: Record<number, string> = {
-  2: 'Toutes les 2 semaines',
-  4: 'Tous les mois',
-  6: 'Toutes les 6 semaines',
-  8: 'Tous les 2 mois',
-}
+import { FREQUENCY_WEEKS, FREQUENCY_LABELS } from '@/lib/subscription-frequency'
 
 const GRINDS = [
   { value: 'grain', label: 'En grains' },

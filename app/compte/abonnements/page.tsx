@@ -3,13 +3,7 @@ import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
 import { createClient } from '@/lib/supabase/server'
 import { SubscriptionRow } from './subscription-row'
-
-const FREQUENCY_LABELS: Record<number, string> = {
-  2: 'Toutes les 2 semaines',
-  4: 'Tous les mois',
-  6: 'Toutes les 6 semaines',
-  8: 'Tous les 2 mois',
-}
+import { FREQUENCY_LABELS } from '@/lib/subscription-frequency'
 
 const GRIND_LABELS: Record<string, string> = {
   grain: 'En grains',
