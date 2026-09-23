@@ -163,7 +163,7 @@ export default async function AvantagePage() {
             </div>
             <p className="text-sm text-kawa-500 mt-3">
               Venez la récupérer directement dans nos locaux du 75 Bd Ernest Dalby, à Nantes,
-              entre 9h et 18h, et repartez avec votre café du jour.
+              entre 9h et 18h.
             </p>
           </div>
 
