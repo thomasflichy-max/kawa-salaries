@@ -541,6 +541,8 @@ export type Database = {
           pickup_slot_date: string | null
           pickup_slot_hour: number | null
           pickup_token: string
+          ready_at: string | null
+          pickup_reminder_sent_at: string | null
         }
         Insert: {
           id?: string
@@ -564,6 +566,8 @@ export type Database = {
           pickup_slot_date?: string | null
           pickup_slot_hour?: number | null
           pickup_token?: string
+          ready_at?: string | null
+          pickup_reminder_sent_at?: string | null
         }
         Update: {
           id?: string
@@ -587,6 +591,8 @@ export type Database = {
           pickup_slot_date?: string | null
           pickup_slot_hour?: number | null
           pickup_token?: string
+          ready_at?: string | null
+          pickup_reminder_sent_at?: string | null
         }
         Relationships: [
           {
@@ -703,6 +709,8 @@ export type Database = {
           pickup_slot_date: string | null
           pickup_slot_hour: number | null
           pickup_token: string
+          ready_at: string | null
+          pickup_reminder_sent_at: string | null
         }
         Insert: {
           id?: string
@@ -728,6 +736,8 @@ export type Database = {
           pickup_slot_date?: string | null
           pickup_slot_hour?: number | null
           pickup_token?: string
+          ready_at?: string | null
+          pickup_reminder_sent_at?: string | null
         }
         Update: {
           id?: string
@@ -753,6 +763,8 @@ export type Database = {
           pickup_slot_date?: string | null
           pickup_slot_hour?: number | null
           pickup_token?: string
+          ready_at?: string | null
+          pickup_reminder_sent_at?: string | null
         }
         Relationships: [
           {
@@ -1173,7 +1185,7 @@ export type Database = {
       }
       set_pickup_slot: {
         Args: { p_token: string; p_date: string; p_hour: number }
-        Returns: boolean
+        Returns: { order_id: string; order_number: string; employee_name: string }[]
       }
     }
     Enums: Record<string, never>

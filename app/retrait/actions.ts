@@ -1,7 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { PICKUP_SLOT_HOURS, upcomingWeekdays } from '@/lib/pickup-slot'
+import { PICKUP_SLOT_HOURS, upcomingWeekdays, formatPickupSlot } from '@/lib/pickup-slot'
+import { notifyStaffDevices } from '@/lib/push-notifications'
 
 export type SetPickupSlotState =
   | { error: string; success?: false }
@@ -29,10 +30,18 @@ export async function setPickupSlotAction(
     p_hour: hour,
   })
 
-  if (error || !data) {
+  const result = data?.[0]
+  if (error || !result) {
     console.error('[setPickupSlotAction] rpc failed:', error)
     return { error: "Ce lien n'est plus valide ou le créneau n'a pas pu être enregistré." }
   }
+
+  const slotLabel = formatPickupSlot(date, hour)
+  notifyStaffDevices(supabase, {
+    title: 'Créneau de retrait choisi',
+    body: `${result.employee_name} — ${result.order_number} : ${slotLabel}`,
+    url: `/admin/commandes/${result.order_id}`,
+  }).catch((pushError) => console.error('[setPickupSlotAction] push notification failed:', pushError))
 
   return { success: true }
 }

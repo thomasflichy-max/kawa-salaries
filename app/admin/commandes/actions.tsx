@@ -77,9 +77,24 @@ async function updateManualOrderStatus(orderId: string, status: DemoOrderStatus,
 // Fires only the moment an order actually transitions into "prêt à l'envoi"
 // (not on every no-op re-save of the same status) and only for pickup
 // orders — delivery orders have nothing for the client to come collect.
-async function notifyIfJustReadyForPickup(order: DemoOrder | null, wasReady: boolean) {
+// `table` is null for a demo order (in-memory, nothing to stamp) and
+// 'orders'/'manual_orders' otherwise — the caller already knows which,
+// no need to re-derive it from `order`.
+async function notifyIfJustReadyForPickup(
+  order: DemoOrder | null,
+  wasReady: boolean,
+  table: 'orders' | 'manual_orders' | null
+) {
   if (!order || wasReady) return
   if (order.status !== 'pret' || order.deliveryMode !== 'pickup') return
+
+  // Anchors the "pas encore choisi de créneau après 3 jours" follow-up —
+  // see app/api/cron/pickup-slot-followups.
+  if (table) {
+    const supabase = await createClient()
+    await supabase.from(table).update({ ready_at: new Date().toISOString() }).eq('id', order.id)
+  }
+
   try {
     await sendOrderReadyForPickupEmail(order)
   } catch (error) {
@@ -93,7 +108,7 @@ export async function advanceOrderStatusAction(orderId: string) {
   if (demoOrder) {
     const wasReady = demoOrder.status === 'pret'
     const order = advanceDemoOrderStatus(orderId, actor)
-    await notifyIfJustReadyForPickup(order, wasReady)
+    await notifyIfJustReadyForPickup(order, wasReady, null)
     revalidateOrderPaths(orderId)
     return
   }
@@ -109,7 +124,7 @@ export async function advanceOrderStatusAction(orderId: string) {
     const wasReady = manual.status === 'pret'
     const next = getNextOrderStatus(manual.status as DemoOrderStatus)
     const order = next ? await updateManualOrderStatus(orderId, next, actor) : null
-    await notifyIfJustReadyForPickup(order, wasReady)
+    await notifyIfJustReadyForPickup(order, wasReady, 'manual_orders')
     revalidateOrderPaths(orderId)
     return
   }
@@ -126,7 +141,7 @@ export async function advanceOrderStatusAction(orderId: string) {
   const wasReady = current.status === 'pret'
   const next = getNextOrderStatus(current.status as DemoOrderStatus)
   const order = next ? await updateRealOrderStatus(orderId, next, actor) : null
-  await notifyIfJustReadyForPickup(order, wasReady)
+  await notifyIfJustReadyForPickup(order, wasReady, 'orders')
   revalidateOrderPaths(orderId)
 }
 
@@ -139,7 +154,7 @@ export async function updateOrderStatusAction(orderId: string, status: DemoOrder
   if (demoOrder) {
     const wasReady = demoOrder.status === 'pret'
     const order = setDemoOrderStatus(orderId, status, actor)
-    await notifyIfJustReadyForPickup(order, wasReady)
+    await notifyIfJustReadyForPickup(order, wasReady, null)
     revalidateOrderPaths(orderId)
     return
   }
@@ -154,7 +169,7 @@ export async function updateOrderStatusAction(orderId: string, status: DemoOrder
   if (manual) {
     const wasReady = manual.status === 'pret'
     const order = await updateManualOrderStatus(orderId, status, actor)
-    await notifyIfJustReadyForPickup(order, wasReady)
+    await notifyIfJustReadyForPickup(order, wasReady, 'manual_orders')
     revalidateOrderPaths(orderId)
     return
   }
@@ -166,7 +181,7 @@ export async function updateOrderStatusAction(orderId: string, status: DemoOrder
     .maybeSingle()
   const wasReady = current?.status === 'pret'
   const order = await updateRealOrderStatus(orderId, status, actor)
-  await notifyIfJustReadyForPickup(order, wasReady ?? false)
+  await notifyIfJustReadyForPickup(order, wasReady ?? false, 'orders')
   revalidateOrderPaths(orderId)
 }
 
