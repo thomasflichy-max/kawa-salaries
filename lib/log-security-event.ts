@@ -54,12 +54,15 @@ export function logSecurityEvent(
         body: event.email ? `${event.email}${event.detail ? ` — ${event.detail}` : ''}` : (event.detail ?? ''),
         url: event.url ?? '/admin/securite/evenements',
       }
-      notifyStaffDevices(supabase, notifyPayload).catch((pushError) => {
-        console.error('[logSecurityEvent] push notification failed:', pushError)
-      })
+      // Exclusive, not additive — a type on GOOGLE_CHAT_EVENT_TYPES already
+      // reaches Chat, so push would just be a duplicate of the same alert.
       if (GOOGLE_CHAT_EVENT_TYPES.has(event.eventType)) {
         notifyGoogleChat(notifyPayload).catch((chatError) => {
           console.error('[logSecurityEvent] Google Chat notification failed:', chatError)
+        })
+      } else {
+        notifyStaffDevices(supabase, notifyPayload).catch((pushError) => {
+          console.error('[logSecurityEvent] push notification failed:', pushError)
         })
       }
     })

@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { PICKUP_SLOT_HOURS, upcomingWeekdays, formatPickupSlot } from '@/lib/pickup-slot'
-import { notifyStaffDevices } from '@/lib/push-notifications'
 import { notifyGoogleChat } from '@/lib/google-chat'
 import { logSecurityEvent } from '@/lib/log-security-event'
 import { sendOrderEmail, REPLY_TO_EMAIL, escapeHtml } from '@/lib/emails/shared'
@@ -61,15 +60,10 @@ export async function setPickupSlotAction(
       console.error('[setPickupSlotAction] email notification failed:', emailError)
     )
   } else {
-    const notifyPayload = {
+    notifyGoogleChat({
       title: 'Créneau de retrait choisi',
       body: `${result.employee_name} — ${result.order_number} : ${slotLabel}`,
-      url: `/admin/commandes/${result.order_id}`,
-    }
-    notifyStaffDevices(supabase, notifyPayload).catch((pushError) =>
-      console.error('[setPickupSlotAction] push notification failed:', pushError)
-    )
-    notifyGoogleChat(notifyPayload).catch((chatError) =>
+    }).catch((chatError) =>
       console.error('[setPickupSlotAction] Google Chat notification failed:', chatError)
     )
   }
