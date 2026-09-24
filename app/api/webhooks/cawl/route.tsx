@@ -9,7 +9,10 @@ import {
 } from '@/app/admin/commandes/manual-orders'
 import { archiveOrderInvoiceAndDeliveryNote } from '@/lib/order-documents'
 import { sendOrderConfirmationEmail } from '@/lib/emails/order-confirmation'
+import { notifyGoogleChat } from '@/lib/google-chat'
 import type { PendingCheckoutItem } from '@/lib/supabase/types'
+
+const currency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 
 export const runtime = 'nodejs'
 
@@ -141,6 +144,12 @@ async function handlePaymentCaptured(
     actor: 'CAWL',
     action: 'Paiement confirmé par CAWL',
   })
+
+  notifyGoogleChat({
+    title: 'Nouvelle commande',
+    body: `${pending.employee_name} — ${pending.order_number} : ${currency.format(pending.amount)} (${items.length} article${items.length > 1 ? 's' : ''})`,
+    url: `/admin/commandes/${order.id}`,
+  }).catch((chatError) => console.error('[cawl webhook] Google Chat notification failed:', chatError))
 
   // Only now, once payment is actually confirmed, is it safe to clear the
   // cart — the employee could have kept adding/removing items while this

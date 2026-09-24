@@ -8,6 +8,7 @@ import { validatePassword } from '@/lib/password-policy'
 import { isPasswordReused, recordPasswordHistory } from '@/lib/password-history'
 import { logSecurityEvent } from '@/lib/log-security-event'
 import { notifyStaffDevices } from '@/lib/push-notifications'
+import { notifyGoogleChat } from '@/lib/google-chat'
 
 export type AuthFormState = { error: string } | undefined
 
@@ -69,11 +70,17 @@ export async function signup(
           console.error('[signup] failed to log signup attempt:', error)
           return
         }
-        notifyStaffDevices(supabase, {
+        const notifyPayload = {
           title: 'Inscription refusée — domaine non reconnu',
           body: `${firstName} ${lastName} (${email})`,
           url: '/admin/inscriptions',
-        }).catch((pushError) => console.error('[signup] push notification failed:', pushError))
+        }
+        notifyStaffDevices(supabase, notifyPayload).catch((pushError) =>
+          console.error('[signup] push notification failed:', pushError)
+        )
+        notifyGoogleChat(notifyPayload).catch((chatError) =>
+          console.error('[signup] Google Chat notification failed:', chatError)
+        )
       })
 
     return {
@@ -123,11 +130,17 @@ export async function signup(
     if (logError) {
       console.error('[signup] failed to log signup attempt:', logError)
     } else {
-      notifyStaffDevices(supabase, {
+      const notifyPayload = {
         title: 'Nouvelle inscription',
         body: `${firstName} ${lastName} (${email}) — ${org.name}`,
         url: '/admin/inscriptions',
-      }).catch((pushError) => console.error('[signup] push notification failed:', pushError))
+      }
+      notifyStaffDevices(supabase, notifyPayload).catch((pushError) =>
+        console.error('[signup] push notification failed:', pushError)
+      )
+      notifyGoogleChat(notifyPayload).catch((chatError) =>
+        console.error('[signup] Google Chat notification failed:', chatError)
+      )
     }
 
     if (signUpData.user) {

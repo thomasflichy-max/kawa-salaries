@@ -20,6 +20,11 @@ const EVENT_NOTIFY_TITLES: Record<SecurityEventType, string> = {
   pickup_slot_changed: 'Créneau de retrait modifié',
 }
 
+// The rest of "Account Management" (login échoué, accès admin non
+// autorisé, etc.) stays push-only — too dense/technical for the Google
+// Chat space. Only the operational, actionable ones also go to Chat.
+const GOOGLE_CHAT_EVENT_TYPES = new Set<SecurityEventType>(['pickup_slot_changed'])
+
 // Fire-and-forget by design (same reasoning as the signup_attempts logging
 // in app/actions/auth.ts) — a logging hiccup must never delay or break the
 // actual response (a login error, a redirect, a webhook 401).
@@ -52,8 +57,10 @@ export function logSecurityEvent(
       notifyStaffDevices(supabase, notifyPayload).catch((pushError) => {
         console.error('[logSecurityEvent] push notification failed:', pushError)
       })
-      notifyGoogleChat(notifyPayload).catch((chatError) => {
-        console.error('[logSecurityEvent] Google Chat notification failed:', chatError)
-      })
+      if (GOOGLE_CHAT_EVENT_TYPES.has(event.eventType)) {
+        notifyGoogleChat(notifyPayload).catch((chatError) => {
+          console.error('[logSecurityEvent] Google Chat notification failed:', chatError)
+        })
+      }
     })
 }
