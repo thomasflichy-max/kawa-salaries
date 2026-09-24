@@ -21,10 +21,13 @@ export function formatPickupSlot(date: string | null | undefined, hour: number |
   return `${day}, ${pickupSlotHourLabel(hour)}`
 }
 
-// Next `count` weekdays starting today, as YYYY-MM-DD (Europe/Paris).
+// Next `count` weekdays starting tomorrow, as YYYY-MM-DD (Europe/Paris) —
+// same-day pickup slots aren't offered, so staff always has at least a
+// night's notice to prepare an order.
 export function upcomingWeekdays(count: number, from = new Date()) {
   const out: string[] = []
   const cursor = new Date(from)
+  cursor.setDate(cursor.getDate() + 1)
   while (out.length < count) {
     const iso = new Intl.DateTimeFormat('en-CA', {
       year: 'numeric',
