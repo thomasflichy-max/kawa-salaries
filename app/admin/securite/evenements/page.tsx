@@ -16,15 +16,17 @@ const EVENT_LABELS: Record<string, { title: string; icon: string }> = {
   },
   support_message: { title: "Question d'un salarié", icon: '💬' },
   support_reply: { title: 'Réponse envoyée', icon: '↩️' },
+  pickup_slot_changed: { title: 'Créneau de retrait modifié', icon: '🔄' },
 }
 
-// Support messages and replies aren't a threat — calmer colors keep them
-// visually distinct from actual security alerts in the same feed, and from
-// each other (incoming question vs. outgoing reply).
-const SUPPORT_EVENT_TYPES = new Set(['support_message', 'support_reply'])
+// Support messages, replies, and pickup-slot changes aren't a threat —
+// calmer colors keep them visually distinct from actual security alerts in
+// the same feed, and from each other.
+const SUPPORT_EVENT_TYPES = new Set(['support_message', 'support_reply', 'pickup_slot_changed'])
 const EVENT_ICON_BG: Record<string, string> = {
   support_message: 'bg-sky-50',
   support_reply: 'bg-emerald-50',
+  pickup_slot_changed: 'bg-amber-50',
 }
 
 type SecurityEvent = {
@@ -115,9 +117,10 @@ export default async function AdminSecurityEventsPage() {
         <div>
           <h1 className="text-xl font-bold text-kawa-800">Account Management</h1>
           <p className="text-kawa-500 text-sm mt-1">
-            Questions envoyées par les salariés, connexions échouées, tentatives d&apos;accès admin
-            non autorisées, tentatives de création de compte admin refusées, et signatures de
-            webhook CAWL invalides — les 500 derniers événements.
+            Questions envoyées par les salariés, changements de créneau de retrait, connexions
+            échouées, tentatives d&apos;accès admin non autorisées, tentatives de création de
+            compte admin refusées, et signatures de webhook CAWL invalides — les 500 derniers
+            événements.
           </p>
         </div>
         <PushNotificationButton />

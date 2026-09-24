@@ -1185,7 +1185,15 @@ export type Database = {
       }
       set_pickup_slot: {
         Args: { p_token: string; p_date: string; p_hour: number }
-        Returns: { order_id: string; order_number: string; employee_name: string }[]
+        Returns: {
+          order_id: string
+          order_number: string
+          employee_name: string
+          employee_email: string
+          was_change: boolean
+          previous_date: string | null
+          previous_hour: number | null
+        }[]
       }
     }
     Enums: Record<string, never>

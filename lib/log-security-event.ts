@@ -8,6 +8,7 @@ export type SecurityEventType =
   | 'unauthorized_admin_access'
   | 'cawl_webhook_signature_invalid'
   | 'document_archiving_failed'
+  | 'pickup_slot_changed'
 
 const EVENT_NOTIFY_TITLES: Record<SecurityEventType, string> = {
   login_failed: 'Connexion échouée',
@@ -15,6 +16,7 @@ const EVENT_NOTIFY_TITLES: Record<SecurityEventType, string> = {
   unauthorized_admin_access: 'Accès admin non autorisé',
   cawl_webhook_signature_invalid: 'Signature webhook CAWL invalide',
   document_archiving_failed: 'Archivage de document échoué',
+  pickup_slot_changed: 'Créneau de retrait modifié',
 }
 
 // Fire-and-forget by design (same reasoning as the signup_attempts logging
@@ -27,7 +29,7 @@ const EVENT_NOTIFY_TITLES: Record<SecurityEventType, string> = {
 // the app entirely) rather than a gap worth a database-webhook setup for.
 export function logSecurityEvent(
   supabase: SupabaseClient<Database>,
-  event: { eventType: SecurityEventType; email?: string | null; detail?: string | null }
+  event: { eventType: SecurityEventType; email?: string | null; detail?: string | null; url?: string }
 ) {
   supabase
     .from('security_events')
@@ -44,7 +46,7 @@ export function logSecurityEvent(
       notifyStaffDevices(supabase, {
         title: EVENT_NOTIFY_TITLES[event.eventType],
         body: event.email ? `${event.email}${event.detail ? ` — ${event.detail}` : ''}` : (event.detail ?? ''),
-        url: '/admin/securite/evenements',
+        url: event.url ?? '/admin/securite/evenements',
       }).catch((pushError) => {
         console.error('[logSecurityEvent] push notification failed:', pushError)
       })
