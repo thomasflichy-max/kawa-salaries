@@ -1,11 +1,17 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getCoffeePricing } from '@/lib/coffee-pricing'
+import { htPriceFromCoffeeDiscount } from '@/lib/order-item-vat'
 
 const DISCOUNT_ABBR: Record<string, string> = {
   classique: 'C',
   bio: 'B',
   decafeine: 'D',
 }
+
+// Classique/bio have a B2B rate (negotiated HT price/kg) — decafeine doesn't,
+// it stays a flat remise (see EditOrganizationDiscountsForm).
+const HT_SUBCATEGORIES = new Set(['classique', 'bio'])
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -14,13 +20,19 @@ const currency = new Intl.NumberFormat('fr-FR', {
 
 export default async function AdminAccountsPage() {
   const supabase = await createClient()
-  const [{ data: organizations }, { data: profiles }, { data: discounts }, { data: extraDomains }] =
+  const [{ data: organizations }, { data: profiles }, { data: discounts }, { data: extraDomains }, pricingRules] =
     await Promise.all([
       supabase.from('organizations').select('id, name, domain, active').order('name'),
       supabase.from('profiles').select('id, organization_id'),
       supabase.from('organization_coffee_discounts').select('organization_id, subcategory, discount_amount'),
       supabase.from('organization_domains').select('organization_id, domain'),
+      getCoffeePricing(),
     ])
+
+  const basePrices = {
+    classique: pricingRules.get('classique')?.base_price ?? 0,
+    bio: pricingRules.get('bio')?.base_price ?? 0,
+  }
 
   const extraDomainsByOrg = new Map<string, string[]>()
   for (const row of extraDomains ?? []) {
@@ -40,8 +52,10 @@ export default async function AdminAccountsPage() {
   for (const rule of discounts ?? []) {
     const existing = discountsByOrg.get(rule.organization_id) ?? ''
     const abbr = DISCOUNT_ABBR[rule.subcategory] ?? rule.subcategory
-    const amount = `${abbr} -${currency.format(rule.discount_amount)}`
-    discountsByOrg.set(rule.organization_id, existing ? `${existing} · ${amount}` : amount)
+    const label = HT_SUBCATEGORIES.has(rule.subcategory)
+      ? `${abbr} ${currency.format(htPriceFromCoffeeDiscount(basePrices[rule.subcategory as 'classique' | 'bio'], rule.discount_amount))} HT`
+      : `${abbr} -${currency.format(rule.discount_amount)}`
+    discountsByOrg.set(rule.organization_id, existing ? `${existing} · ${label}` : label)
   }
 
   return (
@@ -77,7 +91,7 @@ export default async function AdminAccountsPage() {
               <tr className="text-left text-kawa-500 border-b border-kawa-100">
                 <th className="px-5 py-3 font-medium">Nom</th>
                 <th className="px-5 py-3 font-medium">Domaine</th>
-                <th className="px-5 py-3 font-medium">Remise café</th>
+                <th className="px-5 py-3 font-medium">Tarif café</th>
                 <th className="px-5 py-3 font-medium">Salariés</th>
                 <th className="px-5 py-3 font-medium">Statut</th>
                 <th className="px-5 py-3 font-medium" />
