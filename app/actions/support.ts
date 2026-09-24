@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { notifyStaffDevices } from '@/lib/push-notifications'
+import { notifyGoogleChat } from '@/lib/google-chat'
 
 export type SupportMessageState =
   | { error: string; success?: false }
@@ -49,17 +50,21 @@ export async function submitSupportMessage(
 
   // OS-level notification on any staff device that opted in (Account
   // Management page) — replaces the email that used to fire here.
+  const notifyPayload = {
+    title: `Question d'un salarié — ${profile?.full_name ?? user.email}`,
+    body: message,
+    url: '/admin/securite/evenements',
+  }
   try {
-    await notifyStaffDevices(supabase, {
-      title: `Question d'un salarié — ${profile?.full_name ?? user.email}`,
-      body: message,
-      url: '/admin/securite/evenements',
-    })
+    await notifyStaffDevices(supabase, notifyPayload)
   } catch (pushError) {
     // The message is already saved in security_events, so a failed push
     // must not fail the whole submission.
     console.error('[submitSupportMessage] push notification failed:', pushError)
   }
+  notifyGoogleChat(notifyPayload).catch((chatError) =>
+    console.error('[submitSupportMessage] Google Chat notification failed:', chatError)
+  )
 
   return { success: true }
 }

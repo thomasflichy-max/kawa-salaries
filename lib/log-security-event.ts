@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
 import { notifyStaffDevices } from '@/lib/push-notifications'
+import { notifyGoogleChat } from '@/lib/google-chat'
 
 export type SecurityEventType =
   | 'login_failed'
@@ -43,12 +44,16 @@ export function logSecurityEvent(
         console.error('[logSecurityEvent] insert failed:', error)
         return
       }
-      notifyStaffDevices(supabase, {
+      const notifyPayload = {
         title: EVENT_NOTIFY_TITLES[event.eventType],
         body: event.email ? `${event.email}${event.detail ? ` — ${event.detail}` : ''}` : (event.detail ?? ''),
         url: event.url ?? '/admin/securite/evenements',
-      }).catch((pushError) => {
+      }
+      notifyStaffDevices(supabase, notifyPayload).catch((pushError) => {
         console.error('[logSecurityEvent] push notification failed:', pushError)
+      })
+      notifyGoogleChat(notifyPayload).catch((chatError) => {
+        console.error('[logSecurityEvent] Google Chat notification failed:', chatError)
       })
     })
 }
