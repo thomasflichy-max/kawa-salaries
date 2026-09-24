@@ -5,6 +5,7 @@ import { PICKUP_SLOT_HOURS, upcomingWeekdays, formatPickupSlot } from '@/lib/pic
 import { notifyStaffDevices } from '@/lib/push-notifications'
 import { notifyGoogleChat } from '@/lib/google-chat'
 import { logSecurityEvent } from '@/lib/log-security-event'
+import { sendOrderEmail, REPLY_TO_EMAIL, escapeHtml } from '@/lib/emails/shared'
 
 export type SetPickupSlotState =
   | { error: string; success?: false }
@@ -51,6 +52,14 @@ export async function setPickupSlotAction(
       detail: `${result.order_number} : ${previousLabel} → ${slotLabel}`,
       url: `/admin/commandes/${result.order_id}`,
     })
+    sendOrderEmail({
+      to: REPLY_TO_EMAIL,
+      subject: `Créneau modifié — ${result.order_number}`,
+      html: `<p>${escapeHtml(result.employee_name)} a modifié son créneau de retrait pour la commande <strong>${escapeHtml(result.order_number)}</strong>.</p><p>${escapeHtml(previousLabel ?? '—')} → ${escapeHtml(slotLabel ?? '—')}</p>`,
+      text: `${result.employee_name} a modifié son créneau de retrait pour la commande ${result.order_number}.\n${previousLabel ?? '—'} → ${slotLabel ?? '—'}`,
+    }).catch((emailError) =>
+      console.error('[setPickupSlotAction] email notification failed:', emailError)
+    )
   } else {
     const notifyPayload = {
       title: 'Créneau de retrait choisi',
