@@ -149,6 +149,17 @@ export default async function AdminDashboardPage({
     )
     .sort((a, b) => slotKey(a).localeCompare(slotKey(b)) || a.createdAt.localeCompare(b.createdAt))
 
+  // Company deliveries still to go out — no slot to choose here (unlike
+  // pickup), so oldest-first surfaces whoever has been waiting longest.
+  const upcomingDeliveries = allOrders
+    .filter(
+      (o) =>
+        o.deliveryMode !== 'pickup' &&
+        o.status !== 'annulee' &&
+        o.status !== 'livree'
+    )
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -264,6 +275,63 @@ export default async function AdminDashboardPage({
                     </tr>
                   )
                 })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
+        <h2 className="text-sm font-semibold text-kawa-800 px-5 py-4 border-b border-kawa-200">
+          Prochaines livraisons en entreprise
+        </h2>
+        {upcomingDeliveries.length === 0 ? (
+          <p className="text-sm text-kawa-400 p-5">Aucune livraison en attente.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-kawa-500 border-b border-kawa-100">
+                  <th className="px-5 py-3 font-medium">Adresse de livraison</th>
+                  <th className="px-5 py-3 font-medium">Commande</th>
+                  <th className="px-5 py-3 font-medium">Salarié</th>
+                  <th className="px-5 py-3 font-medium">Entreprise</th>
+                  <th className="px-5 py-3 font-medium">Paiement</th>
+                  <th className="px-5 py-3 font-medium">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcomingDeliveries.map((order) => (
+                  <tr key={order.id} className="border-b border-kawa-50 last:border-0">
+                    <td className="px-5 py-3 text-kawa-800">{order.address}</td>
+                    <td className="px-5 py-3">
+                      <a
+                        href={`/admin/commandes/${order.id}`}
+                        className="text-sky-700 hover:underline"
+                      >
+                        {order.orderNumber}
+                      </a>
+                    </td>
+                    <td className="px-5 py-3 text-kawa-700">{order.employeeName}</td>
+                    <td className="px-5 py-3 text-kawa-500">{order.organizationName}</td>
+                    <td className="px-5 py-3">
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                          order.paid ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                        }`}
+                      >
+                        {order.paid ? 'Payée' : 'Non payée'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${DEMO_ORDER_STATUS_STYLES[order.status]}`}
+                      >
+                        {DEMO_ORDER_STATUS_LABELS[order.status]}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
