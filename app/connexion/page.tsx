@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
+import { getLocale } from '@/lib/i18n/locale'
+import { getDictionary } from '@/lib/i18n/dictionary'
+import { LanguageSwitcher } from '@/app/language-switcher'
 import { LoginForm } from './login-form'
 
 export default async function ConnexionPage({
@@ -24,42 +27,46 @@ export default async function ConnexionPage({
     redirect(wantsAdmin && !isKawaStaffEmail(user.email) ? '/compte/avantage' : next || '/compte/avantage')
   }
 
+  const locale = await getLocale()
+  const t = getDictionary(locale)
+
   return (
-    <main className="min-h-screen bg-kawa-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-2xl shadow-sm w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-kawa-800">Connexion</h1>
-          <p className="text-kawa-500 mt-2">Accédez à vos avantages KAWA</p>
+    <main className="min-h-screen bg-kawa-50 flex items-center justify-center p-6">
+      <div className="w-full max-w-md flex flex-col gap-3">
+        <div className="flex justify-end">
+          <LanguageSwitcher locale={locale} labels={t.switcher} />
         </div>
+        <div className="bg-white p-8 rounded-2xl shadow-sm w-full">
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-bold text-kawa-800">{t.login.title}</h1>
+            <p className="text-kawa-500 mt-2">{t.home.subtitle}</p>
+          </div>
 
-        {erreur === 'lien_invalide' && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
-            Ce lien n&apos;est plus valide. Si c&apos;était un lien de confirmation de compte,
-            réessayez de vous connecter — il se peut que le compte soit déjà actif.
-          </p>
-        )}
-        {erreur === 'compte_desactive' && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
-            L&apos;accès de votre entreprise à KAWA est actuellement désactivé. Contactez votre
-            RH ou écrivez-nous à nantes@kawa.coffee si vous pensez qu&apos;il s&apos;agit d&apos;une
-            erreur.
-          </p>
-        )}
-        {erreur === 'compte_suspendu' && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
-            Votre compte KAWA a été suspendu. Contactez votre RH ou écrivez-nous à
-            nantes@kawa.coffee si vous pensez qu&apos;il s&apos;agit d&apos;une erreur.
-          </p>
-        )}
+          {erreur === 'lien_invalide' && (
+            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
+              {t.login.errorLienInvalide}
+            </p>
+          )}
+          {erreur === 'compte_desactive' && (
+            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
+              {t.login.errorCompteDesactive}
+            </p>
+          )}
+          {erreur === 'compte_suspendu' && (
+            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
+              {t.login.errorCompteSuspendu}
+            </p>
+          )}
 
-        <LoginForm next={next ?? '/compte/avantage'} />
+          <LoginForm next={next ?? '/compte/avantage'} t={t.login} passwordForm={t.passwordForm} passwordInput={t.passwordInput} />
 
-        <p className="text-center text-sm text-kawa-400 mt-6">
-          Pas encore de compte ?{' '}
-          <Link href="/" className="text-sky-700 underline">
-            Créer un compte
-          </Link>
-        </p>
+          <p className="text-center text-sm text-kawa-400 mt-6">
+            {t.login.noAccount}{' '}
+            <Link href="/" className="text-sky-700 underline">
+              {t.login.createAccount}
+            </Link>
+          </p>
+        </div>
       </div>
     </main>
   )

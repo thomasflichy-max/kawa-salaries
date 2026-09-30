@@ -2,15 +2,15 @@
 
 import { useActionState } from 'react'
 import { requestPasswordReset } from '@/app/actions/auth'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
-export function RequestResetForm() {
+export function RequestResetForm({ t }: { t: Dictionary['passwordReset'] }) {
   const [state, action, pending] = useActionState(requestPasswordReset, undefined)
 
   if (state?.success) {
     return (
       <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-4 py-3">
-        Si un compte existe avec cette adresse, un email de réinitialisation vient
-        de vous être envoyé.
+        {t.successMessage}
       </p>
     )
   }
@@ -39,7 +39,7 @@ export function RequestResetForm() {
         disabled={pending}
         className="bg-sky-500 text-kawa-950 py-2 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
       >
-        {pending ? 'Envoi…' : 'Envoyer le lien de réinitialisation'}
+        {pending ? t.sending : t.sendLink}
       </button>
     </form>
   )

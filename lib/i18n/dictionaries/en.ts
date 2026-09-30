@@ -288,6 +288,56 @@ export const en = {
     edit: 'Change my slot',
     confirm: 'Confirm my slot',
   },
+  home: {
+    title: 'Employee space',
+    subtitle: 'Access your KAWA benefits',
+    alreadyAccount: 'Already have an account?',
+    login: 'Log in',
+  },
+  signupForm: {
+    firstName: 'First name',
+    lastName: 'Last name',
+    workEmail: 'Work email',
+    password: 'Password',
+    billingAddress: 'Billing address',
+    billingAddressHint: 'Your invoices will be issued in your name, at this address.',
+    creating: 'Creating…',
+    submit: 'Create my account',
+  },
+  login: {
+    title: 'Log in',
+    errorLienInvalide:
+      'This link is no longer valid. If it was an account confirmation link, try logging in again — the account may already be active.',
+    errorCompteDesactive:
+      "Your company's access to KAWA is currently disabled. Contact your HR department or email us at nantes@kawa.coffee if you think this is a mistake.",
+    errorCompteSuspendu:
+      'Your KAWA account has been suspended. Contact your HR department or email us at nantes@kawa.coffee if you think this is a mistake.',
+    noAccount: "Don't have an account yet?",
+    createAccount: 'Create an account',
+    emailLabel: 'Email',
+    passwordLabel: 'Password',
+    connecting: 'Logging in…',
+    submit: 'Log in',
+  },
+  passwordReset: {
+    requestTitle: 'Forgot password',
+    requestSubtitle: 'Enter your email and we will send you a link to choose a new one.',
+    invalidLink: 'This link is no longer valid, please make a new request below.',
+    backToLogin: 'Back to login',
+    successMessage:
+      'If an account exists with this address, a reset email has just been sent to you.',
+    sending: 'Sending…',
+    sendLink: 'Send reset link',
+    newPasswordTitle: 'New password',
+    newPasswordSubtitle: 'Choose your new password.',
+    confirmPasswordLabel: 'Confirm password',
+    choosePassword: 'Set this password',
+  },
+  inscriptionConfirmation: {
+    title: 'Almost done',
+    body: 'Your account has been created. We just sent you a confirmation email: click the link in it to activate your account, then you can log in.',
+    spamNote: "Nothing after a few minutes? Check your spam folder.",
+  },
   retrait: {
     invalidTitle: 'Invalid link',
     invalidBody:

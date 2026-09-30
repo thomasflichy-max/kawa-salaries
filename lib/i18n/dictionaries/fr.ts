@@ -289,6 +289,57 @@ export const fr = {
     edit: 'Modifier mon créneau',
     confirm: 'Confirmer mon créneau',
   },
+  home: {
+    title: 'Espace salariés',
+    subtitle: 'Accédez à vos avantages KAWA',
+    alreadyAccount: 'Déjà un compte ?',
+    login: 'Se connecter',
+  },
+  signupForm: {
+    firstName: 'Prénom',
+    lastName: 'Nom',
+    workEmail: 'Email professionnel',
+    password: 'Mot de passe',
+    billingAddress: 'Adresse de facturation',
+    billingAddressHint: 'Vos factures seront établies à votre nom, à cette adresse.',
+    creating: 'Création en cours…',
+    submit: 'Créer mon compte',
+  },
+  login: {
+    title: 'Connexion',
+    errorLienInvalide:
+      "Ce lien n'est plus valide. Si c'était un lien de confirmation de compte, réessayez de vous connecter — il se peut que le compte soit déjà actif.",
+    errorCompteDesactive:
+      "L'accès de votre entreprise à KAWA est actuellement désactivé. Contactez votre RH ou écrivez-nous à nantes@kawa.coffee si vous pensez qu'il s'agit d'une erreur.",
+    errorCompteSuspendu:
+      "Votre compte KAWA a été suspendu. Contactez votre RH ou écrivez-nous à nantes@kawa.coffee si vous pensez qu'il s'agit d'une erreur.",
+    noAccount: 'Pas encore de compte ?',
+    createAccount: 'Créer un compte',
+    emailLabel: 'Email',
+    passwordLabel: 'Mot de passe',
+    connecting: 'Connexion…',
+    submit: 'Se connecter',
+  },
+  passwordReset: {
+    requestTitle: 'Mot de passe oublié',
+    requestSubtitle:
+      'Indiquez votre email, nous vous envoyons un lien pour en choisir un nouveau.',
+    invalidLink: 'Ce lien n’est plus valide, merci de refaire une demande ci-dessous.',
+    backToLogin: 'Retour à la connexion',
+    successMessage:
+      'Si un compte existe avec cette adresse, un email de réinitialisation vient de vous être envoyé.',
+    sending: 'Envoi…',
+    sendLink: 'Envoyer le lien de réinitialisation',
+    newPasswordTitle: 'Nouveau mot de passe',
+    newPasswordSubtitle: 'Choisissez votre nouveau mot de passe.',
+    confirmPasswordLabel: 'Confirmer le mot de passe',
+    choosePassword: 'Choisir ce mot de passe',
+  },
+  inscriptionConfirmation: {
+    title: 'Presque terminé',
+    body: "Votre compte est créé. Nous venons de vous envoyer un email de confirmation : cliquez sur le lien qu'il contient pour activer votre compte, puis vous pourrez vous connecter.",
+    spamNote: 'Rien reçu au bout de quelques minutes ? Vérifiez vos spams.',
+  },
   retrait: {
     invalidTitle: 'Lien invalide',
     invalidBody:

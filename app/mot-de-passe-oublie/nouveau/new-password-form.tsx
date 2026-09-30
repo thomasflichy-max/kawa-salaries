@@ -4,20 +4,34 @@ import { useActionState } from 'react'
 import { setNewPasswordAfterReset } from '@/app/actions/auth'
 import { PasswordInput } from '@/app/password-input'
 import { PASSWORD_MIN_LENGTH } from '@/lib/password-policy'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
-export function NewPasswordForm() {
+export function NewPasswordForm({
+  t,
+  passwordForm,
+  passwordInput,
+}: {
+  t: Dictionary['passwordReset']
+  passwordForm: Dictionary['passwordForm']
+  passwordInput: Dictionary['passwordInput']
+}) {
   const [state, action, pending] = useActionState(setNewPasswordAfterReset, undefined)
 
   return (
     <form action={action} className="flex flex-col gap-4">
       <div>
-        <label className="text-sm font-medium text-kawa-700">Nouveau mot de passe</label>
-        <PasswordInput name="password" required minLength={PASSWORD_MIN_LENGTH} />
+        <label className="text-sm font-medium text-kawa-700">{passwordForm.newPassword}</label>
+        <PasswordInput name="password" required minLength={PASSWORD_MIN_LENGTH} labels={passwordInput} />
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Confirmer le mot de passe</label>
-        <PasswordInput name="confirmPassword" required minLength={PASSWORD_MIN_LENGTH} />
+        <label className="text-sm font-medium text-kawa-700">{t.confirmPasswordLabel}</label>
+        <PasswordInput
+          name="confirmPassword"
+          required
+          minLength={PASSWORD_MIN_LENGTH}
+          labels={passwordInput}
+        />
       </div>
 
       {state?.error && (
@@ -29,7 +43,7 @@ export function NewPasswordForm() {
         disabled={pending}
         className="bg-sky-500 text-kawa-950 py-2 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
       >
-        {pending ? 'Mise à jour…' : 'Choisir ce mot de passe'}
+        {pending ? passwordForm.updating : t.choosePassword}
       </button>
     </form>
   )
