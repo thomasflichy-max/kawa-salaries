@@ -121,7 +121,8 @@ export const en = {
     step1Title: 'What machine do you have?',
     step1Subtitle: 'The right grind depends directly on it.',
     step2Title: 'Recommended grind',
-    step2Subtitle: (machineLabelLower: string) => `For a ${machineLabelLower}, you need coffee that is:`,
+    step2SubtitlePrefix: 'For a',
+    step2SubtitleSuffix: ', you need coffee that is:',
     continueCta: 'Continue',
     changeMachine: 'Change machine',
     step3Title: 'What flavor are you looking for?',
@@ -180,7 +181,7 @@ export const en = {
     currentPassword: 'Current password',
     forgotPassword: 'Forgot password?',
     newPassword: 'New password',
-    minLength: (n: number) => `At least ${n} characters, with letters and numbers.`,
+    minLength: 'At least 12 characters, with letters and numbers.',
     confirmPassword: 'Confirm new password',
     updated: 'Password updated.',
     updating: 'Updating…',
@@ -231,9 +232,9 @@ export const en = {
     saving: 'Saving…',
     confirmDelivery: 'Confirm delivery',
     redirecting: 'Redirecting…',
-    payCta: (amount: string) => `Pay ${amount}`,
-    secureRedirectNote: (siteLabel: string) =>
-      `You will be redirected to the secure CAWL (Crédit Agricole) payment page — delivery: ${siteLabel}.`,
+    payCtaPrefix: 'Pay',
+    secureRedirectPrefix:
+      'You will be redirected to the secure CAWL (Crédit Agricole) payment page — delivery:',
     marketingNotice:
       'By completing your order, you agree that KAWA may use your email to inform you about its offers and news on similar products. You can opt out at any time from My Account or via the unsubscribe link in every email.',
   },
@@ -244,10 +245,11 @@ export const en = {
     empty: 'No subscriptions yet — you can create one from a coffee product page.',
     seeCoffees: 'View our coffees →',
     quantityPrefix: 'Qty',
-    weeklyFallback: (weeks: number) => `Every ${weeks} weeks`,
+    weeklyFallbackPrefix: 'Every',
+    weeklyFallbackSuffix: 'weeks',
     unavailableNotice:
       'This product is no longer available — the subscription will not restock until it is back.',
-    nextReminder: (date: string) => `Next reminder on ${date}`,
+    nextReminderPrefix: 'Next reminder on',
     paused: 'Paused',
     orderNow: 'Order now',
     pause: 'Pause',
@@ -274,9 +276,10 @@ export const en = {
   },
   orderContact: {
     cta: 'Contact us about this order',
-    title: (orderNumber: string) => `Order ${orderNumber}`,
+    titlePrefix: 'Order',
     subtitle: 'Delivery change, question, complaint… write to us.',
-    defaultMessage: (orderNumber: string) => `Regarding order ${orderNumber}: `,
+    defaultMessagePrefix: 'Regarding order',
+    defaultMessageSuffix: ': ',
     placeholder: 'E.g.: I would actually like to switch to pickup instead of office delivery.',
   },
   pickupScheduler: {

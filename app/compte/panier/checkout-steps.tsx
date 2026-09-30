@@ -175,7 +175,7 @@ export function CheckoutSteps({
               disabled={payPending}
               className="w-full sm:w-auto bg-sky-500 text-kawa-950 px-6 py-3 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
             >
-              {payPending ? t.redirecting : t.payCta(currency.format(total))}
+              {payPending ? t.redirecting : `${t.payCtaPrefix} ${currency.format(total)}`}
             </button>
             {payState?.error && (
               <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 max-w-sm">
@@ -183,7 +183,7 @@ export function CheckoutSteps({
               </p>
             )}
             <p className="text-xs text-kawa-400">
-              {t.secureRedirectNote(selectedSite ? selectedSite.label : t.retraitOption)}
+              {t.secureRedirectPrefix} {selectedSite ? selectedSite.label : t.retraitOption}.
             </p>
             <p className="text-xs text-kawa-400 max-w-md">{t.marketingNotice}</p>
           </form>

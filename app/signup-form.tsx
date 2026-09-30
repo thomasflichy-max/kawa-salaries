@@ -61,7 +61,7 @@ export function SignupForm({
           minLength={PASSWORD_MIN_LENGTH}
           labels={passwordInput}
         />
-        <p className="text-xs text-kawa-400 mt-1">{passwordForm.minLength(PASSWORD_MIN_LENGTH)}</p>
+        <p className="text-xs text-kawa-400 mt-1">{passwordForm.minLength}</p>
       </div>
 
       <div>

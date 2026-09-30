@@ -181,7 +181,8 @@ export function GuideWizard({
         <section className="bg-white rounded-2xl border border-kawa-200 p-6">
           <h2 className="font-semibold text-kawa-800 mb-1">{t.step2Title}</h2>
           <p className="text-sm text-kawa-500 mb-5">
-            {t.step2Subtitle(machineLabel(machine).toLowerCase())}
+            {t.step2SubtitlePrefix} {machineLabel(machine).toLowerCase()}
+            {t.step2SubtitleSuffix}
           </p>
           <div className="flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 mb-5 w-fit">
             <span className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center overflow-hidden">

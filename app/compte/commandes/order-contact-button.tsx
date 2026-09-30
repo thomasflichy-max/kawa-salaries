@@ -36,7 +36,9 @@ export function OrderContactButton({
           <div className="bg-white rounded-2xl border border-kawa-200 p-6 w-full max-w-md">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="font-semibold text-kawa-800">{t.title(orderNumber)}</p>
+                <p className="font-semibold text-kawa-800">
+                  {t.titlePrefix} {orderNumber}
+                </p>
                 <p className="text-sm text-kawa-500 mt-1">{t.subtitle}</p>
               </div>
               <button
@@ -59,7 +61,7 @@ export function OrderContactButton({
                   name="message"
                   required
                   rows={4}
-                  defaultValue={t.defaultMessage(orderNumber)}
+                  defaultValue={`${t.defaultMessagePrefix} ${orderNumber}${t.defaultMessageSuffix}`}
                   placeholder={t.placeholder}
                   className="w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
                 />

@@ -81,14 +81,14 @@ export default async function AbonnementsPage() {
                   <p className="text-sm text-kawa-500">
                     {t.abonnements.quantityPrefix} {sub.quantity} ·{' '}
                     {frequencyLabel(sub.frequency_weeks, locale) ??
-                      t.abonnements.weeklyFallback(sub.frequency_weeks)}
+                      `${t.abonnements.weeklyFallbackPrefix} ${sub.frequency_weeks} ${t.abonnements.weeklyFallbackSuffix}`}
                   </p>
                   {!product.active || !product.in_stock ? (
                     <p className="text-xs text-red-600 mt-0.5">{t.abonnements.unavailableNotice}</p>
                   ) : (
                     <p className="text-xs text-kawa-400 mt-0.5">
                       {sub.active
-                        ? t.abonnements.nextReminder(dateFormat.format(new Date(sub.next_reminder_at)))
+                        ? `${t.abonnements.nextReminderPrefix} ${dateFormat.format(new Date(sub.next_reminder_at))}`
                         : t.abonnements.paused}
                     </p>
                   )}

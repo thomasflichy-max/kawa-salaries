@@ -121,7 +121,10 @@ export const fr = {
     step1Title: 'Quelle est votre machine ?',
     step1Subtitle: 'La mouture adaptée en dépend directement.',
     step2Title: 'Mouture recommandée',
-    step2Subtitle: (machineLabelLower: string) => `Pour une ${machineLabelLower}, il vous faut du café :`,
+    // Plain strings (see checkout.payCtaPrefix comment) — GuideWizard is a
+    // client component and the machine label is only known once rendered.
+    step2SubtitlePrefix: 'Pour une',
+    step2SubtitleSuffix: ', il vous faut du café :',
     continueCta: 'Continuer',
     changeMachine: 'Changer de machine',
     step3Title: 'Quel goût recherchez-vous ?',
@@ -181,7 +184,11 @@ export const fr = {
     currentPassword: 'Mot de passe actuel',
     forgotPassword: 'Mot de passe oublié ?',
     newPassword: 'Nouveau mot de passe',
-    minLength: (n: number) => `Au moins ${n} caractères, avec des lettres et des chiffres.`,
+    // Plain string, not a function of PASSWORD_MIN_LENGTH — a function value
+    // here can't cross the Server → Client Component boundary (React Server
+    // Components can only pass serializable props); the number is fixed
+    // (see lib/password-policy.ts) so hardcoding it is safe.
+    minLength: 'Au moins 12 caractères, avec des lettres et des chiffres.',
     confirmPassword: 'Confirmer le nouveau mot de passe',
     updated: 'Mot de passe mis à jour.',
     updating: 'Mise à jour…',
@@ -232,9 +239,13 @@ export const fr = {
     saving: 'Enregistrement…',
     confirmDelivery: 'Valider la livraison',
     redirecting: 'Redirection…',
-    payCta: (amount: string) => `Payer ${amount}`,
-    secureRedirectNote: (siteLabel: string) =>
-      `Vous allez être redirigé·e vers la page de paiement sécurisée CAWL (Crédit Agricole) — livraison : ${siteLabel}.`,
+    // Plain strings, not functions — a function value can't cross the
+    // Server → Client Component boundary (CheckoutSteps is a client
+    // component and `amount`/`siteLabel` are only known once rendered
+    // there), so the dynamic part is concatenated in the component itself.
+    payCtaPrefix: 'Payer',
+    secureRedirectPrefix:
+      'Vous allez être redirigé·e vers la page de paiement sécurisée CAWL (Crédit Agricole) — livraison :',
     marketingNotice:
       "En finalisant votre commande, vous acceptez que KAWA utilise votre email pour vous informer de ses offres et actualités sur des produits similaires. Vous pouvez vous y opposer à tout moment depuis Mon Compte ou via le lien de désinscription présent dans chaque email.",
   },
@@ -245,10 +256,13 @@ export const fr = {
     empty: "Aucun abonnement pour le moment — vous pouvez en créer un depuis la fiche d'un café.",
     seeCoffees: 'Voir nos cafés →',
     quantityPrefix: 'Qté',
-    weeklyFallback: (weeks: number) => `Toutes les ${weeks} semaines`,
+    // Plain strings, not functions (see checkout.payCtaPrefix comment) —
+    // this whole section is also passed to the client SubscriptionRow.
+    weeklyFallbackPrefix: 'Toutes les',
+    weeklyFallbackSuffix: 'semaines',
     unavailableNotice:
       "Ce produit n'est plus disponible — l'abonnement ne se réassortira pas tant que ce n'est pas rétabli.",
-    nextReminder: (date: string) => `Prochain rappel le ${date}`,
+    nextReminderPrefix: 'Prochain rappel le',
     paused: 'En pause',
     orderNow: 'Commander maintenant',
     pause: 'Mettre en pause',
@@ -275,9 +289,12 @@ export const fr = {
   },
   orderContact: {
     cta: 'Nous écrire à propos de cette commande',
-    title: (orderNumber: string) => `Commande ${orderNumber}`,
+    // Plain string, not a function — OrderContactButton is a client
+    // component and already has its own `orderNumber` prop to prefix with.
+    titlePrefix: 'Commande',
     subtitle: 'Changement de mode de livraison, question, réclamation… écrivez-nous.',
-    defaultMessage: (orderNumber: string) => `Concernant la commande ${orderNumber} : `,
+    defaultMessagePrefix: 'Concernant la commande',
+    defaultMessageSuffix: ' : ',
     placeholder: 'Ex : Je voudrais finalement passer en retrait au lieu de la livraison au bureau.',
   },
   pickupScheduler: {

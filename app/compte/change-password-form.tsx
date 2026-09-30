@@ -43,7 +43,7 @@ export function ChangePasswordForm({
           minLength={PASSWORD_MIN_LENGTH}
           labels={inputLabels}
         />
-        <p className="text-xs text-kawa-400 mt-1">{t.minLength(PASSWORD_MIN_LENGTH)}</p>
+        <p className="text-xs text-kawa-400 mt-1">{t.minLength}</p>
       </div>
 
       <div>
