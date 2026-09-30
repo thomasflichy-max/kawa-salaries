@@ -237,6 +237,81 @@ export const en = {
     marketingNotice:
       'By completing your order, you agree that KAWA may use your email to inform you about its offers and news on similar products. You can opt out at any time from My Account or via the unsubscribe link in every email.',
   },
+  abonnements: {
+    title: 'My subscriptions',
+    subtitle:
+      'An automatic reminder at each due date — you choose the delivery and pay as usual. No automatic charge.',
+    empty: 'No subscriptions yet — you can create one from a coffee product page.',
+    seeCoffees: 'View our coffees →',
+    quantityPrefix: 'Qty',
+    weeklyFallback: (weeks: number) => `Every ${weeks} weeks`,
+    unavailableNotice:
+      'This product is no longer available — the subscription will not restock until it is back.',
+    nextReminder: (date: string) => `Next reminder on ${date}`,
+    paused: 'Paused',
+    orderNow: 'Order now',
+    pause: 'Pause',
+    resume: 'Resume',
+    delete: 'Delete',
+    updateFailed: 'Update failed.',
+    deleteFailed: 'Delete failed.',
+    confirmDelete: 'Delete this subscription?',
+  },
+  commandes: {
+    subtitle: 'Your order history and invoices.',
+    empty: 'No orders yet — the product catalog is coming soon.',
+    backToOrders: '← My orders',
+    invoicePdf: 'Invoice PDF',
+    refunded: 'Refunded',
+    pickupSlotTitle: 'Pickup slot',
+    pickupSlotBody: (address: string) =>
+      `Let us know when you plan to pick up your order at KAWA Nantes (${address}).`,
+    deliveryLabel: 'Delivery',
+    billingAddressLabel: 'Billing address',
+    paymentLabel: 'Payment',
+    paid: 'Paid',
+    notPaid: 'Not paid',
+  },
+  orderContact: {
+    cta: 'Contact us about this order',
+    title: (orderNumber: string) => `Order ${orderNumber}`,
+    subtitle: 'Delivery change, question, complaint… write to us.',
+    defaultMessage: (orderNumber: string) => `Regarding order ${orderNumber}: `,
+    placeholder: 'E.g.: I would actually like to switch to pickup instead of office delivery.',
+  },
+  pickupScheduler: {
+    savedPrefix: 'Slot saved:',
+    savedSuffix: 'You can change it below.',
+    dayLabel: 'Day',
+    hourLabel: 'Time slot',
+    saving: 'Saving…',
+    edit: 'Change my slot',
+    confirm: 'Confirm my slot',
+  },
+  retrait: {
+    invalidTitle: 'Invalid link',
+    invalidBody:
+      'This scheduling link is invalid, or this order is not a pickup at the KAWA office.',
+    seeOrders: 'View my orders',
+    alreadyPickedUpTitle: 'Order already picked up',
+    cancelledTitle: 'Order cancelled',
+    alreadyPickedUpBody: (orderNumber: string) =>
+      `Order ${orderNumber} has been marked as picked up — there is no longer a slot to choose.`,
+    cancelledBody: (orderNumber: string) => `Order ${orderNumber} has been cancelled.`,
+    previousSlotNote: (slot: string) => ` Previously indicated slot: ${slot}.`,
+    scheduleTitle: 'Schedule my pickup',
+    orderLabel: (orderNumber: string) => `Order ${orderNumber}`,
+    pickupLabel: 'Pickup',
+    hoursNote: 'You can pick up your order Monday to Friday, 9am to 6pm.',
+  },
+  desinscription: {
+    confirmedTitle: 'Unsubscribed',
+    confirmedBody:
+      "You will no longer receive KAWA's commercial offers and news. Emails related to your orders (confirmations, invoices) will still be sent. You can resubscribe at any time from My Account.",
+    invalidBody:
+      'This unsubscribe link is invalid or has expired. You can manage your preferences directly from your account.',
+    goToAccount: 'Go to My Account',
+  },
   panierRetour: {
     title: 'Thank you for your order',
     body: "Your payment is being processed. You'll receive a confirmation email as soon as it's validated.",

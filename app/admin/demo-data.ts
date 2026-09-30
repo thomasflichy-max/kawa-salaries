@@ -4,6 +4,8 @@
 // Replace this module entirely once orders are actually written to the
 // `orders` table by a real checkout flow.
 
+import type { Locale } from '@/lib/i18n/locale'
+
 export const DEMO_NOTICE =
   'Données de démonstration — en attente du paiement en ligne et de la facturation.'
 
@@ -92,6 +94,20 @@ export const DEMO_ORDER_STATUS_LABELS: Record<DemoOrderStatus, string> = {
   pret: "Prêt à l'envoi",
   livree: 'Livrée',
   annulee: 'Annulée',
+}
+
+// English-mode display only (employee order pages) — admin stays on
+// DEMO_ORDER_STATUS_LABELS directly, unaffected.
+const DEMO_ORDER_STATUS_LABELS_EN: Record<DemoOrderStatus, string> = {
+  en_cours: 'In progress',
+  en_preparation: 'Being prepared',
+  pret: 'Ready to ship',
+  livree: 'Delivered',
+  annulee: 'Cancelled',
+}
+
+export function orderStatusLabel(status: DemoOrderStatus, locale: Locale = 'fr') {
+  return locale === 'en' ? DEMO_ORDER_STATUS_LABELS_EN[status] : DEMO_ORDER_STATUS_LABELS[status]
 }
 
 export const DEMO_ORDER_STATUS_STYLES: Record<DemoOrderStatus, string> = {
@@ -209,8 +225,12 @@ export const DEMO_ORDERS: DemoOrder[] = DEMO_ORDER_SEEDS.map((seed, i) => {
 
 // Delivery mode drives what the "Livraison" column/detail should show:
 // the client's own address, or the KAWA office when it's a pickup order.
-export function getDeliveryLabel(order: Pick<DemoOrder, 'deliveryMode' | 'address'>) {
-  return order.deliveryMode === 'pickup' ? `Retrait ${KAWA_OFFICE.shortName}` : order.address
+export function getDeliveryLabel(
+  order: Pick<DemoOrder, 'deliveryMode' | 'address'>,
+  locale: Locale = 'fr'
+) {
+  if (order.deliveryMode !== 'pickup') return order.address
+  return locale === 'en' ? `Pickup at ${KAWA_OFFICE.shortName}` : `Retrait ${KAWA_OFFICE.shortName}`
 }
 
 export function getDemoOrderById(id: string) {

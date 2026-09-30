@@ -238,6 +238,81 @@ export const fr = {
     marketingNotice:
       "En finalisant votre commande, vous acceptez que KAWA utilise votre email pour vous informer de ses offres et actualités sur des produits similaires. Vous pouvez vous y opposer à tout moment depuis Mon Compte ou via le lien de désinscription présent dans chaque email.",
   },
+  abonnements: {
+    title: 'Mes abonnements',
+    subtitle:
+      'Un rappel automatique à chaque échéance — vous choisissez la livraison et payez comme pour une commande normale. Pas de prélèvement automatique.',
+    empty: "Aucun abonnement pour le moment — vous pouvez en créer un depuis la fiche d'un café.",
+    seeCoffees: 'Voir nos cafés →',
+    quantityPrefix: 'Qté',
+    weeklyFallback: (weeks: number) => `Toutes les ${weeks} semaines`,
+    unavailableNotice:
+      "Ce produit n'est plus disponible — l'abonnement ne se réassortira pas tant que ce n'est pas rétabli.",
+    nextReminder: (date: string) => `Prochain rappel le ${date}`,
+    paused: 'En pause',
+    orderNow: 'Commander maintenant',
+    pause: 'Mettre en pause',
+    resume: 'Reprendre',
+    delete: 'Supprimer',
+    updateFailed: 'Mise à jour impossible.',
+    deleteFailed: 'Suppression impossible.',
+    confirmDelete: 'Supprimer cet abonnement ?',
+  },
+  commandes: {
+    subtitle: 'Votre historique de commandes et vos factures.',
+    empty: 'Aucune commande pour le moment — le catalogue produits arrive bientôt.',
+    backToOrders: '← Mes commandes',
+    invoicePdf: 'Facture PDF',
+    refunded: 'Remboursé',
+    pickupSlotTitle: 'Créneau de retrait',
+    pickupSlotBody: (address: string) =>
+      `Indiquez quand vous comptez passer récupérer votre commande chez KAWA Nantes (${address}).`,
+    deliveryLabel: 'Livraison',
+    billingAddressLabel: 'Adresse de facturation',
+    paymentLabel: 'Paiement',
+    paid: 'Payée',
+    notPaid: 'Non payée',
+  },
+  orderContact: {
+    cta: 'Nous écrire à propos de cette commande',
+    title: (orderNumber: string) => `Commande ${orderNumber}`,
+    subtitle: 'Changement de mode de livraison, question, réclamation… écrivez-nous.',
+    defaultMessage: (orderNumber: string) => `Concernant la commande ${orderNumber} : `,
+    placeholder: 'Ex : Je voudrais finalement passer en retrait au lieu de la livraison au bureau.',
+  },
+  pickupScheduler: {
+    savedPrefix: 'Passage enregistré :',
+    savedSuffix: 'Vous pouvez le modifier ci-dessous.',
+    dayLabel: 'Jour',
+    hourLabel: 'Créneau horaire',
+    saving: 'Enregistrement…',
+    edit: 'Modifier mon créneau',
+    confirm: 'Confirmer mon créneau',
+  },
+  retrait: {
+    invalidTitle: 'Lien invalide',
+    invalidBody:
+      "Ce lien de prise de rendez-vous n'est pas valide, ou cette commande n'est pas un retrait au bureau KAWA.",
+    seeOrders: 'Voir mes commandes',
+    alreadyPickedUpTitle: 'Commande déjà récupérée',
+    cancelledTitle: 'Commande annulée',
+    alreadyPickedUpBody: (orderNumber: string) =>
+      `La commande ${orderNumber} a été marquée comme récupérée — il n'y a plus de créneau à choisir.`,
+    cancelledBody: (orderNumber: string) => `La commande ${orderNumber} a été annulée.`,
+    previousSlotNote: (slot: string) => ` Créneau qui avait été indiqué : ${slot}.`,
+    scheduleTitle: 'Programmer mon passage',
+    orderLabel: (orderNumber: string) => `Commande ${orderNumber}`,
+    pickupLabel: 'Retrait',
+    hoursNote: 'Vous pouvez venir récupérer votre commande du lundi au vendredi de 09h à 18h.',
+  },
+  desinscription: {
+    confirmedTitle: 'Désinscription confirmée',
+    confirmedBody:
+      'Vous ne recevrez plus les offres et actualités commerciales de KAWA. Les emails liés à vos commandes (confirmations, factures) continueront de vous être envoyés. Vous pouvez vous réabonner à tout moment depuis Mon Compte.',
+    invalidBody:
+      "Ce lien de désinscription n'est pas valide ou a expiré. Vous pouvez gérer vos préférences directement depuis votre compte.",
+    goToAccount: 'Aller à Mon Compte',
+  },
   panierRetour: {
     title: 'Merci pour votre commande',
     body: "Votre paiement est en cours de traitement. Vous recevrez un email de confirmation dès qu'il sera validé.",

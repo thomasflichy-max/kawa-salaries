@@ -2,8 +2,17 @@
 
 import { useTransition } from 'react'
 import { toggleSubscription, deleteSubscription, reorderSubscriptionNow } from '@/app/actions/subscriptions'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
-export function SubscriptionRow({ id, active }: { id: string; active: boolean }) {
+export function SubscriptionRow({
+  id,
+  active,
+  t,
+}: {
+  id: string
+  active: boolean
+  t: Dictionary['abonnements']
+}) {
   const [isPending, startTransition] = useTransition()
 
   function handleToggle() {
@@ -11,7 +20,7 @@ export function SubscriptionRow({ id, active }: { id: string; active: boolean })
       try {
         await toggleSubscription(id, !active)
       } catch {
-        alert('Mise à jour impossible.')
+        alert(t.updateFailed)
       }
     })
   }
@@ -26,12 +35,12 @@ export function SubscriptionRow({ id, active }: { id: string; active: boolean })
   }
 
   function handleDelete() {
-    if (!confirm('Supprimer cet abonnement ?')) return
+    if (!confirm(t.confirmDelete)) return
     startTransition(async () => {
       try {
         await deleteSubscription(id)
       } catch {
-        alert('Suppression impossible.')
+        alert(t.deleteFailed)
       }
     })
   }
@@ -44,7 +53,7 @@ export function SubscriptionRow({ id, active }: { id: string; active: boolean })
         disabled={isPending}
         className="text-sm bg-sky-500 text-kawa-950 px-3 py-1.5 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
       >
-        Commander maintenant
+        {t.orderNow}
       </button>
       <button
         type="button"
@@ -52,7 +61,7 @@ export function SubscriptionRow({ id, active }: { id: string; active: boolean })
         disabled={isPending}
         className="text-sm border border-kawa-200 text-kawa-600 px-3 py-1.5 rounded-lg hover:bg-kawa-50 transition disabled:opacity-50"
       >
-        {active ? 'Mettre en pause' : 'Reprendre'}
+        {active ? t.pause : t.resume}
       </button>
       <button
         type="button"
@@ -60,7 +69,7 @@ export function SubscriptionRow({ id, active }: { id: string; active: boolean })
         disabled={isPending}
         className="text-sm text-red-600 hover:underline disabled:opacity-50"
       >
-        Supprimer
+        {t.delete}
       </button>
     </div>
   )
