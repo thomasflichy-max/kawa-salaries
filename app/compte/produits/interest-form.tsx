@@ -2,8 +2,9 @@
 
 import { useActionState } from 'react'
 import { submitMachineInterest } from '@/app/actions/machine-interest'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
-export function InterestForm({ productId }: { productId: string }) {
+export function InterestForm({ productId, t }: { productId: string; t: Dictionary['interestForm'] }) {
   const [state, action, pending] = useActionState(
     submitMachineInterest.bind(null, productId),
     undefined
@@ -12,7 +13,7 @@ export function InterestForm({ productId }: { productId: string }) {
   if (state?.success) {
     return (
       <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-4 py-3">
-        Merci, votre demande a bien été envoyée. Nous vous recontactons rapidement.
+        {t.successMessage}
       </p>
     )
   }
@@ -21,7 +22,7 @@ export function InterestForm({ productId }: { productId: string }) {
     <form action={action} className="flex flex-col gap-3 max-w-sm">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-medium text-kawa-700">Prénom</label>
+          <label className="text-sm font-medium text-kawa-700">{t.firstName}</label>
           <input
             type="text"
             name="firstName"
@@ -30,7 +31,7 @@ export function InterestForm({ productId }: { productId: string }) {
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-kawa-700">Nom</label>
+          <label className="text-sm font-medium text-kawa-700">{t.lastName}</label>
           <input
             type="text"
             name="lastName"
@@ -41,7 +42,7 @@ export function InterestForm({ productId }: { productId: string }) {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Email</label>
+        <label className="text-sm font-medium text-kawa-700">{t.email}</label>
         <input
           type="email"
           name="email"
@@ -51,7 +52,7 @@ export function InterestForm({ productId }: { productId: string }) {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Téléphone (facultatif)</label>
+        <label className="text-sm font-medium text-kawa-700">{t.phone}</label>
         <input
           type="tel"
           name="phone"
@@ -68,7 +69,7 @@ export function InterestForm({ productId }: { productId: string }) {
         disabled={pending}
         className="bg-sky-500 text-kawa-950 py-3 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
       >
-        {pending ? 'Envoi…' : 'Envoyer ma demande'}
+        {pending ? t.sending : t.submit}
       </button>
     </form>
   )

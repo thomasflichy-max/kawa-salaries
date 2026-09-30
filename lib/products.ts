@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCoffeePricing, computeCoffeePrice } from '@/lib/coffee-pricing'
+import type { Locale } from '@/lib/i18n/locale'
 
 type CoffeePricingRules = Awaited<ReturnType<typeof getCoffeePricing>>
 export type CoffeeDiscounts = Record<string, number>
@@ -23,7 +24,28 @@ export function resolveProductPricing(
 }
 
 const PRODUCT_FIELDS =
-  'id, category, subcategory, tag, name, description, short_description, flavor_tags, price, image_url, hover_image_url, purchasable, in_stock, net_weight_grams'
+  'id, category, subcategory, tag, name, description, short_description, name_en, description_en, short_description_en, flavor_tags, price, image_url, hover_image_url, purchasable, in_stock, net_weight_grams'
+
+// English text is optional per-product (admin/produits) — falls back to
+// French rather than showing blank when a product has no translation yet.
+export function localizeProduct<
+  T extends {
+    name: string
+    description: string | null
+    short_description: string | null
+    name_en?: string | null
+    description_en?: string | null
+    short_description_en?: string | null
+  }
+>(product: T, locale: Locale): T {
+  if (locale !== 'en') return product
+  return {
+    ...product,
+    name: product.name_en || product.name,
+    description: product.description_en || product.description,
+    short_description: product.short_description_en || product.short_description,
+  }
+}
 
 export async function getActiveProducts(category?: string, coffeeDiscounts: CoffeeDiscounts = {}) {
   const supabase = await createClient()

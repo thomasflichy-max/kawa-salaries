@@ -1,12 +1,18 @@
 import Link from 'next/link'
-import { getActiveProducts } from '@/lib/products'
+import { getActiveProducts, localizeProduct } from '@/lib/products'
 import { getEmployee } from '@/lib/get-employee'
-import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
+import { PRODUCT_CATEGORIES, categoryLabel } from '@/lib/product-categories'
+import { getLocale } from '@/lib/i18n/locale'
+import { getDictionary } from '@/lib/i18n/dictionary'
 import { ProductGrid } from './product-grid'
 
 export default async function ProduitsPage() {
   const { coffeeDiscounts } = await getEmployee()
-  const products = await getActiveProducts(undefined, coffeeDiscounts)
+  const locale = await getLocale()
+  const t = getDictionary(locale)
+  const products = (await getActiveProducts(undefined, coffeeDiscounts)).map((p) =>
+    localizeProduct(p, locale)
+  )
 
   const productsByCategory = new Map<string, typeof products>()
   for (const product of products) {
@@ -18,10 +24,8 @@ export default async function ProduitsPage() {
   return (
     <div className="flex flex-col gap-10">
       <div>
-        <h1 className="text-2xl font-bold text-kawa-800">Produits</h1>
-        <p className="text-kawa-500 mt-1">
-          Votre remise KAWA est déjà appliquée sur les produits du catalogue.
-        </p>
+        <h1 className="text-2xl font-bold text-kawa-800">{t.produits.pageTitle}</h1>
+        <p className="text-kawa-500 mt-1">{t.produits.pageSubtitle}</p>
       </div>
 
       <Link
@@ -32,10 +36,8 @@ export default async function ProduitsPage() {
           ☕
         </span>
         <span className="flex-1">
-          <span className="block font-semibold text-kawa-800">Choisir son café</span>
-          <span className="block text-sm text-kawa-500">
-            Pas sûr de la mouture ou du café qu&apos;il vous faut ? Suivez le guide.
-          </span>
+          <span className="block font-semibold text-kawa-800">{t.produits.chooseCoffeeTitle}</span>
+          <span className="block text-sm text-kawa-500">{t.produits.chooseCoffeeSubtitle}</span>
         </span>
         <span className="text-sky-700 text-lg shrink-0">→</span>
       </Link>
@@ -43,9 +45,9 @@ export default async function ProduitsPage() {
       {PRODUCT_CATEGORIES.map((category) => (
         <section key={category.key}>
           <h2 className="text-lg font-semibold text-kawa-800 mb-4">
-            {category.label}
+            {categoryLabel(category, locale)}
           </h2>
-          <ProductGrid products={productsByCategory.get(category.key) ?? []} />
+          <ProductGrid products={productsByCategory.get(category.key) ?? []} t={t.produits} />
         </section>
       ))}
     </div>

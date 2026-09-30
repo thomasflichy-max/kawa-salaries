@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { AddToCartButton } from './add-to-cart-button'
 import { ProductImage } from './product-image'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
 const currency = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
@@ -22,11 +23,11 @@ type Product = {
   in_stock: boolean
 }
 
-export function ProductGrid({ products }: { products: Product[] }) {
+export function ProductGrid({ products, t }: { products: Product[]; t: Dictionary['produits'] }) {
   if (products.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-kawa-200 p-6 text-kawa-400 text-sm">
-        Aucun produit disponible pour le moment dans cette rubrique.
+        {t.emptyCategory}
       </div>
     )
   }
@@ -70,21 +71,21 @@ export function ProductGrid({ products }: { products: Product[] }) {
                 <span className="text-sky-700 font-bold">{currency.format(product.price)}</span>
               </p>
             ) : (
-              <p className="text-kawa-600 font-bold">Sur demande</p>
+              <p className="text-kawa-600 font-bold">{t.onRequest}</p>
             )}
 
             {!product.in_stock ? (
               <p className="text-center w-full bg-kawa-100 text-kawa-600 py-2 rounded-lg font-medium">
-                En rupture de stock
+                {t.outOfStock}
               </p>
             ) : product.purchasable ? (
-              <AddToCartButton productId={product.id} />
+              <AddToCartButton productId={product.id} t={t} />
             ) : (
               <Link
                 href={`/compte/produits/produit/${product.id}`}
                 className="text-center w-full bg-sky-500 text-kawa-950 py-2 rounded-lg font-medium hover:bg-sky-600 transition"
               >
-                Je suis intéressé
+                {t.interested}
               </Link>
             )}
           </div>

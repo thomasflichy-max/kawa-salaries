@@ -24,6 +24,9 @@ type ProductDefaults = {
   name: string
   description: string | null
   short_description: string | null
+  name_en: string | null
+  description_en: string | null
+  short_description_en: string | null
   flavor_tags: string[]
   price: number | null
   image_url: string | null
@@ -133,6 +136,40 @@ export function ProductForm({
           defaultValue={defaults?.description ?? ''}
           className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
+      </div>
+
+      <div className="rounded-lg border border-kawa-200 p-4 flex flex-col gap-4">
+        <p className="text-xs font-medium text-kawa-500 uppercase tracking-wide">
+          Anglais (optionnel — utilisé quand le salarié affiche le site en anglais ; vide = retombe
+          sur le texte français)
+        </p>
+        <div>
+          <label className="text-sm font-medium text-kawa-700">Nom du produit (EN)</label>
+          <input
+            type="text"
+            name="name_en"
+            defaultValue={defaults?.name_en ?? ''}
+            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-kawa-700">Description courte (EN)</label>
+          <textarea
+            name="short_description_en"
+            rows={2}
+            defaultValue={defaults?.short_description_en ?? ''}
+            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-kawa-700">Description détaillée (EN)</label>
+          <textarea
+            name="description_en"
+            rows={3}
+            defaultValue={defaults?.description_en ?? ''}
+            className="mt-1 w-full border border-kawa-200 rounded-lg px-3 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+          />
+        </div>
       </div>
 
       {isCoffee && (

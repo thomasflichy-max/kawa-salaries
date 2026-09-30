@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getProductById } from '@/lib/products'
+import { getProductById, localizeProduct } from '@/lib/products'
 import { getEmployee } from '@/lib/get-employee'
 import { createClient } from '@/lib/supabase/server'
-import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
+import { PRODUCT_CATEGORIES, categoryLabel } from '@/lib/product-categories'
+import { getLocale } from '@/lib/i18n/locale'
+import { getDictionary } from '@/lib/i18n/dictionary'
 import { QuantityAddForm } from '../../quantity-add-form'
 import { InterestForm } from '../../interest-form'
 import { ProductImage } from '../../product-image'
@@ -65,11 +67,14 @@ export default async function ProductDetailPage({
   const { id } = await params
   const { mouture } = await searchParams
   const { coffeeDiscounts, user } = await getEmployee()
-  const product = await getProductById(id, coffeeDiscounts)
+  const locale = await getLocale()
+  const t = getDictionary(locale)
+  const rawProduct = await getProductById(id, coffeeDiscounts)
 
-  if (!product) {
+  if (!rawProduct) {
     notFound()
   }
+  const product = localizeProduct(rawProduct, locale)
 
   // Comes from the "Choisir son café" guide, which already worked out the
   // right mouture from the employee's machine type — pre-select it rather
@@ -99,7 +104,7 @@ export default async function ProductDetailPage({
     <div className="flex flex-col gap-8">
       <nav className="text-sm text-kawa-500 flex items-center gap-2">
         <Link href="/compte/produits" className="hover:text-kawa-800 hover:underline">
-          Produits
+          {t.produits.pageTitle}
         </Link>
         {category && (
           <>
@@ -108,7 +113,7 @@ export default async function ProductDetailPage({
               href={`/compte/produits/${category.slug}`}
               className="hover:text-kawa-800 hover:underline"
             >
-              {category.label}
+              {categoryLabel(category, locale)}
             </Link>
           </>
         )}
@@ -147,7 +152,7 @@ export default async function ProductDetailPage({
               </span>
             ) : (
               <span className="inline-block bg-kawa-100 text-kawa-700 font-bold text-xl px-4 py-1 rounded-full mt-3">
-                Sur demande
+                {t.produits.onRequest}
               </span>
             )}
           </div>
@@ -156,7 +161,7 @@ export default async function ProductDetailPage({
 
           {isCoffee && (
             <p className="text-sm text-kawa-500">
-              Conditionnement : sachet de{' '}
+              {t.produitDetail.packagingPrefix}{' '}
               {product.net_weight_grams < 1000
                 ? `${product.net_weight_grams} g`
                 : `${product.net_weight_grams / 1000} kg`}
@@ -166,7 +171,7 @@ export default async function ProductDetailPage({
 
           {!product.in_stock ? (
             <p className="inline-block self-start bg-kawa-100 text-kawa-700 font-medium px-4 py-2 rounded-lg">
-              En rupture de stock — ce produit sera de nouveau disponible prochainement.
+              {t.produitDetail.outOfStockDetail}
             </p>
           ) : product.purchasable ? (
             <>
@@ -174,24 +179,25 @@ export default async function ProductDetailPage({
                 productId={product.id}
                 showGrind={isCoffee}
                 initialGrind={isCoffee ? initialGrind : undefined}
+                t={t.produits}
+                locale={locale}
               />
-              <p className="text-xs text-kawa-400">
-                Les options de livraison seront à choisir au moment du passage de commande.
-              </p>
-              <SubscribeForm productId={product.id} showGrind={isCoffee} />
+              <p className="text-xs text-kawa-400">{t.produitDetail.deliveryNote}</p>
+              <SubscribeForm productId={product.id} showGrind={isCoffee} t={t.subscribe} locale={locale} />
             </>
           ) : (
             <div className="flex flex-col gap-3">
-              <p className="text-sm text-kawa-600">
-                Ce produit n&apos;est pas disponible à l&apos;achat direct. Laissez-nous vos
-                coordonnées, nous vous recontactons.
-              </p>
-              <InterestForm productId={product.id} />
+              <p className="text-sm text-kawa-600">{t.produitDetail.notPurchasableIntro}</p>
+              <InterestForm productId={product.id} t={t.interestForm} />
             </div>
           )}
 
           {askAbout200g && (
-            <ProductInterestSurvey productId={product.id} initialInterested={interestedIn200g} />
+            <ProductInterestSurvey
+              productId={product.id}
+              initialInterested={interestedIn200g}
+              t={t.interestSurvey}
+            />
           )}
         </div>
       </div>

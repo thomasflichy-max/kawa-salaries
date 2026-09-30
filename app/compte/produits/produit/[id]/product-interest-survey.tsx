@@ -2,13 +2,16 @@
 
 import { useState, useTransition } from 'react'
 import { toggleProductInterestAction } from '@/app/actions/product-interest'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
 export function ProductInterestSurvey({
   productId,
   initialInterested,
+  t,
 }: {
   productId: string
   initialInterested: boolean
+  t: Dictionary['interestSurvey']
 }) {
   const [interested, setInterested] = useState(initialInterested)
   const [isPending, startTransition] = useTransition()
@@ -20,10 +23,14 @@ export function ProductInterestSurvey({
     })
   }
 
+  const [beforeSize, afterSize] = t.question.split('200 g')
+
   return (
     <div className="rounded-xl border border-kawa-200 bg-kawa-50 p-4 flex items-center justify-between gap-4 flex-wrap">
       <p className="text-sm text-kawa-700">
-        Le format <strong>200 g</strong> de ce café vous intéresserait-il ?
+        {beforeSize}
+        <strong>200 g</strong>
+        {afterSize}
       </p>
       <button
         type="button"
@@ -35,7 +42,7 @@ export function ProductInterestSurvey({
             : 'bg-sky-500 text-kawa-950 hover:bg-sky-600'
         }`}
       >
-        {interested ? '✓ Merci, c’est noté' : "Oui, ça m’intéresse"}
+        {interested ? t.interestedConfirmed : t.interestedYes}
       </button>
     </div>
   )

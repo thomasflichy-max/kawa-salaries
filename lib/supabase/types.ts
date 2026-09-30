@@ -240,6 +240,9 @@ export type Database = {
           name: string
           description: string | null
           short_description: string | null
+          name_en: string | null
+          description_en: string | null
+          short_description_en: string | null
           flavor_tags: string[]
           price: number | null
           image_url: string | null
@@ -259,6 +262,9 @@ export type Database = {
           name: string
           description?: string | null
           short_description?: string | null
+          name_en?: string | null
+          description_en?: string | null
+          short_description_en?: string | null
           flavor_tags?: string[]
           price?: number | null
           image_url?: string | null
@@ -278,6 +284,9 @@ export type Database = {
           name?: string
           description?: string | null
           short_description?: string | null
+          name_en?: string | null
+          description_en?: string | null
+          short_description_en?: string | null
           flavor_tags?: string[]
           price?: number | null
           image_url?: string | null

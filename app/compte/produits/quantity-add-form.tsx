@@ -2,32 +2,33 @@
 
 import { useState } from 'react'
 import { AddToCartButton } from './add-to-cart-button'
-
-const GRINDS = [
-  { value: 'grain', label: 'En grains' },
-  { value: 'filtre', label: 'Moulu filtre' },
-  { value: 'espresso', label: 'Moulu espresso' },
-] as const
+import { GRIND_OPTIONS } from '@/lib/grind-type'
+import type { Dictionary } from '@/lib/i18n/dictionary'
+import type { Locale } from '@/lib/i18n/locale'
 
 export function QuantityAddForm({
   productId,
   showGrind = false,
   initialGrind,
+  t,
+  locale,
 }: {
   productId: string
   showGrind?: boolean
-  initialGrind?: (typeof GRINDS)[number]['value']
+  initialGrind?: (typeof GRIND_OPTIONS)[number]['value']
+  t: Dictionary['produits']
+  locale: Locale
 }) {
   const [quantity, setQuantity] = useState(1)
-  const [grind, setGrind] = useState<(typeof GRINDS)[number]['value']>(initialGrind ?? 'grain')
+  const [grind, setGrind] = useState<(typeof GRIND_OPTIONS)[number]['value']>(initialGrind ?? 'grain')
 
   return (
     <div className="flex flex-col gap-4">
       {showGrind && (
         <div>
-          <label className="text-sm font-medium text-kawa-700 block mb-1">Mouture</label>
+          <label className="text-sm font-medium text-kawa-700 block mb-1">{t.grindLabel}</label>
           <div className="flex flex-wrap gap-2">
-            {GRINDS.map((option) => (
+            {GRIND_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 type="button"
@@ -38,7 +39,7 @@ export function QuantityAddForm({
                     : 'border-kawa-200 text-kawa-600 hover:border-kawa-300'
                 }`}
               >
-                {option.label}
+                {locale === 'en' ? option.labelEn : option.label}
               </button>
             ))}
           </div>
@@ -46,7 +47,7 @@ export function QuantityAddForm({
       )}
 
       <div>
-        <label className="text-sm font-medium text-kawa-700 block mb-1">Quantité</label>
+        <label className="text-sm font-medium text-kawa-700 block mb-1">{t.quantityLabel}</label>
         <div className="inline-flex items-center border border-kawa-200 rounded-lg">
           <button
             type="button"
@@ -70,6 +71,7 @@ export function QuantityAddForm({
         productId={productId}
         quantity={quantity}
         grindType={showGrind ? grind : null}
+        t={t}
       />
     </div>
   )

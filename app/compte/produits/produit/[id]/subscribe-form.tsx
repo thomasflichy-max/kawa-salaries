@@ -4,31 +4,32 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useActionState } from 'react'
 import { createSubscription } from '@/app/actions/subscriptions'
-import { FREQUENCY_WEEKS, FREQUENCY_LABELS } from '@/lib/subscription-frequency'
-
-const GRINDS = [
-  { value: 'grain', label: 'En grains' },
-  { value: 'filtre', label: 'Moulu filtre' },
-  { value: 'espresso', label: 'Moulu espresso' },
-] as const
+import { FREQUENCY_WEEKS, frequencyLabel } from '@/lib/subscription-frequency'
+import { GRIND_OPTIONS } from '@/lib/grind-type'
+import type { Dictionary } from '@/lib/i18n/dictionary'
+import type { Locale } from '@/lib/i18n/locale'
 
 export function SubscribeForm({
   productId,
   showGrind = false,
+  t,
+  locale,
 }: {
   productId: string
   showGrind?: boolean
+  t: Dictionary['subscribe']
+  locale: Locale
 }) {
   const [open, setOpen] = useState(false)
-  const [grind, setGrind] = useState<(typeof GRINDS)[number]['value']>('grain')
+  const [grind, setGrind] = useState<(typeof GRIND_OPTIONS)[number]['value']>('grain')
   const [state, action, pending] = useActionState(createSubscription, undefined)
 
   if (state && 'success' in state) {
     return (
       <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
-        Abonnement créé — on vous enverra un rappel à chaque échéance.{' '}
+        {t.successPrefix}{' '}
         <Link href="/compte/abonnements" className="underline font-medium">
-          Gérer mes abonnements
+          {t.manageLink}
         </Link>
       </p>
     )
@@ -41,7 +42,7 @@ export function SubscribeForm({
         onClick={() => setOpen(true)}
         className="w-full py-2.5 rounded-lg font-medium border-2 border-sky-500 text-sky-700 hover:bg-sky-50 transition"
       >
-        Créer un abonnement →
+        {t.createCta}
       </button>
     )
   }
@@ -52,17 +53,14 @@ export function SubscribeForm({
       <input type="hidden" name="quantity" value={1} />
       {showGrind && <input type="hidden" name="grind_type" value={grind} />}
 
-      <p className="text-sm font-medium text-kawa-700">Réassort automatique</p>
-      <p className="text-xs text-kawa-400 -mt-1">
-        On ajoute ce café à votre panier et on vous envoie un email à chaque échéance — vous
-        choisissez la livraison et payez comme pour une commande normale.
-      </p>
+      <p className="text-sm font-medium text-kawa-700">{t.title}</p>
+      <p className="text-xs text-kawa-400 -mt-1">{t.description}</p>
 
       {showGrind && (
         <div>
-          <label className="text-xs text-kawa-500">Mouture</label>
+          <label className="text-xs text-kawa-500">{t.grindLabel}</label>
           <div className="mt-1 flex flex-wrap gap-2">
-            {GRINDS.map((option) => (
+            {GRIND_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 type="button"
@@ -73,7 +71,7 @@ export function SubscribeForm({
                     : 'border-kawa-200 text-kawa-600 hover:border-kawa-300'
                 }`}
               >
-                {option.label}
+                {locale === 'en' ? option.labelEn : option.label}
               </button>
             ))}
           </div>
@@ -81,7 +79,7 @@ export function SubscribeForm({
       )}
 
       <div>
-        <label className="text-xs text-kawa-500">Fréquence</label>
+        <label className="text-xs text-kawa-500">{t.frequencyLabel}</label>
         <select
           name="frequency_weeks"
           defaultValue={4}
@@ -89,7 +87,7 @@ export function SubscribeForm({
         >
           {FREQUENCY_WEEKS.map((weeks) => (
             <option key={weeks} value={weeks}>
-              {FREQUENCY_LABELS[weeks]}
+              {frequencyLabel(weeks, locale)}
             </option>
           ))}
         </select>
@@ -105,14 +103,14 @@ export function SubscribeForm({
           disabled={pending}
           className="bg-sky-500 text-kawa-950 px-4 py-2 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
         >
-          {pending ? 'Création…' : "Créer l'abonnement"}
+          {pending ? t.submitting : t.submit}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="text-sm text-kawa-500 hover:underline"
         >
-          Annuler
+          {t.cancel}
         </button>
       </div>
     </form>
