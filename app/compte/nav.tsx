@@ -3,15 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { PRODUCT_CATEGORIES } from '@/lib/product-categories'
-
-const TABS = [
-  { href: '/compte/avantage', label: 'Votre Avantage' },
-  { href: '/compte/produits', label: 'Produits' },
-  { href: '/compte/commandes', label: 'Mes Commandes' },
-  { href: '/compte', label: 'Mon Compte' },
-  { href: '/compte/panier', label: 'Mon Panier' },
-]
+import { PRODUCT_CATEGORIES, categoryLabel } from '@/lib/product-categories'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
 const tabClasses = (isActive: boolean) =>
   `flex items-center justify-center sm:justify-start px-3 py-3 text-sm sm:px-4 sm:py-4 sm:text-lg font-medium whitespace-nowrap border-b-2 transition ${
@@ -20,9 +13,25 @@ const tabClasses = (isActive: boolean) =>
       : 'border-transparent text-kawa-500 hover:text-kawa-800 hover:border-sky-500'
   }`
 
-export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
+export function EmployeeNav({
+  cartItemCount = 0,
+  t,
+  locale,
+}: {
+  cartItemCount?: number
+  t: Dictionary['nav']
+  locale: 'fr' | 'en'
+}) {
   const pathname = usePathname()
   const [produitsOpen, setProduitsOpen] = useState(false)
+
+  const TABS = [
+    { href: '/compte/avantage', label: t.avantage },
+    { href: '/compte/produits', label: t.produits },
+    { href: '/compte/commandes', label: t.commandes },
+    { href: '/compte', label: t.compte },
+    { href: '/compte/panier', label: t.panier },
+  ]
 
   return (
     <nav className="bg-white border-b border-kawa-200">
@@ -42,7 +51,7 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
                 <button
                   type="button"
                   onClick={() => setProduitsOpen((v) => !v)}
-                  aria-label="Voir les catégories de produits"
+                  aria-label={t.categoriesAriaLabel}
                   className={`px-1.5 flex items-center border-b-2 transition ${
                     isActive ? 'border-sky-500 text-kawa-900' : 'border-transparent text-kawa-500 hover:text-kawa-800'
                   }`}
@@ -69,7 +78,7 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
                     onClick={() => setProduitsOpen(false)}
                     className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
                   >
-                    Choisir son café
+                    {t.choisirSonCafe}
                   </Link>
                   {PRODUCT_CATEGORIES.map((category) => (
                     <Link
@@ -78,7 +87,7 @@ export function EmployeeNav({ cartItemCount = 0 }: { cartItemCount?: number }) {
                       onClick={() => setProduitsOpen(false)}
                       className="block px-4 py-2 text-sm text-kawa-700 hover:bg-kawa-50 hover:underline decoration-sky-500 decoration-2 underline-offset-4 whitespace-nowrap"
                     >
-                      {category.label}
+                      {categoryLabel(category, locale)}
                     </Link>
                   ))}
                 </div>

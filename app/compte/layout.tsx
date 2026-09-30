@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { getEmployee } from '@/lib/get-employee'
 import { createClient } from '@/lib/supabase/server'
 import { isKawaStaffEmail } from '@/lib/is-kawa-staff'
+import { getLocale } from '@/lib/i18n/locale'
+import { getDictionary } from '@/lib/i18n/dictionary'
+import { LanguageSwitcher } from '@/app/language-switcher'
 import { EmployeeNav } from './nav'
 import { SupportButton } from './support-button'
 
@@ -18,6 +21,8 @@ export default async function CompteLayout({
 }) {
   const { user } = await getEmployee()
   const isStaff = isKawaStaffEmail(user.email)
+  const locale = await getLocale()
+  const t = getDictionary(locale)
 
   const supabase = await createClient()
   const { data: cartItems } = await supabase
@@ -39,16 +44,19 @@ export default async function CompteLayout({
               className="h-16 w-auto"
             />
           </Link>
-          {isStaff && (
-            <Link href="/admin" className="text-sm text-sky-700 hover:underline whitespace-nowrap">
-              Espace admin →
-            </Link>
-          )}
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher locale={locale} labels={t.switcher} />
+            {isStaff && (
+              <Link href="/admin" className="text-sm text-sky-700 hover:underline whitespace-nowrap">
+                {t.nav.adminSpace}
+              </Link>
+            )}
+          </div>
         </div>
       </header>
-      <EmployeeNav cartItemCount={cartItemCount} />
+      <EmployeeNav cartItemCount={cartItemCount} t={t.nav} locale={locale} />
       <main className="max-w-4xl mx-auto px-6 py-10">{children}</main>
-      <SupportButton />
+      <SupportButton t={t.support} />
     </div>
   )
 }

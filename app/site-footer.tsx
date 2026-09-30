@@ -1,7 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
-export function SiteFooter() {
+export function SiteFooter({ t }: { t: Dictionary['footer'] }) {
   return (
     <footer className="bg-kawa-50 text-kawa-900 mt-auto">
       <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8">
@@ -56,18 +57,18 @@ export function SiteFooter() {
 
       <div className="border-t border-kawa-200">
         <div className="max-w-6xl mx-auto px-6 py-4 text-xs text-kawa-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <span>© 2026 KAWA Coffee Nantes — Tous droits réservés</span>
+          <span>{t.copyright}</span>
           <div className="flex flex-wrap gap-x-2">
             <Link href="/mentions-legales" className="hover:text-sky-700 hover:underline">
-              Mentions légales
+              {t.legalNotice}
             </Link>
             <span>-</span>
             <Link href="/confidentialite" className="hover:text-sky-700 hover:underline">
-              Politique de confidentialité
+              {t.privacyPolicy}
             </Link>
             <span>-</span>
             <Link href="/cgv" className="hover:text-sky-700 hover:underline">
-              CGV
+              {t.terms}
             </Link>
           </div>
         </div>

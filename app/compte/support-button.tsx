@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useActionState } from 'react'
 import { submitSupportMessage } from '@/app/actions/support'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
-export function SupportButton() {
+export function SupportButton({ t }: { t: Dictionary['support'] }) {
   const [open, setOpen] = useState(false)
   const [state, action, pending] = useActionState(submitSupportMessage, undefined)
 
@@ -13,7 +14,7 @@ export function SupportButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Une question ?"
+        aria-label={t.buttonAriaLabel}
         className="fixed bottom-6 right-6 z-30 bg-sky-500 text-2xl w-14 h-14 rounded-full shadow-lg hover:bg-sky-600 transition flex items-center justify-center"
       >
         💬
@@ -24,15 +25,13 @@ export function SupportButton() {
           <div className="bg-white rounded-2xl border border-kawa-200 p-6 w-full max-w-md">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="font-semibold text-kawa-800">Une question ?</p>
-                <p className="text-sm text-kawa-500 mt-1">
-                  Envoyez-nous un message, on vous répond rapidement.
-                </p>
+                <p className="font-semibold text-kawa-800">{t.title}</p>
+                <p className="text-sm text-kawa-500 mt-1">{t.subtitle}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Fermer"
+                aria-label={t.closeAriaLabel}
                 className="text-kawa-400 hover:text-kawa-700 text-xl leading-none"
               >
                 ×
@@ -41,7 +40,7 @@ export function SupportButton() {
 
             {state?.success ? (
               <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-4 py-3">
-                Message envoyé, merci ! Nous revenons vers vous rapidement.
+                {t.successMessage}
               </p>
             ) : (
               <form action={action} className="flex flex-col gap-3">
@@ -49,7 +48,7 @@ export function SupportButton() {
                   name="message"
                   required
                   rows={4}
-                  placeholder="Ex : Quelle est la différence entre un café moulu filtre et espresso ?"
+                  placeholder={t.placeholder}
                   className="w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
                 />
                 {state?.error && (
@@ -62,7 +61,7 @@ export function SupportButton() {
                   disabled={pending}
                   className="bg-sky-500 text-kawa-950 py-2 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
                 >
-                  {pending ? 'Envoi…' : 'Envoyer'}
+                  {pending ? t.sending : t.send}
                 </button>
               </form>
             )}
