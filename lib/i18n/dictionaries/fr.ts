@@ -26,6 +26,58 @@ export const fr = {
     privacyPolicy: 'Politique de confidentialité',
     terms: 'CGV',
   },
+  avantage: {
+    defaultOrgName: 'votre entreprise',
+    eyebrow: 'Votre avantage KAWA',
+    heroTitle: "Le café d'exception, à la maison.",
+    heroSubtitle: (orgName: string) =>
+      `Grâce à ${orgName}, profitez d'un café de qualité à prix réduit, à déguster chez vous.`,
+    stats: {
+      rank: '12ᵉ',
+      rankLabel: 'Meilleur torréfacteur mondial',
+      coffeesLabel: 'Cafés à découvrir',
+      pickupValue: '24h',
+      pickupLabel: 'Retrait en agence',
+      deliveryValue: '7j ouvrés',
+      deliveryLabel: 'Livraison au travail',
+    },
+    votreAvantageEyebrow: 'Votre avantage',
+    votreAvantageTitle: "Un café d'exception, à prix réduit, pour la maison",
+    votreAvantageBody: (orgName: string) =>
+      `En tant que salarié de ${orgName}, entreprise partenaire de KAWA Nantes, vous bénéficiez d'une réduction personnelle sur nos cafés à déguster chez vous, ainsi que sur nos produits d'entretien et nos machines reconditionnées. Une offre réservée aux salariés des entreprises partenaires de KAWA, basés à Nantes.`,
+    qualiteEyebrow: 'Qualité',
+    qualiteTitle: "Un café d'exception, sélectionné avec soin",
+    qualiteBody:
+      'KAWA Nantes vous propose les cafés TANAT — des cafés de spécialité choisis pour leur qualité, dès la sélection des grains.',
+    savoirFaire: [
+      {
+        title: 'Torréfacteur TANAT',
+        text: '12ᵉ meilleur torréfacteur mondial en 2024, torréfié en petites séries dans son atelier parisien.',
+      },
+      {
+        title: 'Circuit court',
+        text: 'Une relation directe avec nos producteurs de cafés de spécialité, pour des cafés tracés.',
+      },
+      {
+        title: 'Toujours frais',
+        text: 'Chaque café est torréfié spécialement pour votre machine, en petite série.',
+      },
+    ],
+    qualiteFooter:
+      'Le même café que nous servons à nos clients professionnels, à retrouver dans votre tasse à la maison.',
+    livraisonEyebrow: 'Livraison',
+    livraisonTitle: 'Deux façons de repartir avec votre café',
+    livraisonIntro:
+      "La livraison est gratuite, avec deux solutions au choix — il ne vous reste plus qu'à l'emporter chez vous.",
+    pickupCardTitle: 'Retrait en agence — sous 24h',
+    pickupCardBody:
+      'Venez la récupérer directement dans nos locaux du 75 Bd Ernest Dalby, à Nantes, entre 9h et 18h.',
+    deliveryCardTitle: 'Livraison au travail — 7 jours ouvrés',
+    deliveryCardBody:
+      "Votre café est livré gratuitement sur votre lieu de travail — vous n'avez plus qu'à l'emporter chez vous le soir.",
+    closerText: 'Envie de vous régaler chez vous ?',
+    closerCta: 'Voir le catalogue →',
+  },
   support: {
     buttonAriaLabel: 'Une question ?',
     closeAriaLabel: 'Fermer',
