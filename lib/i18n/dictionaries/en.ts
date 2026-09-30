@@ -151,6 +151,48 @@ export const en = {
     sending: 'Sending…',
     submit: 'Send my request',
   },
+  panier: {
+    subtitle: 'Your selection of products.',
+    empty: 'Your cart is empty.',
+    outOfStock: 'Out of stock',
+    remove: 'Remove',
+    savingsPrefix: (orgName: string) => `Saved thanks to the ${orgName} discount`,
+    defaultOrgName: 'company',
+    total: 'Total',
+    ttc: 'incl. VAT',
+    perKg: '/ kg',
+    outOfStockSingle: (name: string) =>
+      `"${name}" is out of stock. Remove it from your cart to complete your order.`,
+    outOfStockMultiple: (names: string) =>
+      `Some products are out of stock (${names}). Remove them from your cart to complete your order.`,
+  },
+  checkout: {
+    confirmCart: 'Confirm my cart',
+    itemSingular: 'item',
+    itemPlural: 'items',
+    ttc: 'incl. VAT',
+    deliveryStepTitle: 'Confirm delivery choice',
+    paymentStepTitle: 'Payment',
+    edit: 'Edit',
+    retraitOption: 'Pickup at KAWA Nantes',
+    deliveryNoteWithAddress:
+      'Your coffee will be delivered free of charge to your office within 7 business days — does that work for you?',
+    deliveryNotePickup:
+      "Your order will be available for pickup within 24h — we'll email you when it's ready to collect.",
+    saving: 'Saving…',
+    confirmDelivery: 'Confirm delivery',
+    redirecting: 'Redirecting…',
+    payCta: (amount: string) => `Pay ${amount}`,
+    secureRedirectNote: (siteLabel: string) =>
+      `You will be redirected to the secure CAWL (Crédit Agricole) payment page — delivery: ${siteLabel}.`,
+    marketingNotice:
+      'By completing your order, you agree that KAWA may use your email to inform you about its offers and news on similar products. You can opt out at any time from My Account or via the unsubscribe link in every email.',
+  },
+  panierRetour: {
+    title: 'Thank you for your order',
+    body: "Your payment is being processed. You'll receive a confirmation email as soon as it's validated.",
+    seeOrders: 'View my orders',
+  },
   support: {
     buttonAriaLabel: 'Got a question?',
     closeAriaLabel: 'Close',

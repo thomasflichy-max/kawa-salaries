@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react'
 import { updateDefaultAddress } from '@/app/actions/auth'
 import { placeOrderAction } from '@/app/actions/checkout'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
 type Address = { id: string; label: string; address: string }
 type Step = 1 | 2 | 3
@@ -14,11 +15,13 @@ function StepHeader({
   title,
   status,
   onEdit,
+  editLabel,
 }: {
   number: number
   title: string
   status: 'done' | 'active' | 'locked'
   onEdit?: () => void
+  editLabel: string
 }) {
   return (
     <div className="flex items-center justify-between">
@@ -40,7 +43,7 @@ function StepHeader({
       </div>
       {status === 'done' && onEdit && (
         <button type="button" onClick={onEdit} className="text-sm text-sky-700 hover:underline">
-          Modifier
+          {editLabel}
         </button>
       )}
     </div>
@@ -52,11 +55,13 @@ export function CheckoutSteps({
   itemCount,
   addresses,
   defaultAddressId,
+  t,
 }: {
   total: number
   itemCount: number
   addresses: Address[]
   defaultAddressId: string | null
+  t: Dictionary['checkout']
 }) {
   const [step, setStep] = useState<Step>(1)
   const [selectedAddress, setSelectedAddress] = useState(defaultAddressId ?? '')
@@ -83,21 +88,23 @@ export function CheckoutSteps({
       <div className="p-5 flex flex-col gap-3">
         <StepHeader
           number={1}
-          title="Valider mon panier"
+          title={t.confirmCart}
           status={step === 1 ? 'active' : 'done'}
           onEdit={() => setStep(1)}
+          editLabel={t.edit}
         />
         {step === 1 && (
           <div className="pl-10 flex flex-col gap-3">
             <p className="text-sm text-kawa-500">
-              {itemCount} article{itemCount > 1 ? 's' : ''} — {currency.format(total)} TTC
+              {itemCount} {itemCount > 1 ? t.itemPlural : t.itemSingular} — {currency.format(total)}{' '}
+              {t.ttc}
             </p>
             <button
               type="button"
               onClick={() => setStep(2)}
               className="self-start bg-sky-500 text-kawa-950 px-4 py-2 rounded-lg font-medium hover:bg-sky-600 transition"
             >
-              Valider mon panier
+              {t.confirmCart}
             </button>
           </div>
         )}
@@ -106,9 +113,10 @@ export function CheckoutSteps({
       <div className="p-5 flex flex-col gap-3">
         <StepHeader
           number={2}
-          title="Valider le choix de la livraison"
+          title={t.deliveryStepTitle}
           status={step === 2 ? 'active' : step > 2 ? 'done' : 'locked'}
           onEdit={() => setStep(2)}
+          editLabel={t.edit}
         />
         {step === 2 && (
           <form action={action} className="pl-10 flex flex-col gap-3 max-w-sm">
@@ -118,7 +126,7 @@ export function CheckoutSteps({
               onChange={(e) => setSelectedAddress(e.target.value)}
               className="w-full border border-kawa-200 rounded-lg px-4 py-2 text-kawa-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
-              <option value="">Retrait KAWA Nantes</option>
+              <option value="">{t.retraitOption}</option>
               {addresses.map((site) => (
                 <option key={site.id} value={site.id}>
                   {site.label} — {site.address}
@@ -127,13 +135,11 @@ export function CheckoutSteps({
             </select>
             {selectedAddress !== '' ? (
               <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                Votre café sera livré gratuitement à vos bureaux sous 7 jours ouvrés, est-ce que
-                c&apos;est bon pour vous ?
+                {t.deliveryNoteWithAddress}
               </p>
             ) : (
               <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                Votre commande sera disponible au retrait sous 24h — nous vous enverrons un mail
-                quand elle sera prête à être récupérée.
+                {t.deliveryNotePickup}
               </p>
             )}
             {state?.error && (
@@ -144,19 +150,24 @@ export function CheckoutSteps({
               disabled={pending}
               className="self-start bg-sky-500 text-kawa-950 px-4 py-2 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
             >
-              {pending ? 'Enregistrement…' : 'Valider la livraison'}
+              {pending ? t.saving : t.confirmDelivery}
             </button>
           </form>
         )}
         {step > 2 && (
           <p className="pl-10 text-sm text-kawa-500">
-            {confirmedSite ? `${confirmedSite.label} — ${confirmedSite.address}` : 'Retrait KAWA Nantes'}
+            {confirmedSite ? `${confirmedSite.label} — ${confirmedSite.address}` : t.retraitOption}
           </p>
         )}
       </div>
 
       <div className="p-5 flex flex-col gap-3">
-        <StepHeader number={3} title="Passage au paiement" status={step === 3 ? 'active' : 'locked'} />
+        <StepHeader
+          number={3}
+          title={t.paymentStepTitle}
+          status={step === 3 ? 'active' : 'locked'}
+          editLabel={t.edit}
+        />
         {step === 3 && (
           <form action={payAction} className="pl-10 flex flex-col gap-3">
             <button
@@ -164,7 +175,7 @@ export function CheckoutSteps({
               disabled={payPending}
               className="w-full sm:w-auto bg-sky-500 text-kawa-950 px-6 py-3 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
             >
-              {payPending ? 'Redirection…' : `Payer ${currency.format(total)}`}
+              {payPending ? t.redirecting : t.payCta(currency.format(total))}
             </button>
             {payState?.error && (
               <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 max-w-sm">
@@ -172,15 +183,9 @@ export function CheckoutSteps({
               </p>
             )}
             <p className="text-xs text-kawa-400">
-              Vous allez être redirigé·e vers la page de paiement sécurisée CAWL (Crédit
-              Agricole) — livraison : {selectedSite ? selectedSite.label : 'Retrait KAWA Nantes'}.
+              {t.secureRedirectNote(selectedSite ? selectedSite.label : t.retraitOption)}
             </p>
-            <p className="text-xs text-kawa-400 max-w-md">
-              En finalisant votre commande, vous acceptez que KAWA utilise votre email pour
-              vous informer de ses offres et actualités sur des produits similaires. Vous
-              pouvez vous y opposer à tout moment depuis Mon Compte ou via le lien de
-              désinscription présent dans chaque email.
-            </p>
+            <p className="text-xs text-kawa-400 max-w-md">{t.marketingNotice}</p>
           </form>
         )}
       </div>

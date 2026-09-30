@@ -4,6 +4,9 @@ import { getEmployee } from '@/lib/get-employee'
 import { updateCartItemQuantity, removeCartItem } from '@/app/actions/cart'
 import { resolveProductPricing } from '@/lib/products'
 import { getCoffeePricing } from '@/lib/coffee-pricing'
+import { grindLabel } from '@/lib/grind-type'
+import { getLocale } from '@/lib/i18n/locale'
+import { getDictionary } from '@/lib/i18n/dictionary'
 import { CheckoutSteps } from './checkout-steps'
 
 const currency = new Intl.NumberFormat('fr-FR', {
@@ -11,20 +14,16 @@ const currency = new Intl.NumberFormat('fr-FR', {
   currency: 'EUR',
 })
 
-const GRIND_LABELS: Record<string, string> = {
-  grain: 'En grains',
-  filtre: 'Moulu filtre',
-  espresso: 'Moulu espresso',
-}
-
 export default async function PanierPage() {
   const { user, profile, organization, coffeeDiscounts, organizationAddresses } = await getEmployee()
+  const locale = await getLocale()
+  const t = getDictionary(locale)
   const supabase = await createClient()
 
   const { data: items, error } = await supabase
     .from('cart_items')
     .select(
-      'id, quantity, grind_type, product:products(id, name, price, image_url, category, subcategory, in_stock)'
+      'id, quantity, grind_type, product:products(id, name, name_en, price, image_url, category, subcategory, in_stock)'
     )
     .eq('user_id', user.id)
     .order('created_at')
@@ -38,7 +37,10 @@ export default async function PanierPage() {
     const { price, basePrice } = item.product
       ? resolveProductPricing(item.product, pricingRules, coffeeDiscounts)
       : { price: 0, basePrice: null }
-    return { ...item, unitPrice: price ?? 0, baseUnitPrice: basePrice }
+    const product = item.product
+      ? { ...item.product, name: (locale === 'en' && item.product.name_en) || item.product.name }
+      : item.product
+    return { ...item, product, unitPrice: price ?? 0, baseUnitPrice: basePrice }
   })
   const total = cartItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
   const outOfStockNames = cartItems
@@ -52,13 +54,13 @@ export default async function PanierPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-bold text-kawa-800">Mon Panier</h1>
-        <p className="text-kawa-500 mt-1">Votre sélection de produits.</p>
+        <h1 className="text-2xl font-bold text-kawa-800">{t.nav.panier}</h1>
+        <p className="text-kawa-500 mt-1">{t.panier.subtitle}</p>
       </div>
 
       {cartItems.length === 0 ? (
         <div className="bg-white rounded-2xl border border-kawa-200 p-10 text-center">
-          <p className="text-kawa-500">Votre panier est vide.</p>
+          <p className="text-kawa-500">{t.panier.empty}</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-kawa-200 overflow-hidden">
@@ -84,16 +86,16 @@ export default async function PanierPage() {
                       {item.product?.category === 'cafe' && (
                         <span className="text-kawa-500 font-normal">
                           {' '}
-                          — {GRIND_LABELS[item.grind_type ?? 'grain'] ?? item.grind_type}
+                          — {grindLabel(item.grind_type, locale)}
                         </span>
                       )}
                     </p>
                     <p className="text-sm text-kawa-500">
                       {currency.format(item.unitPrice)}
-                      {item.baseUnitPrice != null && ' / kg'}
+                      {item.baseUnitPrice != null && ` ${t.panier.perKg}`}
                     </p>
                     {item.product && !item.product.in_stock && (
-                      <p className="text-xs font-medium text-red-700 mt-1">En rupture de stock</p>
+                      <p className="text-xs font-medium text-red-700 mt-1">{t.panier.outOfStock}</p>
                     )}
                   </div>
                 </div>
@@ -134,7 +136,7 @@ export default async function PanierPage() {
                       type="submit"
                       className="text-sm text-red-600 hover:underline"
                     >
-                      Retirer
+                      {t.panier.remove}
                     </button>
                   </form>
                 </div>
@@ -145,15 +147,15 @@ export default async function PanierPage() {
           <div className="flex flex-col gap-2 p-5 border-t border-kawa-100 bg-kawa-50">
             {savings > 0 && (
               <p className="flex items-center justify-between text-sm text-emerald-700">
-                <span>
-                  Économisé grâce à la remise {organization?.name ?? 'entreprise'}
-                </span>
+                <span>{t.panier.savingsPrefix(organization?.name ?? t.panier.defaultOrgName)}</span>
                 <span className="font-semibold">{currency.format(savings)}</span>
               </p>
             )}
             <div className="flex items-center justify-between">
-              <p className="font-semibold text-kawa-800">Total</p>
-              <p className="text-xl font-bold text-sky-700">{currency.format(total)} TTC</p>
+              <p className="font-semibold text-kawa-800">{t.panier.total}</p>
+              <p className="text-xl font-bold text-sky-700">
+                {currency.format(total)} {t.panier.ttc}
+              </p>
             </div>
           </div>
 
@@ -161,8 +163,8 @@ export default async function PanierPage() {
             <div className="p-5 border-t border-kawa-100">
               <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {outOfStockNames.length === 1
-                  ? `« ${outOfStockNames[0]} » est en rupture de stock. Retirez-le du panier pour finaliser votre commande.`
-                  : `Certains produits sont en rupture de stock (${outOfStockNames.join(', ')}). Retirez-les du panier pour finaliser votre commande.`}
+                  ? t.panier.outOfStockSingle(outOfStockNames[0])
+                  : t.panier.outOfStockMultiple(outOfStockNames.join(', '))}
               </p>
             </div>
           ) : (
@@ -171,6 +173,7 @@ export default async function PanierPage() {
               itemCount={cartItems.length}
               addresses={organizationAddresses}
               defaultAddressId={profile?.default_address_id ?? null}
+              t={t.checkout}
             />
           )}
         </div>

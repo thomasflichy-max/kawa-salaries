@@ -151,6 +151,48 @@ export const fr = {
     sending: 'Envoi…',
     submit: 'Envoyer ma demande',
   },
+  panier: {
+    subtitle: 'Votre sélection de produits.',
+    empty: 'Votre panier est vide.',
+    outOfStock: 'En rupture de stock',
+    remove: 'Retirer',
+    savingsPrefix: (orgName: string) => `Économisé grâce à la remise ${orgName}`,
+    defaultOrgName: 'entreprise',
+    total: 'Total',
+    ttc: 'TTC',
+    perKg: '/ kg',
+    outOfStockSingle: (name: string) =>
+      `« ${name} » est en rupture de stock. Retirez-le du panier pour finaliser votre commande.`,
+    outOfStockMultiple: (names: string) =>
+      `Certains produits sont en rupture de stock (${names}). Retirez-les du panier pour finaliser votre commande.`,
+  },
+  checkout: {
+    confirmCart: 'Valider mon panier',
+    itemSingular: 'article',
+    itemPlural: 'articles',
+    ttc: 'TTC',
+    deliveryStepTitle: 'Valider le choix de la livraison',
+    paymentStepTitle: 'Passage au paiement',
+    edit: 'Modifier',
+    retraitOption: 'Retrait KAWA Nantes',
+    deliveryNoteWithAddress:
+      "Votre café sera livré gratuitement à vos bureaux sous 7 jours ouvrés, est-ce que c'est bon pour vous ?",
+    deliveryNotePickup:
+      'Votre commande sera disponible au retrait sous 24h — nous vous enverrons un mail quand elle sera prête à être récupérée.',
+    saving: 'Enregistrement…',
+    confirmDelivery: 'Valider la livraison',
+    redirecting: 'Redirection…',
+    payCta: (amount: string) => `Payer ${amount}`,
+    secureRedirectNote: (siteLabel: string) =>
+      `Vous allez être redirigé·e vers la page de paiement sécurisée CAWL (Crédit Agricole) — livraison : ${siteLabel}.`,
+    marketingNotice:
+      "En finalisant votre commande, vous acceptez que KAWA utilise votre email pour vous informer de ses offres et actualités sur des produits similaires. Vous pouvez vous y opposer à tout moment depuis Mon Compte ou via le lien de désinscription présent dans chaque email.",
+  },
+  panierRetour: {
+    title: 'Merci pour votre commande',
+    body: "Votre paiement est en cours de traitement. Vous recevrez un email de confirmation dès qu'il sera validé.",
+    seeOrders: 'Voir mes commandes',
+  },
   support: {
     buttonAriaLabel: 'Une question ?',
     closeAriaLabel: 'Fermer',
