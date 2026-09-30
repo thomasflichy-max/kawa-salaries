@@ -5,6 +5,9 @@
 export const fr = {
   common: {
     close: 'Fermer',
+    saving: 'Enregistrement…',
+    save: 'Enregistrer',
+    preferenceSaved: 'Préférence enregistrée.',
   },
   switcher: {
     fr: 'FR',
@@ -150,6 +153,53 @@ export const fr = {
     phone: 'Téléphone (facultatif)',
     sending: 'Envoi…',
     submit: 'Envoyer ma demande',
+  },
+  compte: {
+    greeting: (name: string) => `Bonjour ${name}`,
+    emailLabel: 'Email',
+    companyLabel: 'Entreprise',
+    profileTitle: 'Mon profil',
+    deliveryTitle: 'Livraison',
+    subscriptionTitle: 'Réassort automatique',
+    subscriptionBody:
+      'Recevez un rappel automatique pour vos cafés préférés, à la fréquence de votre choix.',
+    manage: 'Gérer →',
+    communicationsTitle: 'Communications',
+    passwordTitle: 'Changer de mot de passe',
+    paymentTitle: 'Moyens de paiement',
+    paymentBody:
+      "Le paiement se fait par carte bancaire directement au moment de la commande, via notre prestataire sécurisé CAWL (Crédit Agricole) — aucune carte n'est enregistrée ni conservée dans votre compte KAWA.",
+    logout: 'Se déconnecter',
+  },
+  profileForm: {
+    fullName: 'Nom complet',
+    billingAddress: 'Adresse de facturation',
+    updated: 'Profil mis à jour.',
+    updating: 'Mise à jour…',
+  },
+  passwordForm: {
+    currentPassword: 'Mot de passe actuel',
+    forgotPassword: 'Mot de passe oublié ?',
+    newPassword: 'Nouveau mot de passe',
+    minLength: (n: number) => `Au moins ${n} caractères, avec des lettres et des chiffres.`,
+    confirmPassword: 'Confirmer le nouveau mot de passe',
+    updated: 'Mot de passe mis à jour.',
+    updating: 'Mise à jour…',
+    submit: 'Changer le mot de passe',
+  },
+  addressForm: {
+    emptyState:
+      "Aucun site n'est encore enregistré pour votre entreprise — vos commandes seront retirées au bureau KAWA Nantes.",
+    label: 'Site de livraison par défaut',
+    hint: 'Tu pourras toujours choisir un autre site au moment de la commande.',
+  },
+  marketingForm: {
+    label:
+      'Recevoir par email les offres et actualités KAWA (nouveaux cafés, promotions, nouveautés). Vous pouvez vous désinscrire à tout moment.',
+  },
+  passwordInput: {
+    show: 'Afficher le mot de passe',
+    hide: 'Masquer le mot de passe',
   },
   panier: {
     subtitle: 'Votre sélection de produits.',

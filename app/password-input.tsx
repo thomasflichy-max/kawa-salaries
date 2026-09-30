@@ -40,8 +40,9 @@ function EyeOffIcon() {
 // since it just forwards whatever input props it's given.
 export function PasswordInput({
   className = '',
+  labels = { show: 'Afficher le mot de passe', hide: 'Masquer le mot de passe' },
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) {
+}: React.InputHTMLAttributes<HTMLInputElement> & { labels?: { show: string; hide: string } }) {
   const [visible, setVisible] = useState(false)
 
   return (
@@ -55,7 +56,7 @@ export function PasswordInput({
         type="button"
         onClick={() => setVisible((v) => !v)}
         tabIndex={-1}
-        aria-label={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+        aria-label={visible ? labels.hide : labels.show}
         className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center"
       >
         {visible ? <EyeOffIcon /> : <EyeIcon />}

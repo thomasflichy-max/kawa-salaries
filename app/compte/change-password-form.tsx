@@ -5,8 +5,15 @@ import Link from 'next/link'
 import { updatePassword } from '@/app/actions/auth'
 import { PasswordInput } from '@/app/password-input'
 import { PASSWORD_MIN_LENGTH } from '@/lib/password-policy'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
-export function ChangePasswordForm() {
+export function ChangePasswordForm({
+  t,
+  inputLabels,
+}: {
+  t: Dictionary['passwordForm']
+  inputLabels: Dictionary['passwordInput']
+}) {
   const formRef = useRef<HTMLFormElement>(null)
   const [state, action, pending] = useActionState(updatePassword, undefined)
 
@@ -20,25 +27,33 @@ export function ChangePasswordForm() {
     <form ref={formRef} action={action} className="flex flex-col gap-4 max-w-sm">
       <div>
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-kawa-700">Mot de passe actuel</label>
+          <label className="text-sm font-medium text-kawa-700">{t.currentPassword}</label>
           <Link href="/mot-de-passe-oublie" className="text-xs text-sky-700 underline">
-            Mot de passe oublié ?
+            {t.forgotPassword}
           </Link>
         </div>
-        <PasswordInput name="currentPassword" required />
+        <PasswordInput name="currentPassword" required labels={inputLabels} />
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Nouveau mot de passe</label>
-        <PasswordInput name="newPassword" required minLength={PASSWORD_MIN_LENGTH} />
-        <p className="text-xs text-kawa-400 mt-1">
-          Au moins {PASSWORD_MIN_LENGTH} caractères, avec des lettres et des chiffres.
-        </p>
+        <label className="text-sm font-medium text-kawa-700">{t.newPassword}</label>
+        <PasswordInput
+          name="newPassword"
+          required
+          minLength={PASSWORD_MIN_LENGTH}
+          labels={inputLabels}
+        />
+        <p className="text-xs text-kawa-400 mt-1">{t.minLength(PASSWORD_MIN_LENGTH)}</p>
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Confirmer le nouveau mot de passe</label>
-        <PasswordInput name="confirmPassword" required minLength={PASSWORD_MIN_LENGTH} />
+        <label className="text-sm font-medium text-kawa-700">{t.confirmPassword}</label>
+        <PasswordInput
+          name="confirmPassword"
+          required
+          minLength={PASSWORD_MIN_LENGTH}
+          labels={inputLabels}
+        />
       </div>
 
       {state?.error && (
@@ -48,7 +63,7 @@ export function ChangePasswordForm() {
       )}
       {state?.success && (
         <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
-          Mot de passe mis à jour.
+          {t.updated}
         </p>
       )}
 
@@ -57,7 +72,7 @@ export function ChangePasswordForm() {
         disabled={pending}
         className="self-start bg-sky-500 text-kawa-950 px-4 py-2 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
       >
-        {pending ? 'Mise à jour…' : 'Changer le mot de passe'}
+        {pending ? t.updating : t.submit}
       </button>
     </form>
   )

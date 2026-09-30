@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { MfaSettings } from './mfa-settings'
 import { WebauthnSettings } from './webauthn-settings'
 import { ChangePasswordForm } from '@/app/compte/change-password-form'
+import { fr } from '@/lib/i18n/dictionaries/fr'
 
 // Supabase rejects WebAuthn enrollment on this project ("MFA enroll is
 // disabled for WebAuthn") — there's no dashboard toggle for it either
@@ -50,7 +51,7 @@ export default async function AdminSecuritePage() {
           Mot de passe
         </h2>
         <div className="p-5">
-          <ChangePasswordForm />
+          <ChangePasswordForm t={fr.passwordForm} inputLabels={fr.passwordInput} />
         </div>
       </section>
     </div>

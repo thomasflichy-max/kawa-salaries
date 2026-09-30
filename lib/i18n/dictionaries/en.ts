@@ -5,6 +5,9 @@ import type { Dictionary } from '../dictionary'
 export const en = {
   common: {
     close: 'Close',
+    saving: 'Saving…',
+    save: 'Save',
+    preferenceSaved: 'Preference saved.',
   },
   switcher: {
     fr: 'FR',
@@ -150,6 +153,52 @@ export const en = {
     phone: 'Phone (optional)',
     sending: 'Sending…',
     submit: 'Send my request',
+  },
+  compte: {
+    greeting: (name: string) => `Hello ${name}`,
+    emailLabel: 'Email',
+    companyLabel: 'Company',
+    profileTitle: 'My profile',
+    deliveryTitle: 'Delivery',
+    subscriptionTitle: 'Automatic restock',
+    subscriptionBody: 'Get an automatic reminder for your favorite coffees, at the frequency of your choice.',
+    manage: 'Manage →',
+    communicationsTitle: 'Communications',
+    passwordTitle: 'Change password',
+    paymentTitle: 'Payment methods',
+    paymentBody:
+      'Payment is made by card directly when ordering, via our secure provider CAWL (Crédit Agricole) — no card is stored or kept in your KAWA account.',
+    logout: 'Log out',
+  },
+  profileForm: {
+    fullName: 'Full name',
+    billingAddress: 'Billing address',
+    updated: 'Profile updated.',
+    updating: 'Updating…',
+  },
+  passwordForm: {
+    currentPassword: 'Current password',
+    forgotPassword: 'Forgot password?',
+    newPassword: 'New password',
+    minLength: (n: number) => `At least ${n} characters, with letters and numbers.`,
+    confirmPassword: 'Confirm new password',
+    updated: 'Password updated.',
+    updating: 'Updating…',
+    submit: 'Change password',
+  },
+  addressForm: {
+    emptyState:
+      'No site is registered yet for your company — your orders will be picked up at the KAWA Nantes office.',
+    label: 'Default delivery site',
+    hint: 'You can always choose another site when placing an order.',
+  },
+  marketingForm: {
+    label:
+      'Receive KAWA offers and news by email (new coffees, promotions, new products). You can unsubscribe at any time.',
+  },
+  passwordInput: {
+    show: 'Show password',
+    hide: 'Hide password',
   },
   panier: {
     subtitle: 'Your selection of products.',

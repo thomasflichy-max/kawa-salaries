@@ -2,8 +2,17 @@
 
 import { useActionState, useState } from 'react'
 import { updateMarketingPreference } from '@/app/actions/auth'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
-export function MarketingPreferenceForm({ optedOut }: { optedOut: boolean }) {
+export function MarketingPreferenceForm({
+  optedOut,
+  t,
+  common,
+}: {
+  optedOut: boolean
+  t: Dictionary['marketingForm']
+  common: Dictionary['common']
+}) {
   const [state, action, pending] = useActionState(updateMarketingPreference, undefined)
   const [subscribe, setSubscribe] = useState(!optedOut)
 
@@ -17,10 +26,7 @@ export function MarketingPreferenceForm({ optedOut }: { optedOut: boolean }) {
           onChange={(e) => setSubscribe(e.target.checked)}
           className="mt-0.5 rounded"
         />
-        <span>
-          Recevoir par email les offres et actualités KAWA (nouveaux cafés, promotions,
-          nouveautés). Vous pouvez vous désinscrire à tout moment.
-        </span>
+        <span>{t.label}</span>
       </label>
 
       {state?.error && (
@@ -28,7 +34,7 @@ export function MarketingPreferenceForm({ optedOut }: { optedOut: boolean }) {
       )}
       {state?.success && (
         <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
-          Préférence enregistrée.
+          {common.preferenceSaved}
         </p>
       )}
 
@@ -37,7 +43,7 @@ export function MarketingPreferenceForm({ optedOut }: { optedOut: boolean }) {
         disabled={pending}
         className="self-start bg-sky-500 text-kawa-950 px-4 py-2 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
       >
-        {pending ? 'Enregistrement…' : 'Enregistrer'}
+        {pending ? common.saving : common.save}
       </button>
     </form>
   )

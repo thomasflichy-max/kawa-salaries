@@ -2,20 +2,25 @@
 
 import { useActionState } from 'react'
 import { updateProfile } from '@/app/actions/auth'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 
 export function ProfileForm({
   fullName,
   billingAddress,
+  t,
+  common,
 }: {
   fullName: string | null
   billingAddress: string | null
+  t: Dictionary['profileForm']
+  common: Dictionary['common']
 }) {
   const [state, action, pending] = useActionState(updateProfile, undefined)
 
   return (
     <form action={action} className="flex flex-col gap-3 max-w-sm">
       <div>
-        <label className="text-sm font-medium text-kawa-700">Nom complet</label>
+        <label className="text-sm font-medium text-kawa-700">{t.fullName}</label>
         <input
           type="text"
           name="fullName"
@@ -26,7 +31,7 @@ export function ProfileForm({
       </div>
 
       <div>
-        <label className="text-sm font-medium text-kawa-700">Adresse de facturation</label>
+        <label className="text-sm font-medium text-kawa-700">{t.billingAddress}</label>
         <textarea
           name="billingAddress"
           defaultValue={billingAddress ?? ''}
@@ -40,9 +45,7 @@ export function ProfileForm({
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{state.error}</p>
       )}
       {state?.success && (
-        <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
-          Profil mis à jour.
-        </p>
+        <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">{t.updated}</p>
       )}
 
       <button
@@ -50,7 +53,7 @@ export function ProfileForm({
         disabled={pending}
         className="self-start bg-sky-500 text-kawa-950 px-4 py-2 rounded-lg font-medium hover:bg-sky-600 transition disabled:opacity-50"
       >
-        {pending ? 'Mise à jour…' : 'Enregistrer'}
+        {pending ? t.updating : common.save}
       </button>
     </form>
   )
